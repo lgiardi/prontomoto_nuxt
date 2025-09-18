@@ -45,9 +45,27 @@
           </div>
           
           <div v-else class="hidden md:flex items-center space-x-4">
-            <NuxtLink to="/auth/register" class="bg-[#90c149] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#7aa83f] transition-colors">
-              Registrati come Concessionario
-            </NuxtLink>
+            <!-- Dropdown Registrati -->
+            <div class="relative" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
+              <button class="bg-[#90c149] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#7aa83f] transition-colors">
+                Registrati
+              </button>
+              
+              <!-- Dropdown Menu -->
+              <div v-if="showDropdown" class="absolute top-full left-0 pt-1 w-48 z-50">
+                <div class="bg-white rounded-lg shadow-lg border border-gray-200">
+                <div class="py-1">
+                  <NuxtLink to="/auth/register" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" @click="showDropdown = false">
+                    👤 Utente
+                  </NuxtLink>
+                  <NuxtLink to="/auth/register-dealer" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" @click="showDropdown = false">
+                    🏪 Concessionario
+                  </NuxtLink>
+                </div>
+                </div>
+              </div>
+            </div>
+            
             <NuxtLink to="/auth/login" class="text-gray-600 hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors">
               Accedi
             </NuxtLink>
@@ -98,9 +116,15 @@
             </div>
             
             <div v-else class="space-y-2">
-              <NuxtLink to="/auth/register" class="block w-full bg-[#90c149] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#7aa83f] transition-colors text-center">
-                Registrati come Concessionario
-              </NuxtLink>
+              <div class="space-y-1">
+                <div class="text-center text-sm text-gray-600 py-1">Registrati come:</div>
+                <NuxtLink to="/auth/register" class="block w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors text-center">
+                  👤 Utente
+                </NuxtLink>
+                <NuxtLink to="/auth/register-dealer" class="block w-full bg-[#90c149] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#7aa83f] transition-colors text-center">
+                  🏪 Concessionario
+                </NuxtLink>
+              </div>
               <NuxtLink to="/auth/login" class="block w-full text-gray-600 hover:text-[#90c149] px-4 py-2 text-sm font-medium transition-colors text-center">
                 Accedi
               </NuxtLink>
@@ -116,6 +140,7 @@
 import { ref, onMounted } from 'vue'
 
 const mobileMenuOpen = ref(false)
+const showDropdown = ref(false)
 const user = ref(null)
 
 const toggleMobileMenu = () => {

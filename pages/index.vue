@@ -188,7 +188,10 @@ const filteredMotos = computed(() => {
     filtered = filtered.filter(moto => moto.categoria === filters.value.categoria)
   }
   if (filters.value.cilindrata) {
-    filtered = filtered.filter(moto => moto.cilindrata === parseInt(filters.value.cilindrata))
+    filtered = filtered.filter(moto => {
+      const motoCilindrataNormalizzata = normalizeCilindrata(moto.cilindrata, moto.modello)
+      return motoCilindrataNormalizzata === parseInt(filters.value.cilindrata)
+    })
   }
   if (filters.value.marca) {
     filtered = filtered.filter(moto => moto.marca === filters.value.marca)
@@ -254,6 +257,44 @@ const scrollToFilters = () => {
 }
 
 
+// Funzione per normalizzare le cilindrate (raggruppa 124 in 125, etc.)
+const normalizeCilindrata = (cilindrata, modello = '') => {
+  if (!cilindrata && !modello) return null
+  
+  // Prima controlla se nel modello c'è un numero
+  if (modello) {
+    const modelloStr = modello.toString()
+    const numeroNelModello = modelloStr.match(/\d+/)
+    if (numeroNelModello) {
+      const numero = parseInt(numeroNelModello[0])
+      // Se il numero è una cilindrata valida, usalo
+      if (numero >= 50 && numero <= 2000) {
+        return numero
+      }
+    }
+  }
+  
+  // Se non c'è nel modello, usa la cilindrata numerica
+  const cc = parseInt(cilindrata)
+  if (!cc) return null
+  
+  // Raggruppa cilindrate simili
+  if (cc >= 120 && cc <= 130) return 125
+  if (cc >= 150 && cc <= 160) return 150
+  if (cc >= 200 && cc <= 250) return 250
+  if (cc >= 300 && cc <= 350) return 300
+  if (cc >= 400 && cc <= 450) return 400
+  if (cc >= 500 && cc <= 550) return 500
+  if (cc >= 600 && cc <= 650) return 600
+  if (cc >= 700 && cc <= 750) return 700
+  if (cc >= 800 && cc <= 850) return 800
+  if (cc >= 900 && cc <= 950) return 900
+  if (cc >= 1000 && cc <= 1100) return 1000
+  if (cc >= 1200 && cc <= 1300) return 1200
+  
+  return cc
+}
+
 const calculateStats = () => {
   const categories = {}
   const cilindrate = {}
@@ -262,15 +303,37 @@ const calculateStats = () => {
   const allestimenti = {}
   const citta = {}
   
-  motos.value.forEach(moto => {
+  // Filtra le moto in base ai filtri attuali (escluso il filtro per cui stiamo calcolando le stats)
+  const filteredMotos = motos.value.filter(moto => {
+    // Applica tutti i filtri tranne quello per cui stiamo calcolando le statistiche
+    if (filters.value.categoria && moto.categoria !== filters.value.categoria) return false
+    
+    // Per il filtro cilindrata, usa la cilindrata normalizzata
+    if (filters.value.cilindrata) {
+      const motoCilindrataNormalizzata = normalizeCilindrata(moto.cilindrata, moto.modello)
+      const filtroCilindrata = parseInt(filters.value.cilindrata)
+      if (motoCilindrataNormalizzata !== filtroCilindrata) return false
+    }
+    
+    if (filters.value.marca && moto.marca !== filters.value.marca) return false
+    if (filters.value.modello && moto.modello !== filters.value.modello) return false
+    if (filters.value.allestimento && moto.allestimento !== filters.value.allestimento) return false
+    if (filters.value.citta && !moto.concessionari.some(c => c.citta === filters.value.citta)) return false
+    return true
+  })
+  
+  filteredMotos.forEach(moto => {
     // Categories
     if (moto.categoria) {
       categories[moto.categoria] = (categories[moto.categoria] || 0) + 1
     }
     
-    // Cilindrate
-    if (moto.cilindrata) {
-      cilindrate[moto.cilindrata] = (cilindrate[moto.cilindrata] || 0) + 1
+    // Cilindrate (normalizzate)
+    if (moto.cilindrata || moto.modello) {
+      const cilindrataNormalizzata = normalizeCilindrata(moto.cilindrata, moto.modello)
+      if (cilindrataNormalizzata) {
+        cilindrate[cilindrataNormalizzata] = (cilindrate[cilindrataNormalizzata] || 0) + 1
+      }
     }
     
     // Marche
@@ -319,9 +382,10 @@ onMounted(async () => {
   }
 })
 
-// Watch filters to reset pagination
+// Watch filters to reset pagination and recalculate stats
 watch(filters, () => {
   currentPage.value = 1
+  calculateStats() // Ricalcola le statistiche quando cambiano i filtri
 }, { deep: true })
 
 // Modal functions

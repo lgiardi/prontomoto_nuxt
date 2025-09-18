@@ -120,6 +120,9 @@ CREATE POLICY "Users can view own data" ON utenti
 CREATE POLICY "Users can update own data" ON utenti
   FOR UPDATE USING (auth.uid() = id);
 
+CREATE POLICY "Users can insert own data" ON utenti
+  FOR INSERT WITH CHECK (auth.uid() = id);
+
 -- Policy per preferiti_utenti
 CREATE POLICY "Users can manage own favorites" ON preferiti_utenti
   FOR ALL USING (auth.uid() = utente_id);
@@ -138,6 +141,7 @@ CREATE INDEX IF NOT EXISTS idx_lead_status ON lead(status);
 CREATE INDEX IF NOT EXISTS idx_lead_created_at ON lead(created_at);
 CREATE INDEX IF NOT EXISTS idx_preferiti_utente ON preferiti_utenti(utente_id);
 CREATE INDEX IF NOT EXISTS idx_ricerche_utente ON ricerche_utenti(utente_id);
+CREATE INDEX IF NOT EXISTS idx_utenti_user_type ON utenti(user_type);
 
 
 

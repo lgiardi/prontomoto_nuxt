@@ -1,0 +1,35 @@
+# ===========================================
+# SUPABASE CONFIGURATION
+# ===========================================
+# Vai su https://supabase.com > Il tuo progetto > Settings > API
+# Copia e incolla qui i tuoi dati:
+
+SUPABASE_URL=https://xffcrstnyfjthlaurlyx.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmZmNyc3RueWZqdGhsYXVybHl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwNjA4OTgsImV4cCI6MjA3MzYzNjg5OH0.ksZs9k0fYCUZ0nKvF-s8LNL3SQQbppifIbtTVxpyQUE
+
+# ===========================================
+# SANITY CONFIGURATION (EXISTING)
+# ===========================================
+SANITY_PROJECT_ID=1i1fbngf
+SANITY_DATASET=production
+
+# ===========================================
+# SMTP CONFIGURATION (OPZIONALE)
+# ===========================================
+# Se vuoi configurare email personalizzate, decommenta e configura:
+
+ SMTP_HOST=authsmtp.securemail.pro
+ SMTP_PORT=465
+SMTP_USER=info@prontomoto.it
+SMTP_PASS=Judin6lt
+SMTP_ADMIN_EMAIL=info@prontomoto.it
+ SMTP_SENDER_NAME=ProntoMoto
+
+# ===========================================
+# STRIPE CONFIGURATION (FUTURO)
+# ===========================================
+# Per i pagamenti futuri:
+
+# STRIPE_PUBLISHABLE_KEY=pk_test_your-stripe-key-here
+# STRIPE_SECRET_KEY=sk_test_your-stripe-secret-here
+# STRIPE_WEBHOOK_SECRET=whsec_your-webhook-secret-here

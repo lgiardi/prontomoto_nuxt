@@ -1,0 +1,20 @@
+{
+  // usa i tipi generati da Nuxt
+  "extends": "./.nuxt/tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "@types/node",
+      "@nuxt/schema"
+    ]
+  },
+  "include": [
+    "app.vue",
+    "pages/**/*",
+    "components/**/*",
+    "layouts/**/*",
+    "plugins/**/*",
+    "composables/**/*",
+    "server/**/*"
+  ]
+}
+

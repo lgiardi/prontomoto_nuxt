@@ -53,10 +53,17 @@
           </button>
         </div>
 
-        <div class="text-center">
-          <NuxtLink to="/auth/register" class="text-indigo-600 hover:text-indigo-500">
-            Non hai un account? Registrati
-          </NuxtLink>
+        <div class="text-center space-y-2">
+          <div>
+            <NuxtLink to="/auth/forgot-password" class="text-indigo-600 hover:text-indigo-500 text-sm">
+              Password dimenticata?
+            </NuxtLink>
+          </div>
+          <div>
+            <NuxtLink to="/auth/register" class="text-indigo-600 hover:text-indigo-500">
+              Non hai un account? Registrati
+            </NuxtLink>
+          </div>
         </div>
       </form>
     </div>

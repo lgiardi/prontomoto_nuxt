@@ -1,5 +1,5 @@
 <template>
-  <header class="bg-white shadow-md border-b border-gray-200">
+  <header class="bg-white border-b border-gray-200">
     <div class="w-full px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <!-- Logo con link alla home -->
@@ -32,16 +32,102 @@
         <!-- CTA Buttons -->
         <div class="flex items-center space-x-4">
           <div v-if="user" class="hidden md:flex items-center space-x-4">
-            <span class="text-gray-700 text-sm">Ciao, {{ user.email }}!</span>
-            <NuxtLink to="/dashboard" class="text-gray-600 hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors">
-              Dashboard
+            <!-- User Menu Dropdown -->
+            <div class="relative" @mouseenter="showUserMenu = true" @mouseleave="showUserMenu = false">
+              <button class="flex items-center space-x-2 text-gray-700 hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors">
+                <span>👤</span>
+                <span>{{ user.email?.split('@')[0] || 'Utente' }}</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+              
+              <!-- User Dropdown Menu -->
+              <div v-if="showUserMenu" class="absolute top-full right-0 pt-1 w-56 z-50">
+                <div class="bg-white rounded-lg shadow-lg border border-gray-200">
+                  <div class="py-1">
+                    <div class="px-4 py-2 text-xs text-gray-500 border-b border-gray-100">
+                      {{ user.email }}
+                      <div class="text-xs text-[#90c149] font-medium">
+                        {{ userType === 'concessionario' ? '🏪 Concessionario' : '👤 Cliente' }}
+                      </div>
+                    </div>
+                    
+                    <!-- Menu Cliente -->
+                    <div v-if="userType === 'cliente'">
+                      <NuxtLink to="/dashboard" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" @click="showUserMenu = false">
+                        📊 Dashboard
+                      </NuxtLink>
+                      
+                      <NuxtLink to="/preferiti" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" @click="showUserMenu = false">
+                        ❤️ Preferiti
+                      </NuxtLink>
+                      
+                      <NuxtLink to="/ricerche" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" @click="showUserMenu = false">
+                        🔍 Ricerche
+                      </NuxtLink>
+                      
+                      <NuxtLink to="/messaggi" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" @click="showUserMenu = false">
+                        💬 Messaggi
+                      </NuxtLink>
+                      
+                      <NuxtLink to="/appuntamenti" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" @click="showUserMenu = false">
+                        📅 Appuntamenti
+                      </NuxtLink>
+                    </div>
+                    
+                    <!-- Menu Concessionario -->
+                    <div v-else-if="userType === 'concessionario'">
+                      <NuxtLink to="/dealer/dashboard" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" @click="showUserMenu = false">
+                        📊 Dashboard
+                      </NuxtLink>
+                      
+                      <NuxtLink to="/dealer/moto" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" @click="showUserMenu = false">
+                        🏍️ Gestione Moto
+                      </NuxtLink>
+                      
+                      <NuxtLink to="/dealer/lead" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" @click="showUserMenu = false">
+                        📞 Lead
+                      </NuxtLink>
+                      
+                      <NuxtLink to="/dealer/messaggi" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" @click="showUserMenu = false">
+                        💬 Messaggi
+                      </NuxtLink>
+                      
+                      <NuxtLink to="/dealer/appuntamenti" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" @click="showUserMenu = false">
+                        📅 Appuntamenti
+                      </NuxtLink>
+                      
+                      <NuxtLink to="/dealer/analytics" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" @click="showUserMenu = false">
+                        📈 Analytics
+                      </NuxtLink>
+                    </div>
+                    
+                    <!-- Menu comune -->
+                    <div class="border-t border-gray-100"></div>
+                    
+                    <NuxtLink to="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" @click="showUserMenu = false">
+                      👤 Profilo
+                    </NuxtLink>
+                    
+                    <NuxtLink to="/impostazioni" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" @click="showUserMenu = false">
+                      ⚙️ Impostazioni
+                    </NuxtLink>
+                    
+                    <NuxtLink to="/cambia-password" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" @click="showUserMenu = false">
+                      🔒 Cambia Password
             </NuxtLink>
+                    
             <button
               @click="handleLogout"
-              class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
+                      class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
             >
-              Logout
+                      🚪 Logout
             </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           
           <div v-else class="hidden md:flex items-center space-x-4">
@@ -60,7 +146,7 @@
                   </NuxtLink>
                   <NuxtLink to="/auth/register-dealer" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" @click="showDropdown = false">
                     🏪 Concessionario
-                  </NuxtLink>
+            </NuxtLink>
                 </div>
                 </div>
               </div>
@@ -101,17 +187,83 @@
           </a>
           <div class="pt-4 space-y-2">
             <div v-if="user" class="space-y-2">
-              <div class="text-center text-sm text-gray-600 py-2">
-                Ciao, {{ user.email }}!
+              <div class="text-center text-sm text-gray-600 py-2 border-b border-gray-200">
+                {{ user.email }}
+                <div class="text-xs text-[#90c149] font-medium">
+                  {{ userType === 'concessionario' ? '🏪 Concessionario' : '👤 Cliente' }}
+                </div>
               </div>
+              
+              <!-- Menu Cliente Mobile -->
+              <div v-if="userType === 'cliente'">
               <NuxtLink to="/dashboard" class="block w-full text-gray-600 hover:text-[#90c149] px-4 py-2 text-sm font-medium transition-colors text-center">
-                Dashboard
+                  📊 Dashboard
+                </NuxtLink>
+                
+                <NuxtLink to="/preferiti" class="block w-full text-gray-600 hover:text-[#90c149] px-4 py-2 text-sm font-medium transition-colors text-center">
+                  ❤️ Preferiti
+                </NuxtLink>
+                
+                <NuxtLink to="/ricerche" class="block w-full text-gray-600 hover:text-[#90c149] px-4 py-2 text-sm font-medium transition-colors text-center">
+                  🔍 Ricerche
+                </NuxtLink>
+                
+                <NuxtLink to="/messaggi" class="block w-full text-gray-600 hover:text-[#90c149] px-4 py-2 text-sm font-medium transition-colors text-center">
+                  💬 Messaggi
+                </NuxtLink>
+                
+                <NuxtLink to="/appuntamenti" class="block w-full text-gray-600 hover:text-[#90c149] px-4 py-2 text-sm font-medium transition-colors text-center">
+                  📅 Appuntamenti
+                </NuxtLink>
+              </div>
+              
+              <!-- Menu Concessionario Mobile -->
+              <div v-else-if="userType === 'concessionario'">
+                <NuxtLink to="/dealer/dashboard" class="block w-full text-gray-600 hover:text-[#90c149] px-4 py-2 text-sm font-medium transition-colors text-center">
+                  📊 Dashboard
+                </NuxtLink>
+                
+                <NuxtLink to="/dealer/moto" class="block w-full text-gray-600 hover:text-[#90c149] px-4 py-2 text-sm font-medium transition-colors text-center">
+                  🏍️ Gestione Moto
+                </NuxtLink>
+                
+                <NuxtLink to="/dealer/lead" class="block w-full text-gray-600 hover:text-[#90c149] px-4 py-2 text-sm font-medium transition-colors text-center">
+                  📞 Lead
+                </NuxtLink>
+                
+                <NuxtLink to="/dealer/messaggi" class="block w-full text-gray-600 hover:text-[#90c149] px-4 py-2 text-sm font-medium transition-colors text-center">
+                  💬 Messaggi
+                </NuxtLink>
+                
+                <NuxtLink to="/dealer/appuntamenti" class="block w-full text-gray-600 hover:text-[#90c149] px-4 py-2 text-sm font-medium transition-colors text-center">
+                  📅 Appuntamenti
+                </NuxtLink>
+                
+                <NuxtLink to="/dealer/analytics" class="block w-full text-gray-600 hover:text-[#90c149] px-4 py-2 text-sm font-medium transition-colors text-center">
+                  📈 Analytics
+                </NuxtLink>
+              </div>
+              
+              <!-- Menu comune -->
+              <div class="border-t border-gray-200 my-2"></div>
+              
+              <NuxtLink to="/profile" class="block w-full text-gray-600 hover:text-[#90c149] px-4 py-2 text-sm font-medium transition-colors text-center">
+                👤 Profilo
               </NuxtLink>
+              
+              <NuxtLink to="/impostazioni" class="block w-full text-gray-600 hover:text-[#90c149] px-4 py-2 text-sm font-medium transition-colors text-center">
+                ⚙️ Impostazioni
+              </NuxtLink>
+              
+              <NuxtLink to="/cambia-password" class="block w-full text-gray-600 hover:text-[#90c149] px-4 py-2 text-sm font-medium transition-colors text-center">
+                🔒 Cambia Password
+              </NuxtLink>
+              
               <button
                 @click="handleLogout"
                 class="block w-full bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors text-center"
               >
-                Logout
+                🚪 Logout
               </button>
             </div>
             
@@ -123,7 +275,7 @@
                 </NuxtLink>
                 <NuxtLink to="/auth/register-dealer" class="block w-full bg-[#90c149] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#7aa83f] transition-colors text-center">
                   🏪 Concessionario
-                </NuxtLink>
+              </NuxtLink>
               </div>
               <NuxtLink to="/auth/login" class="block w-full text-gray-600 hover:text-[#90c149] px-4 py-2 text-sm font-medium transition-colors text-center">
                 Accedi
@@ -137,11 +289,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 
 const mobileMenuOpen = ref(false)
 const showDropdown = ref(false)
+const showUserMenu = ref(false)
 const user = ref(null)
+
+// Composable per rilevare il tipo di utente
+const { userType, userData, loading: userTypeLoading } = useUserType()
 
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value
@@ -154,9 +310,23 @@ const handleLogout = async () => {
   await navigateTo('/')
 }
 
-onMounted(async () => {
+// Carica l'utente
+const loadUser = async () => {
   const { getUser } = useSupabase()
   user.value = await getUser()
+}
+
+// Listener per cambiamenti di autenticazione
+const { onAuthStateChange } = useSupabase()
+onAuthStateChange((event, session) => {
+  user.value = session?.user || null
+  mobileMenuOpen.value = false
+  showDropdown.value = false
+  showUserMenu.value = false
+})
+
+onMounted(() => {
+  loadUser()
 })
 </script>
 

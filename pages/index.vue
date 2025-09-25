@@ -81,12 +81,12 @@
                 </span>
                 </div>
                 
-                <!-- CTA Fissa Appuntamento -->
+                <!-- CTA Vedi Dettagli -->
                 <button 
-                  @click="openAppointmentModal(moto)"
+                  @click="goToMoto(moto._id)"
                   class="w-full bg-[#90c149] text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-[#7aa83f] transition-colors"
                 >
-                  Fissa Appuntamento
+                  Vedi Dettagli
                 </button>
               </div>
               </div>
@@ -127,13 +127,6 @@
     </div>
     </div>
 
-    <!-- Modal Fissa Appuntamento -->
-    <ModalFissaAppuntamento 
-      :isOpen="showAppointmentModal"
-      :moto="selectedMoto"
-      @close="closeAppointmentModal"
-      @openDetail="goToMotoDetail"
-    />
   </div>
 </template>
 
@@ -143,8 +136,6 @@ definePageMeta({
   layout: false
 })
 
-// Import components
-import ModalFissaAppuntamento from '~/components/ModalFissaAppuntamento.vue'
 
 // Data
 const motos = ref([])
@@ -175,9 +166,6 @@ const stats = ref({
   citta: []
 })
 
-// Modal state
-const showAppointmentModal = ref(false)
-const selectedMoto = ref(null)
 
 // Computed
 const filteredMotos = computed(() => {
@@ -388,19 +376,4 @@ watch(filters, () => {
   calculateStats() // Ricalcola le statistiche quando cambiano i filtri
 }, { deep: true })
 
-// Modal functions
-const openAppointmentModal = (moto) => {
-  selectedMoto.value = moto
-  showAppointmentModal.value = true
-}
-
-const closeAppointmentModal = () => {
-  showAppointmentModal.value = false
-  selectedMoto.value = null
-}
-
-const goToMotoDetail = (concessionario) => {
-  // Naviga alla scheda moto con il concessionario selezionato
-  navigateTo(`/moto/${selectedMoto.value._id}?concessionario=${concessionario._id}`)
-}
 </script>

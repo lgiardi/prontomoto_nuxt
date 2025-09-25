@@ -1,290 +1,276 @@
 <template>
-  <div class="min-h-screen w-full bg-gray-50 font-sans">
-    <!-- Header Menu -->
+  <div class="min-h-screen w-full bg-white">
     <HeaderMenu />
     
-    <!-- Main Content -->
-    <div class="w-full px-4 py-8">
       <div v-if="loading" class="text-center py-12">
-        <div class="text-lg text-gray-600">Caricamento...</div>
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#90c149] mx-auto mb-4"></div>
+      <div class="text-lg text-gray-600">Caricamento moto...</div>
       </div>
       
-      <div v-else-if="moto" class="max-w-6xl mx-auto">
-        <!-- Breadcrumb -->
-        <nav class="mb-6">
-          <NuxtLink to="/" class="text-[#90c149] hover:underline">← Torna all'elenco</NuxtLink>
-        </nav>
-
-        <!-- Header Moto -->
-        <div class="bg-white rounded-2xl shadow-md p-6 mb-6">
-          <div class="flex flex-col lg:flex-row gap-6">
-            <!-- Immagine -->
-            <div class="lg:w-1/2">
-              <div v-if="moto.immagineCopertina" class="aspect-square rounded-xl overflow-hidden">
-                <img 
-                  :src="moto.immagineCopertina" 
-                  :alt="`${moto.marca} ${moto.modello}`"
-                  class="w-full h-full object-cover"
-                />
-              </div>
-              <div v-else class="aspect-square bg-gray-200 rounded-xl flex items-center justify-center">
-                <span class="text-gray-400 text-lg">🏍️</span>
-              </div>
-            </div>
-            
-            <!-- Info Principali -->
-            <div class="lg:w-1/2">
-              <h1 class="text-3xl font-bold text-black mb-2">{{ moto.marca }} {{ moto.modello }}</h1>
-              <p v-if="moto.allestimento" class="text-lg text-gray-600 mb-4">{{ moto.allestimento }}</p>
-              
-              <div class="space-y-3 mb-6">
-                <div v-if="moto.prezzo" class="text-2xl font-bold text-black">
-                  € {{ moto.prezzo.toLocaleString() }}
-                </div>
-                <div v-if="moto.categoria" class="text-sm text-gray-600">
-                  <span class="font-medium">Categoria:</span> {{ moto.categoria }}
-                </div>
-                <div v-if="moto.cilindrata" class="text-sm text-gray-600">
-                  <span class="font-medium">Cilindrata:</span> {{ moto.cilindrata }} cc
-                </div>
-              </div>
-              
-              <!-- CTA Buttons -->
-              <div class="flex gap-3">
-                <button 
-                  @click="apriModalAppuntamento"
-                  class="flex-1 bg-[#90c149] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#7aa83f] transition-colors flex items-center justify-center gap-2"
-                >
-                  📞 Fissa Appuntamento
-                </button>
-                <button 
-                  @click="apriModalConcessionari"
-                  class="flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
-                >
-                  🏪 Trova Concessionari
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Gallery Immagini -->
-        <div v-if="moto.immaginiGallery && moto.immaginiGallery.length > 0" class="bg-white rounded-2xl shadow-md p-6 mb-6">
-          <h2 class="text-xl font-bold text-black mb-4">📸 Gallery</h2>
-          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div v-else-if="moto" class="w-full">
+      <!-- Hero Gallery - Attaccato direttamente all'header -->
+      <div 
+        v-if="moto.immaginiGallery && moto.immaginiGallery.length > 0" 
+        class="relative overflow-hidden w-full"
+        @mouseenter="stopAutoScroll"
+        @mouseleave="startAutoScroll"
+      >
+        <div class="flex transition-transform duration-500 ease-in-out" :style="{ transform: `translateX(-${currentImageIndex * 33.33}%)` }">
             <div 
               v-for="(immagine, index) in moto.immaginiGallery" 
               :key="index"
-              class="aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-              @click="apriLightbox(index)"
+            class="w-1/3 flex-shrink-0"
             >
               <img 
                 :src="immagine" 
                 :alt="`${moto.marca} ${moto.modello} - Immagine ${index + 1}`"
-                class="w-full h-full object-cover"
+              class="w-full object-contain bg-gray-50"
               />
-            </div>
           </div>
         </div>
 
-        <!-- Specifiche Tecniche -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Motore -->
-          <div class="bg-white rounded-2xl shadow-md p-6">
-            <h2 class="text-xl font-bold text-black mb-4">🔧 Motore</h2>
-            <div class="space-y-2 text-sm">
-              <div v-if="moto.cilindrata"><span class="font-medium">Cilindrata:</span> {{ moto.cilindrata }} cc</div>
-              <div v-if="moto.tipoMotore"><span class="font-medium">Tipo motore:</span> {{ moto.tipoMotore }}</div>
-              <div v-if="moto.tempi"><span class="font-medium">Tempi:</span> {{ moto.tempi }}</div>
-              <div v-if="moto.cilindri"><span class="font-medium">Cilindri:</span> {{ moto.cilindri }}</div>
-              <div v-if="moto.configurazioneCilindri"><span class="font-medium">Configurazione:</span> {{ moto.configurazioneCilindri }}</div>
-              <div v-if="moto.disposizioneCilindri"><span class="font-medium">Disposizione:</span> {{ moto.disposizioneCilindri }}</div>
-              <div v-if="moto.raffreddamento"><span class="font-medium">Raffreddamento:</span> {{ moto.raffreddamento }}</div>
-              <div v-if="moto.alimentazione"><span class="font-medium">Alimentazione:</span> {{ moto.alimentazione }}</div>
-              <div v-if="moto.alesaggio"><span class="font-medium">Alesaggio:</span> {{ moto.alesaggio }} mm</div>
-              <div v-if="moto.corsa"><span class="font-medium">Corsa:</span> {{ moto.corsa }} mm</div>
-              <div v-if="moto.potenza"><span class="font-medium">Potenza:</span> {{ moto.potenza }}</div>
-              <div v-if="moto.coppia"><span class="font-medium">Coppia:</span> {{ moto.coppia }}</div>
-              <div v-if="moto.numeroValvole"><span class="font-medium">Valvole:</span> {{ moto.numeroValvole }}</div>
-              <div v-if="moto.distribuzione"><span class="font-medium">Distribuzione:</span> {{ moto.distribuzione }}</div>
-            </div>
+        <!-- Navigation Arrows -->
+        <button 
+          v-if="moto.immaginiGallery.length > 3"
+          @click="previousImage"
+          class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-70 transition-all z-10"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <button 
+          v-if="moto.immaginiGallery.length > 3"
+          @click="nextImage"
+          class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-70 transition-all z-10"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+        
+        <!-- Image Counter -->
+        <div v-if="moto.immaginiGallery.length > 3" class="absolute bottom-4 right-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm z-10">
+          {{ currentImageIndex + 1 }} / {{ Math.max(1, moto.immaginiGallery.length - 2) }}
           </div>
 
-          <!-- Dimensioni -->
-          <div class="bg-white rounded-2xl shadow-md p-6">
-            <h2 class="text-xl font-bold text-black mb-4">📏 Dimensioni</h2>
-            <div class="space-y-2 text-sm">
-              <div v-if="moto.lunghezza"><span class="font-medium">Lunghezza:</span> {{ moto.lunghezza }} mm</div>
-              <div v-if="moto.larghezza"><span class="font-medium">Larghezza:</span> {{ moto.larghezza }} mm</div>
-              <div v-if="moto.altezza"><span class="font-medium">Altezza:</span> {{ moto.altezza }} mm</div>
-              <div v-if="moto.interasse"><span class="font-medium">Interasse:</span> {{ moto.interasse }} mm</div>
-              <div v-if="moto.altezzaSellaDaTerraMin"><span class="font-medium">Altezza sella min:</span> {{ moto.altezzaSellaDaTerraMin }} mm</div>
-              <div v-if="moto.altezzaSellaDaTerraMax"><span class="font-medium">Altezza sella max:</span> {{ moto.altezzaSellaDaTerraMax }} mm</div>
-              <div v-if="moto.altezzaMinimaDaTerra"><span class="font-medium">Altezza da terra:</span> {{ moto.altezzaMinimaDaTerra }} mm</div>
-              <div v-if="moto.pesoASecco"><span class="font-medium">Peso a secco:</span> {{ moto.pesoASecco }} kg</div>
-              <div v-if="moto.pesoInOrdineDiMarcia"><span class="font-medium">Peso in marcia:</span> {{ moto.pesoInOrdineDiMarcia }} kg</div>
-            </div>
-          </div>
-
-          <!-- Trasmissione -->
-          <div class="bg-white rounded-2xl shadow-md p-6">
-            <h2 class="text-xl font-bold text-black mb-4">⚙️ Trasmissione</h2>
-            <div class="space-y-2 text-sm">
-              <div v-if="moto.tipologiaCambio"><span class="font-medium">Cambio:</span> {{ moto.tipologiaCambio }}</div>
-              <div v-if="moto.numeroMarce"><span class="font-medium">Marce:</span> {{ moto.numeroMarce }}</div>
-              <div v-if="moto.presenzaRetromarcia"><span class="font-medium">Retromarcia:</span> {{ moto.presenzaRetromarcia }}</div>
-              <div v-if="moto.frizione"><span class="font-medium">Frizione:</span> {{ moto.frizione }}</div>
-              <div v-if="moto.trasmissioneFinale"><span class="font-medium">Trasmissione finale:</span> {{ moto.trasmissioneFinale }}</div>
-              <div v-if="moto.consumoMedioVmtc"><span class="font-medium">Consumo medio:</span> {{ moto.consumoMedioVmtc }} km/l</div>
-              <div v-if="moto.capacitaSerbatoioCarburante"><span class="font-medium">Serbatoio:</span> {{ moto.capacitaSerbatoioCarburante }} lt</div>
-              <div v-if="moto.capacitaRiservaCarburante"><span class="font-medium">Riserva:</span> {{ moto.capacitaRiservaCarburante }} lt</div>
-            </div>
-          </div>
-
-          <!-- Ciclistica -->
-          <div class="bg-white rounded-2xl shadow-md p-6">
-            <h2 class="text-xl font-bold text-black mb-4">🚲 Ciclistica</h2>
-            <div class="space-y-2 text-sm">
-              <div v-if="moto.telaio"><span class="font-medium">Telaio:</span> {{ moto.telaio }}</div>
-              <div v-if="moto.sospensioneAnteriore"><span class="font-medium">Sospensione anteriore:</span> {{ moto.sospensioneAnteriore }}</div>
-              <div v-if="moto.escursioneAnteriore"><span class="font-medium">Escursione anteriore:</span> {{ moto.escursioneAnteriore }} mm</div>
-              <div v-if="moto.sospensionePosteriore"><span class="font-medium">Sospensione posteriore:</span> {{ moto.sospensionePosteriore }}</div>
-              <div v-if="moto.escursionePosteriore"><span class="font-medium">Escursione posteriore:</span> {{ moto.escursionePosteriore }} mm</div>
-              <div v-if="moto.tipoFrenoAnteriore"><span class="font-medium">Freno anteriore:</span> {{ moto.tipoFrenoAnteriore }}</div>
-              <div v-if="moto.misuraFrenoAnteriore"><span class="font-medium">Freno anteriore:</span> {{ moto.misuraFrenoAnteriore }} mm</div>
-              <div v-if="moto.tipoFrenoPosteriore"><span class="font-medium">Freno posteriore:</span> {{ moto.tipoFrenoPosteriore }}</div>
-              <div v-if="moto.misuraFrenoPosteriore"><span class="font-medium">Freno posteriore:</span> {{ moto.misuraFrenoPosteriore }} mm</div>
-              <div v-if="moto.abs"><span class="font-medium">ABS:</span> {{ moto.abs }}</div>
-            </div>
-          </div>
-
-          <!-- Ruote -->
-          <div class="bg-white rounded-2xl shadow-md p-6">
-            <h2 class="text-xl font-bold text-black mb-4">🛞 Ruote</h2>
-            <div class="space-y-2 text-sm">
-              <div v-if="moto.tipoRuote"><span class="font-medium">Tipo ruote:</span> {{ moto.tipoRuote }}</div>
-              <div v-if="moto.misuraCerchioAnteriore"><span class="font-medium">Cerchio anteriore:</span> {{ moto.misuraCerchioAnteriore }}"</div>
-              <div v-if="moto.pneumaticoAnteriore"><span class="font-medium">Pneumatico anteriore:</span> {{ moto.pneumaticoAnteriore }}</div>
-              <div v-if="moto.misuraCerchioPosteriore"><span class="font-medium">Cerchio posteriore:</span> {{ moto.misuraCerchioPosteriore }}"</div>
-              <div v-if="moto.pneumaticoPosteriore"><span class="font-medium">Pneumatico posteriore:</span> {{ moto.pneumaticoPosteriore }}</div>
-            </div>
-          </div>
-
-          <!-- Elettronica -->
-          <div class="bg-white rounded-2xl shadow-md p-6">
-            <h2 class="text-xl font-bold text-black mb-4">⚡ Elettronica</h2>
-            <div class="space-y-2 text-sm">
-              <div v-if="moto.rideByWire"><span class="font-medium">Ride by Wire:</span> {{ moto.rideByWire }}</div>
-              <div v-if="moto.controlloTrazione"><span class="font-medium">Controllo trazione:</span> {{ moto.controlloTrazione }}</div>
-              <div v-if="moto.mappeMotore"><span class="font-medium">Mappe motore:</span> {{ moto.mappeMotore }}</div>
-              <div v-if="moto.emissioni"><span class="font-medium">Emissioni:</span> {{ moto.emissioni }}</div>
-              <div v-if="moto.depotenziata"><span class="font-medium">Depotenziata:</span> {{ moto.depotenziata }}</div>
-              <div v-if="moto.avviamento"><span class="font-medium">Avviamento:</span> {{ moto.avviamento }}</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Concessionario Selezionato -->
-        <div v-if="concessionarioSelezionato" class="bg-white rounded-2xl shadow-md p-6 mt-6 border-l-4 border-[#90c149]">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-bold text-black">🏪 Concessionario Selezionato</h2>
+          <!-- Dots Indicator -->
+          <div v-if="moto.immaginiGallery.length > 3" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
             <button 
-              @click="rimuoviSelezioneConcessionario"
-              class="text-gray-400 hover:text-gray-600 text-sm"
-            >
-              ✕ Rimuovi selezione
-            </button>
+              v-for="(_, index) in Math.max(1, moto.immaginiGallery.length - 2)" 
+              :key="index"
+              @click="currentImageIndex = index"
+              :class="[
+                'w-2 h-2 rounded-full transition-all',
+                currentImageIndex === index 
+                  ? 'bg-white' 
+                  : 'bg-white bg-opacity-50 hover:bg-opacity-75'
+              ]"
+            ></button>
+            </div>
           </div>
-          <div class="bg-green-50 rounded-lg p-4">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+
+      <!-- Fallback Image -->
+      <div v-else class="bg-gray-200 flex items-center justify-center">
+        <div class="text-center">
+          <div class="text-6xl mb-4">🏍️</div>
+          <p class="text-gray-500">Immagine non disponibile</p>
+            </div>
+          </div>
+
+      <!-- Info Principali -->
+      <div class="w-full bg-white">
+        <div class="w-full px-6 py-12">
+          <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-5xl font-bold text-gray-900 mb-4">{{ moto.marca }} {{ moto.modello }}</h1>
+            <p v-if="moto.allestimento" class="text-2xl text-gray-600 mb-8">{{ moto.allestimento }}</p>
+            
+            <div class="flex flex-wrap justify-center gap-6 mb-8">
+              <span v-if="moto.categoria" class="bg-[#90c149] text-white px-6 py-3 rounded-full text-lg font-medium">
+                {{ moto.categoria }}
+              </span>
+              <span v-if="moto.cilindrata" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-full text-lg font-medium">
+                {{ moto.cilindrata }} cc
+              </span>
+              <span v-if="moto.pesoASecco" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-full text-lg font-medium">
+                {{ moto.pesoASecco }} kg
+              </span>
+          </div>
+
+            <div v-if="moto.prezzo" class="text-4xl font-bold text-[#90c149] mb-12">
+              € {{ moto.prezzo.toLocaleString() }}
+          </div>
+
+            <!-- CTA Principale -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto">
+              <button 
+                @click="scrollToConcessionari"
+                class="bg-[#90c149] text-white px-12 py-4 rounded-full font-semibold hover:bg-[#7aa83f] transition-colors flex items-center justify-center gap-3 text-lg"
+              >
+                🏪 Trova Concessionari
+              </button>
+              <button 
+                @click="scrollToSpecifiche"
+                class="bg-gray-100 text-gray-700 px-12 py-4 rounded-full font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-3 text-lg"
+              >
+                📋 Specifiche Tecniche
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sezione Concessionari -->
+      <div id="concessionari" class="w-full bg-gray-50 py-16">
+        <div class="max-w-7xl mx-auto px-6">
+          <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">🏪 I Tuoi Concessionari di Fiducia</h2>
+            <p class="text-xl text-gray-600">Concessionari autorizzati con moto in pronta consegna</p>
+        </div>
+
+          <!-- Lista Concessionari -->
+          <div v-if="moto.concessionari && moto.concessionari.length > 0" class="space-y-8">
+            <div 
+              v-for="(concessionario, index) in moto.concessionari" 
+              :key="concessionario._id"
+              class="bg-white rounded-3xl shadow-2xl overflow-hidden hover:shadow-3xl transition-all duration-500"
+            >
+              <!-- Header Concessionario -->
+              <div class="bg-gradient-to-r from-[#90c149] to-[#7aa83f] p-8 text-white">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-6">
+                    <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                      <span class="text-3xl">🏪</span>
+          </div>
               <div>
-                <h3 class="text-lg font-semibold text-black">{{ concessionarioSelezionato.nome }}</h3>
-                <p class="text-gray-600">{{ concessionarioSelezionato.citta }}, {{ concessionarioSelezionato.provincia }}</p>
-                <div class="flex items-center gap-4 mt-2">
-                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    ✅ Disponibile
-                  </span>
-                  <span class="text-xs text-gray-500">Pronta consegna</span>
+                      <h3 class="text-3xl font-bold mb-2">{{ concessionario.nome }}</h3>
+                      <p class="text-xl opacity-90">{{ concessionario.citta }}, {{ concessionario.provincia }}</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-2xl font-bold mb-1">⭐ 4.8</div>
+                    <div class="text-sm opacity-90">Rating medio</div>
+                  </div>
                 </div>
               </div>
               
-              <div class="flex flex-col gap-2">
-                <div v-if="concessionarioSelezionato.telefono" class="flex items-center gap-2 text-sm text-gray-600">
-                  <span>📞</span>
-                  <a :href="`tel:${concessionarioSelezionato.telefono}`" class="hover:text-[#90c149] transition-colors">
-                    {{ concessionarioSelezionato.telefono }}
+              <!-- Contenuto Principale -->
+              <div class="p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  
+                  <!-- Colonna Sinistra - Info Principali -->
+                  <div class="lg:col-span-2 space-y-6">
+                    
+                    <!-- Status e Disponibilità -->
+                    <div class="bg-green-50 border border-green-200 rounded-2xl p-6">
+                      <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                          <span class="text-2xl text-white">✅</span>
+                        </div>
+                        <div>
+                          <h4 class="text-xl font-bold text-green-800">Disponibile in Pronta Consegna</h4>
+                          <p class="text-green-600">Moto immediatamente disponibile</p>
+                        </div>
+                      </div>
+                      
+                      <!-- Info Moto -->
+                      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white rounded-xl p-4 border border-green-200">
+                          <div class="text-sm text-gray-600 mb-1">Colore Disponibile</div>
+                          <div class="font-semibold text-gray-900">Rosso, Nero, Bianco</div>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 border border-green-200">
+                          <div class="text-sm text-gray-600 mb-1">Stato</div>
+                          <div class="font-semibold text-green-600">✅ Pronta Consegna</div>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 border border-green-200">
+                          <div class="text-sm text-gray-600 mb-1">Tempi</div>
+                          <div class="font-semibold text-gray-900">Immediato</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Info Concessionario -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div class="space-y-4">
+                        <h5 class="text-lg font-semibold text-gray-900">📞 Contatti</h5>
+                        <div v-if="concessionario.telefono" class="flex items-center gap-3">
+                          <span class="text-2xl">📞</span>
+                          <a :href="`tel:${concessionario.telefono}`" class="text-lg font-medium text-[#90c149] hover:text-[#7aa83f] transition-colors">
+                            {{ concessionario.telefono }}
                   </a>
                 </div>
-                <div v-if="concessionarioSelezionato.email" class="flex items-center gap-2 text-sm text-gray-600">
-                  <span>✉️</span>
-                  <a :href="`mailto:${concessionarioSelezionato.email}`" class="hover:text-[#90c149] transition-colors">
-                    {{ concessionarioSelezionato.email }}
-                  </a>
+                        <div v-if="concessionario.email" class="flex items-center gap-3">
+                          <span class="text-2xl">✉️</span>
+                          <a :href="`mailto:${concessionario.email}`" class="text-lg font-medium text-[#90c149] hover:text-[#7aa83f] transition-colors">
+                            {{ concessionario.email }}
+                          </a>
+                        </div>
+                      </div>
+                      
+                      <div class="space-y-4">
+                        <h5 class="text-lg font-semibold text-gray-900">🏢 Showroom</h5>
+                        <div class="space-y-2">
+                          <div class="flex justify-between">
+                            <span class="text-gray-600">Dipendenti:</span>
+                            <span class="font-semibold">12</span>
+                          </div>
+                          <div class="flex justify-between">
+                            <span class="text-gray-600">Metri quadri:</span>
+                            <span class="font-semibold">450 m²</span>
+                          </div>
+                          <div class="flex justify-between">
+                            <span class="text-gray-600">Anni attività:</span>
+                            <span class="font-semibold">15+</span>
+                          </div>
+                        </div>
                 </div>
               </div>
             </div>
             
-            <!-- CTA per il concessionario selezionato -->
-            <div class="flex gap-3 mt-4">
+                  <!-- Colonna Destra - CTA e Azioni -->
+                  <div class="space-y-6">
+                    
+                    <!-- CTA Principali -->
+                    <div class="space-y-4">
               <button 
-                @click="contattaConcessionario(concessionarioSelezionato)"
-                class="flex-1 bg-[#90c149] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#7aa83f] transition-colors flex items-center justify-center gap-2"
+                        @click="contattaConcessionario(concessionario)"
+                        class="w-full bg-[#90c149] text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-[#7aa83f] transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
               >
                 📞 Contatta Ora
               </button>
               <button 
-                @click="apriModalAppuntamento"
-                class="flex-1 bg-white text-[#90c149] border border-[#90c149] px-4 py-2 rounded-lg font-medium hover:bg-green-50 transition-colors flex items-center justify-center gap-2"
+                        @click="fissaAppuntamento(concessionario)"
+                        class="w-full bg-white text-[#90c149] border-2 border-[#90c149] px-8 py-4 rounded-2xl font-bold text-lg hover:bg-green-50 transition-all duration-300 flex items-center justify-center gap-3"
               >
                 📅 Fissa Appuntamento
               </button>
             </div>
           </div>
         </div>
-
-        <!-- Informazioni Aggiuntive -->
-        <div v-if="moto.garanzia || moto.optional || moto.inizioProduzione || moto.fineProduzione" class="bg-white rounded-2xl shadow-md p-6 mt-6">
-          <h2 class="text-xl font-bold text-black mb-4">ℹ️ Informazioni Aggiuntive</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div v-if="moto.garanzia"><span class="font-medium">Garanzia:</span> {{ moto.garanzia }}</div>
-            <div v-if="moto.optional"><span class="font-medium">Optional:</span> {{ moto.optional }}</div>
-            <div v-if="moto.inizioProduzione"><span class="font-medium">Inizio produzione:</span> {{ moto.inizioProduzione }}</div>
-            <div v-if="moto.fineProduzione"><span class="font-medium">Fine produzione:</span> {{ moto.fineProduzione }}</div>
+              </div>
+            </div>
+          </div>
           </div>
         </div>
       </div>
       
       <div v-else class="text-center py-12">
-        <div class="text-lg text-gray-600">Moto non trovata</div>
-        <NuxtLink to="/" class="text-[#90c149] hover:underline mt-2 inline-block">← Torna all'elenco</NuxtLink>
-      </div>
+      <div class="text-6xl mb-4">❌</div>
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">Moto non trovata</h2>
+      <p class="text-gray-600 mb-6">La moto che stai cercando non è disponibile</p>
+      <NuxtLink to="/" class="bg-[#90c149] text-white px-6 py-3 rounded-lg hover:bg-[#7aa83f] transition-colors">
+        ← Torna all'elenco
+      </NuxtLink>
     </div>
-
-    <!-- Modal Fissa Appuntamento -->
-    <ModalFissaAppuntamento 
-      :is-open="isModalAppuntamentoOpen" 
-      :moto="moto"
-      @close="chiudiModalAppuntamento"
-      @open-detail="vaiAllaScheda"
-      @book-appointment="fissaAppuntamento"
-    />
-
-    <!-- Modal Concessionari -->
-    <ModalConcessionari 
-      :is-open="isModalConcessionariOpen" 
-      :moto="moto"
-      @close="chiudiModalConcessionari"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import HeaderMenu from "@/components/HeaderMenu.vue"
-import ModalFissaAppuntamento from "@/components/ModalFissaAppuntamento.vue"
-import ModalConcessionari from "@/components/ModalConcessionari.vue"
 
-// Types basati sullo schema Sanity
+// Types
 interface Concessionario {
   _id: string
   nome: string
@@ -302,105 +288,64 @@ interface Moto {
   categoria?: string
   prezzo?: number
   cilindrata?: number
-  tipoMotore?: string
-  tempi?: number
-  cilindri?: number
-  configurazioneCilindri?: string
-  disposizioneCilindri?: string
-  raffreddamento?: string
-  alimentazione?: string
-  alesaggio?: number
-  corsa?: number
-  potenza?: string
-  coppia?: string
-  numeroValvole?: number
-  distribuzione?: string
-  lunghezza?: number
-  larghezza?: number
-  altezza?: number
-  interasse?: number
-  altezzaSellaDaTerraMin?: number
-  altezzaSellaDaTerraMax?: number
-  altezzaMinimaDaTerra?: number
   pesoASecco?: number
-  pesoInOrdineDiMarcia?: number
-  tipologiaCambio?: string
-  numeroMarce?: number
-  presenzaRetromarcia?: string
-  frizione?: string
-  trasmissioneFinale?: string
-  consumoMedioVmtc?: number
-  capacitaSerbatoioCarburante?: number
-  capacitaRiservaCarburante?: number
-  telaio?: string
-  sospensioneAnteriore?: string
-  escursioneAnteriore?: number
-  sospensionePosteriore?: string
-  escursionePosteriore?: number
-  tipoFrenoAnteriore?: string
-  misuraFrenoAnteriore?: number
-  tipoFrenoPosteriore?: string
-  misuraFrenoPosteriore?: number
-  abs?: string
-  tipoRuote?: string
-  misuraCerchioAnteriore?: number
-  pneumaticoAnteriore?: string
-  misuraCerchioPosteriore?: number
-  pneumaticoPosteriore?: string
-  rideByWire?: string
-  controlloTrazione?: string
-  mappeMotore?: string
-  emissioni?: string
-  depotenziata?: string
-  avviamento?: string
-  garanzia?: string
-  optional?: string
-  inizioProduzione?: number
-  fineProduzione?: number
   immagineCopertina?: string
   immaginiGallery?: string[]
-  link?: string
+  concessionari?: Concessionario[]
 }
 
 const route = useRoute()
 const moto = ref<Moto | null>(null)
 const loading = ref(true)
 
-// Modal states
-const isModalAppuntamentoOpen = ref(false)
-const isModalConcessionariOpen = ref(false)
-const concessionarioSelezionato = ref<Concessionario | null>(null)
+// Gallery state
+const currentImageIndex = ref(0)
+const autoScrollInterval = ref<NodeJS.Timeout | null>(null)
 
-// Funzioni per i modal
-const apriModalAppuntamento = () => {
-  isModalAppuntamentoOpen.value = true
+// Methods
+const nextImage = () => {
+  if (!moto.value?.immaginiGallery) return
+  const maxIndex = Math.max(0, moto.value.immaginiGallery.length - 3)
+  if (currentImageIndex.value < maxIndex) {
+    currentImageIndex.value++
+  } else {
+    currentImageIndex.value = 0
+  }
 }
 
-const chiudiModalAppuntamento = () => {
-  isModalAppuntamentoOpen.value = false
+const previousImage = () => {
+  if (!moto.value?.immaginiGallery) return
+  const maxIndex = Math.max(0, moto.value.immaginiGallery.length - 3)
+  if (currentImageIndex.value > 0) {
+    currentImageIndex.value--
+  } else {
+    currentImageIndex.value = maxIndex
+  }
 }
 
-const apriModalConcessionari = () => {
-  isModalConcessionariOpen.value = true
+const startAutoScroll = () => {
+  if (!moto.value?.immaginiGallery || moto.value.immaginiGallery.length <= 3) return
+  autoScrollInterval.value = setInterval(() => {
+    nextImage()
+  }, 4000)
 }
 
-const chiudiModalConcessionari = () => {
-  isModalConcessionariOpen.value = false
+const stopAutoScroll = () => {
+  if (autoScrollInterval.value) {
+    clearInterval(autoScrollInterval.value)
+    autoScrollInterval.value = null
+  }
 }
 
-const fissaAppuntamento = (concessionario: any) => {
-  console.log('Fissa appuntamento con:', concessionario)
-  concessionarioSelezionato.value = concessionario
-  // Aggiorna l'URL con il concessionario selezionato
-  const currentUrl = new URL(window.location.href)
-  currentUrl.searchParams.set('concessionario', concessionario._id)
-  window.history.replaceState({}, '', currentUrl.toString())
-  // Qui puoi implementare la logica per fissare l'appuntamento
-  // Ad esempio: aprire un form, inviare email, etc.
-  alert(`Appuntamento fissato con ${concessionario.nome} a ${concessionario.citta}`)
+const scrollToConcessionari = () => {
+  document.getElementById('concessionari')?.scrollIntoView({ behavior: 'smooth' })
 }
 
-const contattaConcessionario = (concessionario: any) => {
+const scrollToSpecifiche = () => {
+  document.getElementById('specifiche')?.scrollIntoView({ behavior: 'smooth' })
+}
+
+const contattaConcessionario = (concessionario: Concessionario) => {
   if (concessionario.telefono) {
     window.open(`tel:${concessionario.telefono}`, '_self')
   } else if (concessionario.email) {
@@ -408,44 +353,25 @@ const contattaConcessionario = (concessionario: any) => {
   }
 }
 
-const vaiAllaScheda = (concessionario: any) => {
-  console.log('Vai alla scheda per:', concessionario)
-  concessionarioSelezionato.value = concessionario
-}
-
-const rimuoviSelezioneConcessionario = () => {
-  concessionarioSelezionato.value = null
-  // Rimuovi il parametro concessionario dall'URL
-  const currentUrl = new URL(window.location.href)
-  currentUrl.searchParams.delete('concessionario')
-  window.history.replaceState({}, '', currentUrl.toString())
-}
-
-const apriLightbox = (index: number) => {
-  // Implementare lightbox per le immagini
-  console.log('Apri lightbox per immagine:', index)
+const fissaAppuntamento = (concessionario: Concessionario) => {
+  console.log('Fissa appuntamento con:', concessionario)
+  alert(`Appuntamento fissato con ${concessionario.nome} a ${concessionario.citta}`)
 }
 
 // Fetch moto da API
 onMounted(async () => {
   try {
     const motoId = route.params.id
-    const concessionarioId = route.query.concessionario as string
-    
     console.log('Caricamento moto con ID:', motoId)
-    console.log('Concessionario selezionato ID:', concessionarioId)
     
     const motoFetched = await $fetch(`/api/motos/${motoId}`)
     console.log('Moto caricata:', motoFetched)
     moto.value = motoFetched
     
-    // Se c'è un concessionario selezionato, lo carico
-    if (concessionarioId && moto.value?.concessionari) {
-      const concessionario = moto.value.concessionari.find(c => c._id === concessionarioId)
-      if (concessionario) {
-        concessionarioSelezionato.value = concessionario
-        console.log('Concessionario selezionato caricato:', concessionario)
-      }
+    currentImageIndex.value = 0
+    
+    if (moto.value?.immaginiGallery && moto.value.immaginiGallery.length > 4) {
+      startAutoScroll()
     }
   } catch (error) {
     console.error('Errore nel caricamento della moto:', error)
@@ -454,8 +380,14 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+onUnmounted(() => {
+  stopAutoScroll()
+})
 </script>
 
 <style scoped>
-/* Stili personalizzati se necessari */
+html {
+  scroll-behavior: smooth;
+}
 </style>

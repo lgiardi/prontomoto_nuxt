@@ -32,54 +32,56 @@
     </header>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Status Banner -->
-      <div v-if="dealerData?.status === 'pending'" class="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Page Title -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Dashboard Concessionario</h1>
+        <p class="text-gray-600 mt-2">Gestisci la tua concessionaria e le tue moto</p>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Moto in Vendita -->
+        <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-            </svg>
+              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <span class="text-blue-600 text-sm font-medium">🏍️</span>
+              </div>
           </div>
-          <div class="ml-3">
-            <h3 class="text-sm font-medium text-yellow-800">
-              Account in attesa di approvazione
-            </h3>
-            <p class="text-sm text-yellow-700 mt-1">
-              Il tuo account è stato creato ma è in attesa di approvazione da parte dell'amministratore.
-            </p>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500">Moto in Vendita</p>
+              <p class="text-2xl font-semibold text-gray-900">{{ stats.motoInVendita }}</p>
           </div>
         </div>
       </div>
 
-      <!-- Dashboard Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- Moto Disponibili -->
+        <!-- Contatti Ricevuti -->
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <div class="w-8 h-8 bg-[#90c149] rounded-md flex items-center justify-center">
-                <span class="text-white text-sm font-medium">🏍️</span>
+              <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <span class="text-green-600 text-sm font-medium">📞</span>
               </div>
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500">Moto Disponibili</p>
-              <p class="text-2xl font-semibold text-gray-900">{{ stats.motoDisponibili }}</p>
+              <p class="text-sm font-medium text-gray-500">Contatti Ricevuti</p>
+              <p class="text-2xl font-semibold text-gray-900">{{ stats.contattiRicevuti }}</p>
             </div>
           </div>
         </div>
 
-        <!-- Lead Ricevuti -->
+        <!-- Appuntamenti -->
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
-                <span class="text-white text-sm font-medium">📞</span>
+              <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                <span class="text-yellow-600 text-sm font-medium">📅</span>
               </div>
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500">Lead Ricevuti</p>
-              <p class="text-2xl font-semibold text-gray-900">{{ stats.leadRicevuti }}</p>
+              <p class="text-sm font-medium text-gray-500">Appuntamenti</p>
+              <p class="text-2xl font-semibold text-gray-900">{{ stats.appuntamenti }}</p>
             </div>
           </div>
         </div>
@@ -88,8 +90,8 @@
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <div class="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
-                <span class="text-white text-sm font-medium">👁️</span>
+              <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                <span class="text-purple-600 text-sm font-medium">👁️</span>
               </div>
             </div>
             <div class="ml-4">
@@ -101,105 +103,99 @@
       </div>
 
       <!-- Quick Actions -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <!-- Gestione Moto -->
-        <div class="bg-white rounded-lg shadow p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Gestione Moto</h3>
-          <p class="text-sm text-gray-600 mb-4">
-            Aggiungi o rimuovi moto dal tuo catalogo disponibile.
-          </p>
-          <button 
-            @click="navigateTo('/dealer/moto')"
-            class="bg-[#90c149] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#7aa83f] transition-colors"
-          >
+      <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Azioni Rapide</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button class="bg-[#90c149] text-white px-6 py-3 rounded-md hover:bg-[#7ba83a] transition-colors">
+            Aggiungi Moto
+          </button>
+          <button class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors">
             Gestisci Moto
           </button>
-        </div>
-
-        <!-- Lead Management -->
-        <div class="bg-white rounded-lg shadow p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Gestione Lead</h3>
-          <p class="text-sm text-gray-600 mb-4">
-            Visualizza e gestisci i lead ricevuti dai potenziali clienti.
-          </p>
-          <button 
-            @click="navigateTo('/dealer/lead')"
-            class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
-          >
-            Visualizza Lead
+          <button class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition-colors">
+            Modifica Profilo
           </button>
         </div>
       </div>
 
-      <!-- Recent Activity -->
-      <div class="bg-white rounded-lg shadow">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900">Attività Recente</h3>
+      <!-- Top Moto -->
+      <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Le Tue Moto Più Visualizzate</h2>
+        <div v-if="topMoto.length > 0" class="space-y-4">
+          <div v-for="moto in topMoto" :key="moto.id" class="flex items-center justify-between p-4 border rounded-lg">
+            <div class="flex items-center space-x-4">
+              <img :src="moto.immagine" :alt="moto.marca + ' ' + moto.modello" class="w-16 h-16 object-cover rounded">
+              <div>
+                <h3 class="font-medium text-gray-900">{{ moto.marca }} {{ moto.modello }}</h3>
+                <p class="text-sm text-gray-500">{{ moto.anno }} • {{ moto.km }} km</p>
+              </div>
         </div>
-        <div class="p-6">
-          <div v-if="recentActivity.length === 0" class="text-center py-8 text-gray-500">
-            <p>Nessuna attività recente</p>
+            <div class="text-right">
+              <p class="text-sm text-gray-500">Visualizzazioni</p>
+              <p class="font-semibold text-gray-900">{{ moto.visualizzazioni }}</p>
           </div>
-          <div v-else class="space-y-4">
-            <div 
-              v-for="activity in recentActivity" 
-              :key="activity.id"
-              class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
-            >
-              <div class="flex-shrink-0">
-                <div class="w-8 h-8 bg-[#90c149] rounded-full flex items-center justify-center">
-                  <span class="text-white text-xs">📞</span>
                 </div>
               </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900">{{ activity.title }}</p>
-                <p class="text-sm text-gray-500">{{ activity.description }}</p>
+        <div v-else class="text-center py-8 text-gray-500">
+          <p>Nessuna moto ancora visualizzata</p>
+        </div>
               </div>
-              <div class="text-sm text-gray-500">
-                {{ formatDate(activity.created_at) }}
+
+      <!-- Recent Activity -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Attività Recente</h2>
+        <div v-if="recentActivity.length > 0" class="space-y-4">
+          <div v-for="activity in recentActivity" :key="activity.id" class="flex items-center space-x-4 p-4 border rounded-lg">
+            <div class="flex-shrink-0">
+              <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                <span class="text-gray-600 text-sm">📊</span>
               </div>
             </div>
+            <div class="flex-1">
+              <p class="text-sm text-gray-900">{{ activity.description }}</p>
+              <p class="text-xs text-gray-500">{{ activity.timestamp }}</p>
           </div>
         </div>
       </div>
+        <div v-else class="text-center py-8 text-gray-500">
+          <p>Nessuna attività recente</p>
     </div>
+      </div>
+    </main>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-
-// Meta
+<script setup>
+// Questo middleware protegge la pagina - solo concessionari autenticati possono accedere
 definePageMeta({
-  layout: false,
-  middleware: 'auth'
+  middleware: 'auth',
+  layout: false
 })
 
-// Data
+const { user } = useSupabaseUser()
 const dealerData = ref(null)
+const loading = ref(true)
+
+// Stats
 const stats = ref({
-  motoDisponibili: 0,
-  leadRicevuti: 0,
+  motoInVendita: 0,
+  contattiRicevuti: 0,
+  appuntamenti: 0,
   visualizzazioni: 0
 })
+
+// Top moto
+const topMoto = ref([])
+
+// Recent activity
 const recentActivity = ref([])
 
-// Supabase client
-const supabase = useSupabaseClient()
-const user = useSupabaseUser()
-
-// Redirect if not logged in
-watch(user, (newUser) => {
-  if (!newUser) {
-    navigateTo('/auth/login')
-  }
-}, { immediate: true })
-
+// Carica i dati del concessionario
 const loadDealerData = async () => {
   if (!user.value) return
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await useSupabase()
       .from('concessionari')
       .select('*')
       .eq('id', user.value.id)
@@ -207,68 +203,91 @@ const loadDealerData = async () => {
 
     if (error) throw error
     dealerData.value = data
-  } catch (err) {
-    console.error('Error loading dealer data:', err)
+  } catch (error) {
+    console.error('Errore nel caricamento dati concessionario:', error)
   }
 }
 
+// Carica le statistiche
 const loadStats = async () => {
-  if (!user.value) return
-
-  try {
-    // Load moto disponibili
-    const { data: motoData } = await supabase
-      .from('moto_concessionari')
-      .select('*')
-      .eq('concessionario_id', user.value.id)
-      .eq('disponibile', true)
-
-    stats.value.motoDisponibili = motoData?.length || 0
-
-    // Load lead ricevuti (placeholder)
-    stats.value.leadRicevuti = 0 // TODO: Implement when lead system is ready
-
-    // Load visualizzazioni (placeholder)
-    stats.value.visualizzazioni = 0 // TODO: Implement analytics
-  } catch (err) {
-    console.error('Error loading stats:', err)
+  // Simula il caricamento delle statistiche
+  stats.value = {
+    motoInVendita: 12,
+    contattiRicevuti: 45,
+    appuntamenti: 8,
+    visualizzazioni: 234
   }
 }
 
-const loadRecentActivity = async () => {
-  // Placeholder for recent activity
-  recentActivity.value = []
+// Carica le top moto
+const loadTopMoto = async () => {
+  // Simula il caricamento delle top moto
+  topMoto.value = [
+    {
+      id: 1,
+      marca: 'Honda',
+      modello: 'CBR 600RR',
+      anno: 2023,
+      km: '0',
+      immagine: 'https://via.placeholder.com/150',
+      visualizzazioni: 45
+    },
+    {
+      id: 2,
+      marca: 'Yamaha',
+      modello: 'R1',
+      anno: 2022,
+      km: '500',
+      immagine: 'https://via.placeholder.com/150',
+      visualizzazioni: 38
+    }
+  ]
 }
 
+// Carica l'attività recente
+const loadRecentActivity = async () => {
+  // Simula il caricamento dell'attività recente
+  recentActivity.value = [
+    {
+      id: 1,
+      description: 'Nuova moto aggiunta: Honda CBR 600RR',
+      timestamp: '2 ore fa'
+    },
+    {
+      id: 2,
+      description: 'Contatto ricevuto per Yamaha R1',
+      timestamp: '4 ore fa'
+    },
+    {
+      id: 3,
+      description: 'Appuntamento fissato per domani',
+      timestamp: '1 giorno fa'
+    }
+  ]
+}
+
+// Logout
 const handleLogout = async () => {
   try {
-    await supabase.auth.signOut()
-    navigateTo('/')
-  } catch (err) {
-    console.error('Logout error:', err)
+    const { signOut } = useSupabase()
+    await signOut()
+    await navigateTo('/')
+  } catch (error) {
+    console.error('Errore durante il logout:', error)
   }
 }
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('it-IT', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
+// Carica tutti i dati
 onMounted(async () => {
   await loadDealerData()
   await loadStats()
+  await loadTopMoto()
   await loadRecentActivity()
+  
+  loading.value = false
 })
 </script>
 
 <style scoped>
 /* Stili personalizzati se necessari */
 </style>
-
-
-

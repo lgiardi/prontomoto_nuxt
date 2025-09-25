@@ -108,6 +108,7 @@ interface Moto {
 const props = defineProps<{
   isOpen: boolean
   moto: Moto | null
+  cittaFiltro?: string
 }>()
 
 const emit = defineEmits<{
@@ -127,6 +128,17 @@ const cittaDisponibili = computed(() => {
   })
   return Array.from(citta).sort()
 })
+
+// Pre-seleziona la città dal filtro se disponibile
+watch(() => props.isOpen, (isOpen) => {
+  if (isOpen && props.cittaFiltro && props.moto) {
+    // Verifica se la città del filtro è disponibile per questa moto
+    const cittaDisponibili = props.moto.concessionari.map(c => c.citta).filter(Boolean)
+    if (cittaDisponibili.includes(props.cittaFiltro)) {
+      cittaSelezionata.value = props.cittaFiltro
+    }
+  }
+}, { immediate: true })
 
 // Filtra concessionari per città selezionata
 const concessionariFiltrati = computed(() => {

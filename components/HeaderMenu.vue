@@ -15,18 +15,99 @@
 
         <!-- Menu Navigation -->
         <nav class="hidden md:flex space-x-8">
-          <a href="#" class="text-black hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors">
-            Moto
-          </a>
-          <a href="#" class="text-black hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors">
-            Concessionari
-          </a>
-          <a href="#" class="text-black hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors">
+          <NuxtLink to="/moto" class="text-black hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors">
+            Cerca Moto, Scooter e Servizi in tutta Italia
+          </NuxtLink>
+          
+          <NuxtLink to="/moto/nuovo" class="text-black hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors">
+            Nuovo
+          </NuxtLink>
+          
+          <!-- Usato Dropdown -->
+          <div class="relative" @mouseenter="showUsato = true" @mouseleave="showUsato = false">
+            <button class="text-black hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors flex items-center">
+              Usato
+              <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            
+            <!-- Dropdown Menu -->
+            <div v-if="showUsato" class="absolute top-full left-0 pt-1 w-48 z-50">
+              <div class="bg-white rounded-lg shadow-lg border border-gray-200">
+                <div class="py-1">
+                  <NuxtLink to="/moto/usato/privati" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Da privati
+                  </NuxtLink>
+                  <NuxtLink to="/moto/usato/concessionari" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                    Da concessionari
+                  </NuxtLink>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Servizi Dropdown -->
+          <div class="relative" @mouseenter="showServizi = true" @mouseleave="showServizi = false">
+            <button class="text-black hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors flex items-center">
             Servizi
-          </a>
-          <a href="#" class="text-black hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors">
-            Contatti
-          </a>
+              <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            
+            <!-- Dropdown Menu -->
+            <div v-if="showServizi" class="absolute top-full left-0 pt-1 w-56 z-50">
+              <div class="bg-white rounded-lg shadow-lg border border-gray-200">
+                <div class="py-1">
+                  <NuxtLink to="/servizi/tagliando" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Tagliando
+                  </NuxtLink>
+                  <NuxtLink to="/servizi/revisione" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Revisione
+                  </NuxtLink>
+                  <NuxtLink to="/servizi/gomme" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
+                    </svg>
+                    Sostituzione Gomme
+                  </NuxtLink>
+                  <NuxtLink to="/servizi/manutenzione" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                    </svg>
+                    Manutenzione
+                  </NuxtLink>
+                  <NuxtLink to="/servizi/assistenza" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z"></path>
+                    </svg>
+                    Assistenza Stradale
+                  </NuxtLink>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <NuxtLink to="/assicurazioni" class="text-black hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors">
+            Assicurazioni
+          </NuxtLink>
+          <NuxtLink to="/finanziamenti" class="text-black hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors">
+            Finanziamenti
+          </NuxtLink>
         </nav>
 
         <!-- CTA Buttons -->
@@ -173,18 +254,77 @@
       <!-- Mobile menu -->
       <div v-if="mobileMenuOpen" class="md:hidden">
         <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-gray-200">
-          <a href="#" class="text-black hover:text-[#90c149] block px-3 py-2 text-base font-medium">
-            Moto
-          </a>
-          <a href="#" class="text-black hover:text-[#90c149] block px-3 py-2 text-base font-medium">
-            Concessionari
-          </a>
-          <a href="#" class="text-black hover:text-[#90c149] block px-3 py-2 text-base font-medium">
-            Servizi
-          </a>
-          <a href="#" class="text-black hover:text-[#90c149] block px-3 py-2 text-base font-medium">
-            Contatti
-          </a>
+          <NuxtLink to="/moto" class="text-black hover:text-[#90c149] block px-3 py-2 text-base font-medium">
+            Cerca Moto, Scooter e Servizi in tutta Italia
+          </NuxtLink>
+          
+          <NuxtLink to="/moto/nuovo" class="text-black hover:text-[#90c149] block px-3 py-2 text-base font-medium">
+            Nuovo
+          </NuxtLink>
+          
+          <!-- Mobile Usato -->
+          <div class="px-3 py-2">
+            <div class="text-gray-600 text-sm font-medium mb-2">Usato</div>
+            <div class="ml-4 space-y-1">
+              <NuxtLink to="/moto/usato/privati" class="text-gray-600 hover:text-[#90c149] block px-3 py-1 text-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                Da privati
+              </NuxtLink>
+              <NuxtLink to="/moto/usato/concessionari" class="text-gray-600 hover:text-[#90c149] block px-3 py-1 text-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+                Da concessionari
+              </NuxtLink>
+            </div>
+          </div>
+          
+          <!-- Mobile Servizi -->
+          <div class="px-3 py-2">
+            <div class="text-gray-600 text-sm font-medium mb-2">Servizi</div>
+            <div class="ml-4 space-y-1">
+              <NuxtLink to="/servizi/tagliando" class="text-gray-600 hover:text-[#90c149] block px-3 py-1 text-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Tagliando
+              </NuxtLink>
+              <NuxtLink to="/servizi/revisione" class="text-gray-600 hover:text-[#90c149] block px-3 py-1 text-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Revisione
+              </NuxtLink>
+              <NuxtLink to="/servizi/gomme" class="text-gray-600 hover:text-[#90c149] block px-3 py-1 text-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
+                </svg>
+                Sostituzione Gomme
+              </NuxtLink>
+              <NuxtLink to="/servizi/manutenzione" class="text-gray-600 hover:text-[#90c149] block px-3 py-1 text-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                </svg>
+                Manutenzione
+              </NuxtLink>
+              <NuxtLink to="/servizi/assistenza" class="text-gray-600 hover:text-[#90c149] block px-3 py-1 text-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z"></path>
+                </svg>
+                Assistenza Stradale
+              </NuxtLink>
+            </div>
+          </div>
+          
+          <NuxtLink to="/assicurazioni" class="text-black hover:text-[#90c149] block px-3 py-2 text-base font-medium">
+            Assicurazioni
+          </NuxtLink>
+          <NuxtLink to="/finanziamenti" class="text-black hover:text-[#90c149] block px-3 py-2 text-base font-medium">
+            Finanziamenti
+          </NuxtLink>
           <div class="pt-4 space-y-2">
             <div v-if="user" class="space-y-2">
               <div class="text-center text-sm text-gray-600 py-2 border-b border-gray-200">
@@ -294,6 +434,8 @@ import { ref, onMounted, watch } from 'vue'
 const mobileMenuOpen = ref(false)
 const showDropdown = ref(false)
 const showUserMenu = ref(false)
+const showUsato = ref(false)
+const showServizi = ref(false)
 const user = ref(null)
 
 // Composable per rilevare il tipo di utente
@@ -323,6 +465,8 @@ onAuthStateChange((event, session) => {
   mobileMenuOpen.value = false
   showDropdown.value = false
   showUserMenu.value = false
+  showUsato.value = false
+  showServizi.value = false
 })
 
 onMounted(() => {

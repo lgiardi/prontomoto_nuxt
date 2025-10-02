@@ -44,22 +44,42 @@
             <div 
               v-for="moto in paginatedMotos" 
               :key="moto._id"
-              class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+              :class="[
+                'rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-shadow',
+                cittaSelezionata && moto.concessionari?.some(c => c.citta === cittaSelezionata) 
+                  ? 'bg-green-50 border-2 border-[#90c149]' 
+                  : 'bg-white'
+              ]"
             >
+              <!-- Immagine con logo sopra -->
+              <div class="relative">
+                <!-- Logo sopra l'immagine -->
+                <div class="absolute top-4 left-4 right-4 z-10 flex justify-center">
+                  <img 
+                    v-if="moto.marca === 'Benelli'"
+                    src="https://www.gemotors.it/wp-content/uploads/2025/03/benelli-seeklogo-768x243.png" 
+                    :alt="`Logo ${moto.marca}`"
+                    class="h-8"
+                  />
+                </div>
+                
               <!-- Immagine -->
               <div 
-                class="aspect-square bg-gray-200 cursor-pointer bg-center bg-no-repeat bg-contain" 
+                  class="aspect-square cursor-pointer bg-center bg-no-repeat bg-contain" 
                 :style="moto.immagineUrl ? `background-image: url(${moto.immagineUrl})` : ''"
                 @click="goToMoto(moto._id)"
               >
                 <div v-if="!moto.immagineUrl" class="w-full h-full flex items-center justify-center">
                   <span class="text-4xl text-gray-400">🏍️</span>
+                  </div>
                 </div>
               </div>
               
-              <!-- Info -->
-              <div class="p-4">
-                <h3 class="font-bold text-lg text-gray-900 mb-1">
+              <!-- Info sotto l'immagine -->
+              <div class="p-6">
+                <!-- Header con titolo e prezzo -->
+                <div class="mb-4">
+                  <h3 class="font-bold text-xl text-gray-900 mb-1">
                   {{ moto.marca }} {{ moto.modello }}
                 </h3>
                 
@@ -67,24 +87,91 @@
                   {{ moto.allestimento }}
                 </div>
                 
-                <div class="flex justify-between items-center mb-2">
-                  <span class="text-sm text-gray-500">{{ moto.categoria }}</span>
-                  <span class="text-sm text-gray-500">{{ moto.cilindrata }} cc</span>
+                  <div class="text-2xl font-bold text-gray-900">
+                    {{ moto.prezzo ? `€${moto.prezzo.toLocaleString()}` : 'Prezzo su richiesta' }}
+                  </div>
                 </div>
                 
-                <div class="flex justify-between items-center mb-3">
-                  <span class="text-lg font-bold text-[#90c149]">
-                    {{ moto.prezzo ? `€${moto.prezzo.toLocaleString()}` : 'Prezzo su richiesta' }}
+                <!-- Specifiche tecniche -->
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                  <div class="text-center p-2 bg-gray-50 rounded-lg">
+                    <div class="text-xs text-gray-500 uppercase tracking-wide">Categoria</div>
+                    <div class="text-sm font-medium text-gray-900">{{ moto.categoria }}</div>
+                  </div>
+                  <div class="text-center p-2 bg-gray-50 rounded-lg">
+                    <div class="text-xs text-gray-500 uppercase tracking-wide">Cilindrata</div>
+                    <div class="text-sm font-medium text-gray-900">{{ moto.cilindrata }} cc</div>
+                  </div>
+                </div>
+                
+                <!-- Badge disponibilità città -->
+                <div v-if="cittaSelezionata && moto.concessionari?.some(c => c.citta === cittaSelezionata)" class="mb-3">
+                  <div class="inline-flex items-center gap-2 px-3 py-1 bg-[#90c149] text-white rounded-full text-xs font-medium">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Disponibile a {{ cittaSelezionata }}
+                  </div>
+                </div>
+                
+                <!-- Disponibilità e colori -->
+                <div class="mb-4">
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                      <svg class="w-4 h-4 text-[#90c149]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      <span class="text-sm font-medium text-gray-900">
+                        <template v-if="cittaSelezionata">
+                          Disponibile a {{ cittaSelezionata }}
+                        </template>
+                        <template v-else>
+                          Disponibile in Italia
+                        </template>
+                      </span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                      </svg>
+                      <span class="text-sm text-gray-600">
+                        <template v-if="cittaSelezionata">
+                          {{ getConcessionariInCitta(moto, cittaSelezionata) }} venditori
+                        </template>
+                        <template v-else>
+                          {{ moto.concessionari?.length || 0 }} concessionari
+                        </template>
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <!-- Colori Disponibili -->
+                  <div v-if="moto.colori && moto.colori.length > 0" class="mt-3">
+                    <div class="flex items-center gap-2 mb-2">
+                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z"></path>
+                      </svg>
+                      <span class="text-xs text-gray-500 uppercase tracking-wide">Colori disponibili</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1">
+                      <span 
+                        v-for="(colore, index) in moto.colori.slice(0, 3)" 
+                        :key="index"
+                        class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-700 font-medium"
+                      >
+                        {{ colore }}
                   </span>
-                  <span class="text-sm text-gray-500">
-                    {{ moto.concessionariCount }} concessionari
+                      <span v-if="moto.colori.length > 3" class="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-700 font-medium">
+                        +{{ moto.colori.length - 3 }}
                 </span>
+                    </div>
+                  </div>
                 </div>
                 
                 <!-- CTA Vedi Dettagli -->
                 <button 
                   @click="goToMoto(moto._id)"
-                  class="w-full bg-[#90c149] text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-[#7aa83f] transition-colors"
+                  class="w-full bg-[#90c149] text-white py-3 px-4 rounded-xl text-sm font-semibold hover:bg-[#7aa83f] transition-all duration-200 shadow-sm hover:shadow-md"
                 >
                   Vedi Dettagli
                 </button>
@@ -168,6 +255,10 @@ const stats = ref({
 
 
 // Computed
+const cittaSelezionata = computed(() => {
+  return filters.value.citta
+})
+
 const filteredMotos = computed(() => {
   let filtered = [...motos.value]
   
@@ -192,7 +283,7 @@ const filteredMotos = computed(() => {
   }
   if (filters.value.citta) {
     filtered = filtered.filter(moto => 
-      moto.concessionari.some(c => c.citta === filters.value.citta)
+      moto.concessionari?.some(c => c.citta === filters.value.citta)
     )
   }
   
@@ -224,6 +315,13 @@ const paginatedMotos = computed(() => {
 // Methods
 const goToMoto = (id) => {
   navigateTo(`/moto/${id}`)
+}
+
+const getConcessionariInCitta = (moto, citta) => {
+  if (!moto.concessionari) return 0
+  return moto.concessionari.filter(concessionario => 
+    concessionario.citta.toLowerCase() === citta.toLowerCase()
+  ).length
 }
 
 const resetFilters = () => {
@@ -306,7 +404,8 @@ const calculateStats = () => {
     if (filters.value.marca && moto.marca !== filters.value.marca) return false
     if (filters.value.modello && moto.modello !== filters.value.modello) return false
     if (filters.value.allestimento && moto.allestimento !== filters.value.allestimento) return false
-    if (filters.value.citta && !moto.concessionari.some(c => c.citta === filters.value.citta)) return false
+    // Non applico il filtro per città quando calcolo le statistiche delle città
+    // altrimenti vedo solo le città che hanno moto con i filtri attuali
     return true
   })
   

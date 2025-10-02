@@ -307,7 +307,9 @@ const formData = ref({
 // Load motos from API
 const loadMotos = async () => {
   try {
+    console.log('Caricamento moto...')
     const data = await $fetch('/api/motos')
+    console.log('Moto caricate:', data)
     motos.value = data
     filteredMotos.value = data
   } catch (error) {
@@ -373,10 +375,10 @@ const submitForm = async () => {
     if (error) throw error
     
     // Success message
-    alert('Moto aggiunta con successo!')
+    alert('✅ Moto aggiunta con successo!')
     
-    // Redirect to dashboard
-    await navigateTo('/dealer/dashboard')
+    // Redirect to gestisci moto
+    await navigateTo('/dealer/gestisci-moto')
     
   } catch (error) {
     console.error('Errore nell\'aggiunta della moto:', error)

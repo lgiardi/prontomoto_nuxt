@@ -106,11 +106,16 @@
       <div class="bg-white rounded-lg shadow p-6 mb-8">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Azioni Rapide</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <NuxtLink to="/dealer/aggiungi-moto" class="bg-[#90c149] text-white px-6 py-3 rounded-md hover:bg-[#7ba83a] transition-colors inline-block text-center">
-            Aggiungi Moto
-          </NuxtLink>
+          <div class="flex space-x-4">
+            <NuxtLink to="/dealer/aggiungi-moto" class="bg-[#90c149] text-white px-6 py-3 rounded-md hover:bg-[#7ba83a] transition-colors inline-block text-center">
+              Aggiungi Moto
+            </NuxtLink>
+            <NuxtLink to="/dealer/gestisci-moto" class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition-colors inline-block text-center">
+              Gestisci Moto
+            </NuxtLink>
+          </div>
           <button class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors">
-            Gestisci Moto
+            Gestisci Lead
           </button>
           <button class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition-colors">
             Modifica Profilo

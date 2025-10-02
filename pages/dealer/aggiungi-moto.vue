@@ -279,6 +279,7 @@ definePageMeta({
 })
 
 const { user } = useSupabaseUser()
+const supabase = useSupabase()
 const loading = ref(false)
 
 // Moto data
@@ -357,7 +358,7 @@ const submitForm = async () => {
   
   try {
     // Aggiungi la relazione in Supabase
-    const { data, error } = await useSupabase()
+    const { data, error } = await supabase
       .from('moto_concessionari')
       .insert({
         moto_id: selectedMoto.value._id,

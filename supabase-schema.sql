@@ -23,6 +23,11 @@ CREATE TABLE IF NOT EXISTS moto_concessionari (
   concessionario_id UUID REFERENCES concessionari(id) ON DELETE CASCADE,
   disponibile BOOLEAN DEFAULT true,
   prezzo_speciale DECIMAL(10,2),
+  quantita INTEGER DEFAULT 1,
+  colore VARCHAR(100),
+  promozioni JSONB, -- JSON con le promozioni selezionate
+  foto_principale TEXT, -- URL foto principale del concessionario
+  foto_gallery JSONB, -- JSON array con le foto del concessionario
   note TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

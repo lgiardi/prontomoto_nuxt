@@ -106,9 +106,9 @@
       <div class="bg-white rounded-lg shadow p-6 mb-8">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Azioni Rapide</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button class="bg-[#90c149] text-white px-6 py-3 rounded-md hover:bg-[#7ba83a] transition-colors">
+          <NuxtLink to="/dealer/aggiungi-moto" class="bg-[#90c149] text-white px-6 py-3 rounded-md hover:bg-[#7ba83a] transition-colors inline-block text-center">
             Aggiungi Moto
-          </button>
+          </NuxtLink>
           <button class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors">
             Gestisci Moto
           </button>

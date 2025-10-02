@@ -33,149 +33,67 @@
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Gestisci le Tue Moto</h1>
-        <p class="text-gray-600 mt-2">Visualizza e gestisci le moto che hai aggiunto al tuo inventario.</p>
+        <h1 class="text-3xl font-bold text-gray-900">Le Tue Moto in Vendita</h1>
+        <p class="text-gray-600 mt-2">Gestisci le moto che hai aggiunto al catalogo.</p>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="loading" class="flex justify-center items-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#90c149]"></div>
-      </div>
-
-      <!-- Moto List -->
-      <div v-else-if="motoConcessionario.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div 
-          v-for="moto in motoConcessionario" 
-          :key="moto.id"
-          class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
-        >
-          <!-- Moto Image -->
-          <div class="aspect-w-16 aspect-h-9">
-            <img 
-              :src="moto.moto?.immagineUrl || 'https://via.placeholder.com/400x300'" 
-              :alt="moto.moto?.marca + ' ' + moto.moto?.modello"
-              class="w-full h-48 object-cover rounded-t-lg"
-            />
-          </div>
-
-          <!-- Moto Info -->
-          <div class="p-6">
-            <h3 class="text-xl font-bold text-gray-900 mb-2">
-              {{ moto.moto?.marca }} {{ moto.moto?.modello }}
-            </h3>
-            
-            <div v-if="moto.moto?.allestimento" class="text-sm text-gray-600 mb-3">
-              {{ moto.moto.allestimento }}
-            </div>
-
-            <!-- Prezzo -->
-            <div class="mb-4">
-              <div class="text-2xl font-bold text-gray-900">
-                €{{ moto.prezzo_speciale?.toLocaleString() || 'N/A' }}
-              </div>
-              <div v-if="moto.moto?.prezzo" class="text-sm text-gray-500">
-                Prezzo listino: €{{ moto.moto.prezzo.toLocaleString() }}
-              </div>
-            </div>
-
-            <!-- Dettagli -->
-            <div class="space-y-2 mb-4">
-              <div class="flex justify-between">
-                <span class="text-sm text-gray-600">Quantità:</span>
-                <span class="text-sm font-medium">{{ moto.quantita }}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-sm text-gray-600">Colore:</span>
-                <span class="text-sm font-medium">{{ moto.colore }}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-sm text-gray-600">Disponibile:</span>
-                <span class="text-sm font-medium" :class="moto.disponibile ? 'text-green-600' : 'text-red-600'">
-                  {{ moto.disponibile ? 'Sì' : 'No' }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Promozioni -->
-            <div v-if="moto.promozioni && Object.values(moto.promozioni).some(p => p)" class="mb-4">
-              <div class="text-sm font-medium text-gray-700 mb-2">Promozioni:</div>
-              <div class="flex flex-wrap gap-1">
-                <span 
-                  v-if="moto.promozioni.bollaInclusa" 
-                  class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
-                >
-                  Bolla inclusa
-                </span>
-                <span 
-                  v-if="moto.promozioni.messaSuStrada" 
-                  class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
-                >
-                  Messa su strada gratis
-                </span>
-                <span 
-                  v-if="moto.promozioni.garanziaEstesa" 
-                  class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
-                >
-                  Garanzia estesa
-                </span>
-                <span 
-                  v-if="moto.promozioni.primaRevisione" 
-                  class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
-                >
-                  Prima revisione gratis
-                </span>
-                <span 
-                  v-if="moto.promozioni.assicurazioneScontata" 
-                  class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
-                >
-                  Assicurazione scontata
-                </span>
-              </div>
-            </div>
-
-            <!-- Note -->
-            <div v-if="moto.note" class="mb-4">
-              <div class="text-sm text-gray-600">
-                <strong>Note:</strong> {{ moto.note }}
-              </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="flex space-x-2">
-              <button 
-                @click="editMoto(moto)"
-                class="flex-1 bg-[#90c149] text-white px-4 py-2 rounded-lg hover:bg-[#7ba83a] transition-colors text-sm font-medium"
-              >
-                Modifica
-              </button>
-              <button 
-                @click="deleteMoto(moto.id)"
-                class="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors text-sm font-medium"
-              >
-                Elimina
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Empty State -->
-      <div v-else class="text-center py-12">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+      <div v-if="loading" class="text-center py-10">
+        <svg class="animate-spin h-8 w-8 text-[#90c149] mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">Nessuna moto aggiunta</h3>
-        <p class="mt-1 text-sm text-gray-500">Inizia aggiungendo la tua prima moto.</p>
-        <div class="mt-6">
-          <NuxtLink 
-            to="/dealer/aggiungi-moto"
-            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#90c149] hover:bg-[#7ba83a]"
-          >
-            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            Aggiungi Prima Moto
-          </NuxtLink>
+        <p class="mt-3 text-gray-600">Caricamento moto...</p>
+      </div>
+
+      <div v-else-if="dealerMotos.length === 0" class="bg-white rounded-lg shadow p-8 text-center">
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">Nessuna moto in vendita</h3>
+        <p class="text-gray-600 mb-6">Sembra che tu non abbia ancora aggiunto nessuna moto al tuo inventario.</p>
+        <NuxtLink to="/dealer/aggiungi-moto" class="bg-[#90c149] text-white px-6 py-3 rounded-md hover:bg-[#7ba83a] transition-colors inline-block">
+          Aggiungi la tua prima moto
+        </NuxtLink>
+      </div>
+
+      <div v-else class="space-y-6">
+        <div v-for="moto in dealerMotos" :key="moto.id" class="bg-white rounded-lg shadow p-6 flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
+          <img 
+            :src="moto.immagineUrl || 'https://via.placeholder.com/120x90'" 
+            :alt="moto.marca + ' ' + moto.modello"
+            class="w-32 h-24 object-cover rounded-lg flex-shrink-0"
+          />
+          <div class="flex-1">
+            <h3 class="text-xl font-bold text-gray-900">{{ moto.marca }} {{ moto.modello }} <span v-if="moto.allestimento" class="font-normal text-gray-600 text-base">({{ moto.allestimento }})</span></h3>
+            <p class="text-gray-600 mt-1">{{ moto.categoria }} • {{ moto.cilindrata }}cc</p>
+            <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
+              <div class="flex items-center text-gray-700">
+                <svg class="w-4 h-4 mr-2 text-[#90c149]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                Prezzo: <span class="font-medium ml-1">€{{ moto.prezzo_speciale?.toLocaleString() || 'N/A' }}</span>
+              </div>
+              <div class="flex items-center text-gray-700">
+                <svg class="w-4 h-4 mr-2 text-[#90c149]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7V4c0-1.105 3.582-2 8-2s8 .895 8 2v3M12 20v-9"></path></svg>
+                Quantità: <span class="font-medium ml-1">{{ moto.quantita }}</span>
+              </div>
+              <div class="flex items-center text-gray-700">
+                <svg class="w-4 h-4 mr-2 text-[#90c149]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z"></path></svg>
+                Colore: <span class="font-medium ml-1">{{ moto.colore || 'N/A' }}</span>
+              </div>
+              <div v-if="moto.promozioni && Object.values(moto.promozioni).some(p => p)" class="flex items-center text-gray-700">
+                <svg class="w-4 h-4 mr-2 text-[#90c149]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                Promozioni: <span class="font-medium ml-1">{{ Object.values(moto.promozioni).filter(p => p).length }} attive</span>
+              </div>
+              <div v-if="moto.note" class="flex items-center text-gray-700">
+                <svg class="w-4 h-4 mr-2 text-[#90c149]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                Note: <span class="font-medium ml-1">Presenti</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex space-x-3 mt-4 md:mt-0 flex-shrink-0">
+            <button @click="editMoto(moto.id)" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors text-sm">
+              Modifica
+            </button>
+            <button @click="confirmDelete(moto.id)" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors text-sm">
+              Elimina
+            </button>
+          </div>
         </div>
       </div>
     </main>
@@ -184,20 +102,19 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useSupabaseUser, useSupabase } from '#imports'
 
 definePageMeta({
   middleware: 'auth',
   layout: false
 })
 
-const { user } = useSupabaseUser()
-const supabase = useSupabase()
-const loading = ref(true)
+const supabase = useSupabaseClient()
 const dealerData = ref(null)
-const motoConcessionario = ref([])
+const dealerMotos = ref([])
+const loading = ref(true)
+const user = ref(null)
 
-// Load dealer data
+// Funzione per caricare i dati del concessionario
 const loadDealerData = async () => {
   if (!user.value) return
 
@@ -215,82 +132,101 @@ const loadDealerData = async () => {
   }
 }
 
-// Load moto from concessionario
-const loadMotoConcessionario = async () => {
-  if (!user.value) return
+// Funzione per caricare le moto del concessionario
+const loadDealerMotos = async () => {
+  if (!user.value) {
+    loading.value = false
+    return
+  }
 
   try {
-    const { data, error } = await supabase
+    loading.value = true
+    console.log('🔍 Caricamento moto del concessionario...')
+    
+    // 1. Recupera le relazioni moto_concessionari per questo concessionario
+    const { data: motoConcessionari, error: mcError } = await supabase
       .from('moto_concessionari')
-      .select(`
-        *,
-        moto:moto_id
-      `)
+      .select('*')
       .eq('concessionario_id', user.value.id)
 
-    if (error) throw error
+    if (mcError) {
+      console.error('❌ Errore nel caricamento moto_concessionari:', mcError)
+      throw mcError
+    }
 
-    // Per ogni moto, carica i dettagli da Sanity
-    const motoWithDetails = await Promise.all(
-      data.map(async (moto) => {
-        try {
-          // Carica i dettagli della moto da Sanity
-          const motoDetails = await $fetch(`/api/motos/${moto.moto_id}`)
-          return {
-            ...moto,
-            moto: motoDetails,
-            promozioni: moto.promozioni ? JSON.parse(moto.promozioni) : {}
-          }
-        } catch (error) {
-          console.error('Errore nel caricamento dettagli moto:', error)
-          return {
-            ...moto,
-            moto: null,
-            promozioni: moto.promozioni ? JSON.parse(moto.promozioni) : {}
-          }
-        }
-      })
-    )
+    console.log('📊 Moto concessionari trovate:', motoConcessionari)
 
-    motoConcessionario.value = motoWithDetails
+    if (motoConcessionari.length === 0) {
+      dealerMotos.value = []
+      loading.value = false
+      return
+    }
+
+    // 2. Recupera i dettagli delle moto da Sanity usando gli ID
+    const motoIds = motoConcessionari.map(mc => mc.moto_id)
+    console.log('📝 Moto IDs da cercare:', motoIds)
+    
+    // Usa $fetch per chiamare l'API di Sanity
+    const motosFromSanity = await $fetch('/api/motos', {
+      method: 'GET',
+      query: { 
+        ids: motoIds.join(',')
+      }
+    })
+
+    console.log('📊 Moto da Sanity:', motosFromSanity)
+
+    // 3. Combina i dati di Sanity con i dati specifici del concessionario
+    dealerMotos.value = motoConcessionari.map(mc => {
+      const sanityMoto = motosFromSanity.find(sm => sm._id === mc.moto_id)
+      return {
+        ...mc, // Dati da moto_concessionari (id, prezzo_speciale, quantita, colore, promozioni, note, foto_principale, foto_gallery)
+        ...sanityMoto // Dati da Sanity (marca, modello, allestimento, categoria, cilindrata, immagineUrl)
+      }
+    })
+    
+    console.log('✅ Moto del concessionario caricate:', dealerMotos.value)
+
   } catch (error) {
-    console.error('Errore nel caricamento moto concessionario:', error)
+    console.error('❌ Errore nel caricamento delle moto del concessionario:', error)
+    alert('Errore nel caricamento delle tue moto. Riprova.')
   } finally {
     loading.value = false
   }
 }
 
-// Edit moto
-const editMoto = (moto) => {
-  // TODO: Implementare modifica moto
-  alert('Funzione di modifica in sviluppo')
+const editMoto = (motoId) => {
+  console.log('Modifica moto:', motoId)
+  navigateTo('/dealer/modifica-moto/' + motoId)
 }
 
-// Delete moto
-const deleteMoto = async (motoId) => {
-  if (!confirm('Sei sicuro di voler eliminare questa moto?')) return
+const confirmDelete = async (motoId) => {
+  if (confirm('Sei sicuro di voler eliminare questa moto dal tuo inventario?')) {
+    await deleteMoto(motoId)
+  }
+}
 
+const deleteMoto = async (motoId) => {
   try {
     const { error } = await supabase
       .from('moto_concessionari')
       .delete()
-      .eq('id', motoId)
+      .eq('id', motoId) // Usa l'ID della relazione moto_concessionari
 
     if (error) throw error
 
     alert('Moto eliminata con successo!')
-    await loadMotoConcessionario()
+    await loadDealerMotos() // Ricarica la lista delle moto
   } catch (error) {
     console.error('Errore nell\'eliminazione della moto:', error)
     alert('Errore nell\'eliminazione della moto. Riprova.')
   }
 }
 
-// Handle logout
 const handleLogout = async () => {
   try {
-    const { signOut } = supabase
-    await signOut()
+    const { error } = await supabase.auth.signOut()
+    if (error) throw error
     await navigateTo('/')
   } catch (error) {
     console.error('Errore durante il logout:', error)
@@ -298,8 +234,52 @@ const handleLogout = async () => {
 }
 
 onMounted(async () => {
-  await loadDealerData()
-  await loadMotoConcessionario()
+  try {
+    console.log('🚀 Inizio caricamento gestisci-moto...')
+    
+    // Carica l'utente usando il session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    console.log('📊 Sessione ricevuta:', session)
+    console.log('❌ Errore sessione:', sessionError)
+    
+    if (session && session.user) {
+      user.value = session.user
+      console.log('👤 User caricato da sessione:', user.value)
+      console.log('✅ User ID:', user.value?.id)
+      
+      await loadDealerData()
+      await loadDealerMotos()
+      return
+    }
+    
+    // Se non c'è sessione, prova con getUser
+    console.log('🔄 Tentativo con getUser...')
+    const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser()
+    console.log('👤 User da getUser:', currentUser)
+    console.log('❌ Errore getUser:', userError)
+    
+    if (userError) {
+      console.error('❌ Errore nel caricamento utente:', userError)
+      alert('Errore nel caricamento utente. Ricarica la pagina.')
+      return
+    }
+    
+    if (!currentUser) {
+      console.log('❌ Nessun utente trovato, redirect a login')
+      await navigateTo('/auth/login')
+      return
+    }
+    
+    user.value = currentUser
+    console.log('👤 User caricato da getUser:', user.value)
+    console.log('✅ User ID:', user.value?.id)
+    
+    await loadDealerData()
+    await loadDealerMotos()
+  } catch (error) {
+    console.error('❌ Errore generale in gestisci-moto:', error)
+    alert('Errore nel caricamento. Ricarica la pagina.')
+  }
 })
 </script>
 

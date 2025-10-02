@@ -19,9 +19,32 @@
             Cerca Moto, Scooter e Servizi in tutta Italia
           </NuxtLink>
           
-          <NuxtLink to="/moto/nuovo" class="text-black hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors">
-            Nuovo
-          </NuxtLink>
+          <!-- Nuovo Dropdown -->
+          <div class="relative" @mouseenter="showNuovo = true" @mouseleave="showNuovo = false">
+            <button class="text-black hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors flex items-center">
+              Nuovo
+              <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            
+            <!-- Dropdown Menu -->
+            <div v-if="showNuovo" class="absolute top-full left-0 pt-1 w-56 z-50">
+              <div class="bg-white rounded-lg shadow-lg border border-gray-200">
+                <div class="py-1">
+                  <NuxtLink to="/moto/nuovo" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                    Vedi Tutte
+                  </NuxtLink>
+                  <NuxtLink to="/moto/nuovo/piu-vendute" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                    40 Moto più vendute
+                  </NuxtLink>
+                  <NuxtLink to="/moto/nuovo/scooter-piu-venduti" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                    40 Scooter più venduti
+                  </NuxtLink>
+                </div>
+              </div>
+            </div>
+          </div>
           
           <!-- Usato Dropdown -->
           <div class="relative" @mouseenter="showUsato = true" @mouseleave="showUsato = false">
@@ -258,9 +281,21 @@
             Cerca Moto, Scooter e Servizi in tutta Italia
           </NuxtLink>
           
-          <NuxtLink to="/moto/nuovo" class="text-black hover:text-[#90c149] block px-3 py-2 text-base font-medium">
-            Nuovo
-          </NuxtLink>
+          <!-- Mobile Nuovo -->
+          <div class="px-3 py-2">
+            <div class="text-black font-medium text-base mb-2">Nuovo</div>
+            <div class="ml-4 space-y-1">
+              <NuxtLink to="/moto/nuovo" class="text-gray-600 hover:text-[#90c149] block px-3 py-2 text-sm font-medium transition-colors">
+                Vedi Tutte
+              </NuxtLink>
+              <NuxtLink to="/moto/nuovo/piu-vendute" class="text-gray-600 hover:text-[#90c149] block px-3 py-2 text-sm font-medium transition-colors">
+                40 Moto più vendute
+              </NuxtLink>
+              <NuxtLink to="/moto/nuovo/scooter-piu-venduti" class="text-gray-600 hover:text-[#90c149] block px-3 py-2 text-sm font-medium transition-colors">
+                40 Scooter più venduti
+              </NuxtLink>
+            </div>
+          </div>
           
           <!-- Mobile Usato -->
           <div class="px-3 py-2">
@@ -436,6 +471,7 @@ const showDropdown = ref(false)
 const showUserMenu = ref(false)
 const showUsato = ref(false)
 const showServizi = ref(false)
+const showNuovo = ref(false)
 const user = ref(null)
 
 // Composable per rilevare il tipo di utente

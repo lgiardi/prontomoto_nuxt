@@ -83,6 +83,44 @@
                 </div>
               </div>
 
+              <!-- Moto Selezionata -->
+              <div v-if="selectedMoto" class="mt-6 p-6 bg-green-50 border border-green-200 rounded-lg">
+                <h3 class="text-xl font-bold text-green-800 mb-4">Moto Selezionata</h3>
+                <div class="flex items-start space-x-6">
+                  <img 
+                    :src="selectedMoto.immagineUrl || 'https://via.placeholder.com/120x90'" 
+                    :alt="selectedMoto.marca + ' ' + selectedMoto.modello"
+                    class="w-32 h-24 object-cover rounded-lg"
+                  />
+                  <div class="flex-1">
+                    <h4 class="text-2xl font-bold text-green-900 mb-2">
+                      {{ selectedMoto.marca }} {{ selectedMoto.modello }}
+                    </h4>
+                    <p v-if="selectedMoto.allestimento" class="text-lg text-green-700 mb-2">
+                      {{ selectedMoto.allestimento }}
+                    </p>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span class="font-medium text-green-800">Categoria:</span>
+                        <span class="text-green-700 ml-2">{{ selectedMoto.categoria }}</span>
+                      </div>
+                      <div>
+                        <span class="font-medium text-green-800">Cilindrata:</span>
+                        <span class="text-green-700 ml-2">{{ selectedMoto.cilindrata }}cc</span>
+                      </div>
+                      <div>
+                        <span class="font-medium text-green-800">Prezzo Listino:</span>
+                        <span class="text-green-700 ml-2">€{{ selectedMoto.prezzo?.toLocaleString() || 'N/A' }}</span>
+                      </div>
+                      <div>
+                        <span class="font-medium text-green-800">Peso:</span>
+                        <span class="text-green-700 ml-2">{{ selectedMoto.pesoASecco || 'N/A' }} kg</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div v-else class="text-center py-8 text-gray-500">
                 <p>Nessuna moto trovata</p>
               </div>
@@ -278,9 +316,11 @@ definePageMeta({
   layout: false
 })
 
-const { user } = useSupabaseUser()
-const supabase = useSupabase()
 const loading = ref(false)
+const user = ref(null)
+
+// Inizializza Supabase
+const supabase = useSupabaseClient()
 
 // Moto data
 const motos = ref([])
@@ -308,13 +348,16 @@ const formData = ref({
 // Load motos from API
 const loadMotos = async () => {
   try {
-    console.log('Caricamento moto...')
+    console.log('🚀 Caricamento moto...')
     const data = await $fetch('/api/motos')
-    console.log('Moto caricate:', data)
+    console.log('✅ Moto caricate:', data)
+    console.log('📊 Numero moto:', data.length)
     motos.value = data
     filteredMotos.value = data
+    console.log('✅ Moto salvate in motos.value:', motos.value.length)
   } catch (error) {
-    console.error('Errore nel caricamento delle moto:', error)
+    console.error('❌ Errore nel caricamento delle moto:', error)
+    alert('Errore nel caricamento delle moto. Ricarica la pagina.')
   }
 }
 
@@ -352,46 +395,169 @@ const removeFoto = (index) => {
 
 // Submit form
 const submitForm = async () => {
-  if (!user.value || !selectedMoto.value) return
+  console.log('🚀 Submit form chiamato!')
+  console.log('User:', user.value)
+  console.log('Selected moto:', selectedMoto.value)
   
+  if (!user.value) {
+    console.log('❌ User non loggato! Devi fare login prima.')
+    alert('❌ Devi essere loggato per aggiungere moto!')
+    await navigateTo('/')
+    return
+  }
+  
+  if (!selectedMoto.value) {
+    console.log('❌ Nessuna moto selezionata!')
+    alert('❌ Seleziona una moto dal catalogo!')
+    return
+  }
+  
+  console.log('✅ Inizio inserimento nel database...')
   loading.value = true
   
   try {
-    // Aggiungi la relazione in Supabase
+    // Prima controlla se l'utente esiste nella tabella concessionari
+    const { data: dealerCheck, error: dealerError } = await supabase
+      .from('concessionari')
+      .select('id')
+      .eq('id', user.value.id)
+      .single()
+
+    if (dealerError && dealerError.code === 'PGRST116') {
+      console.log('🔄 Utente non trovato nella tabella concessionari, creazione...')
+      const { data: newDealer, error: insertError } = await supabase
+        .from('concessionari')
+        .insert({
+          id: user.value.id,
+          nome: user.value.user_metadata?.nome || user.value.email?.split('@')[0] || 'Concessionario',
+          email: user.value.email,
+          telefono: user.value.user_metadata?.telefono || null,
+          citta: user.value.user_metadata?.citta || 'Milano',
+          provincia: user.value.user_metadata?.provincia || 'MI',
+          indirizzo: user.value.user_metadata?.indirizzo || null,
+          cap: user.value.user_metadata?.cap || null,
+          tipo: 'concessionario'
+        })
+        .select()
+        .single()
+
+      if (insertError) {
+        console.error('❌ Errore nella creazione del concessionario:', insertError)
+        throw insertError
+      }
+      
+      console.log('✅ Concessionario creato:', newDealer)
+    }
+    
+    // Aggiungi la relazione in Supabase - solo i campi essenziali che esistono
+    const insertData = {
+      moto_id: selectedMoto.value._id,
+      concessionario_id: user.value.id,
+      disponibile: true,
+      prezzo_speciale: formData.value.prezzoConcessionario
+      // Altri campi commentati perché le colonne non esistono in Supabase
+      // quantita: formData.value.quantita,
+      // colore: formData.value.colore,
+      // promozioni: JSON.stringify(formData.value.promozioni),
+      // foto_principale: formData.value.fotoPrincipale,
+      // foto_gallery: JSON.stringify(formData.value.fotoGallery.filter(url => url.trim())),
+      // note: formData.value.note
+    }
+    
+    console.log('📝 Dati da inserire:', insertData)
+    console.log('📝 Moto ID:', selectedMoto.value._id)
+    console.log('📝 User ID:', user.value.id)
+    console.log('📝 Prezzo:', formData.value.prezzoConcessionario)
+    console.log('📝 Quantità (non salvata):', formData.value.quantita)
+    console.log('📝 Colore (non salvato):', formData.value.colore)
+    console.log('📝 Promozioni (non salvate):', formData.value.promozioni)
+    console.log('📝 Foto principale (non salvata):', formData.value.fotoPrincipale)
+    console.log('📝 Foto gallery (non salvate):', formData.value.fotoGallery)
+    console.log('📝 Note (non salvate):', formData.value.note)
+    
     const { data, error } = await supabase
       .from('moto_concessionari')
-      .insert({
-        moto_id: selectedMoto.value._id,
-        concessionario_id: user.value.id,
-        disponibile: true,
-        prezzo_speciale: formData.value.prezzoConcessionario,
-        quantita: formData.value.quantita,
-        colore: formData.value.colore,
-        promozioni: JSON.stringify(formData.value.promozioni),
-        foto_principale: formData.value.fotoPrincipale,
-        foto_gallery: JSON.stringify(formData.value.fotoGallery.filter(url => url.trim())),
-        note: formData.value.note
-      })
+      .insert(insertData)
     
-    if (error) throw error
+    if (error) {
+      console.error('❌ Errore Supabase:', error)
+      console.error('❌ Error details:', error.details)
+      console.error('❌ Error message:', error.message)
+      console.error('❌ Error code:', error.code)
+      console.error('❌ Error hint:', error.hint)
+      throw error
+    }
+    
+    console.log('✅ Inserimento completato con successo!')
+    console.log('📊 Data ricevuta:', data)
     
     // Success message
     alert('✅ Moto aggiunta con successo!')
     
     // Redirect to gestisci moto
+    console.log('🔄 Redirect a gestisci-moto...')
     await navigateTo('/dealer/gestisci-moto')
     
   } catch (error) {
-    console.error('Errore nell\'aggiunta della moto:', error)
+    console.error('❌ Errore nell\'aggiunta della moto:', error)
     alert('Errore nell\'aggiunta della moto. Riprova.')
   } finally {
+    console.log('🏁 Form completato, loading = false')
     loading.value = false
   }
 }
 
-// Load motos on mount
-onMounted(() => {
-  loadMotos()
+// Load user and motos on mount
+onMounted(async () => {
+  try {
+    console.log('🚀 Inizio caricamento pagina...')
+    
+    // Prova prima con getSession
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    console.log('📊 Sessione ricevuta:', session)
+    console.log('❌ Errore sessione:', sessionError)
+    
+    if (session && session.user) {
+      user.value = session.user
+      console.log('👤 User caricato da sessione:', user.value)
+      console.log('✅ User ID:', user.value?.id)
+      
+      // Carica le moto
+      await loadMotos()
+      return
+    }
+    
+    // Se non c'è sessione, prova con getUser
+    console.log('🔄 Tentativo con getUser...')
+    const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser()
+    console.log('👤 User da getUser:', currentUser)
+    console.log('❌ Errore getUser:', userError)
+    
+    if (userError) {
+      console.error('❌ Errore nel caricamento utente:', userError)
+      alert('Errore nel caricamento utente. Ricarica la pagina.')
+      return
+    }
+    
+    if (!currentUser) {
+      console.log('❌ Nessun utente trovato, redirect a login')
+      alert('❌ Devi essere loggato per aggiungere moto!')
+      await navigateTo('/auth/login')
+      return
+    }
+    
+    user.value = currentUser
+    console.log('👤 User caricato da getUser:', user.value)
+    console.log('✅ User ID:', user.value?.id)
+    
+    // Carica le moto
+    await loadMotos()
+  } catch (error) {
+    console.error('❌ Errore generale:', error)
+    console.error('❌ Stack trace:', error.stack)
+    console.error('❌ Error message:', error.message)
+    alert('Errore nel caricamento. Ricarica la pagina.')
+  }
 })
 </script>
 

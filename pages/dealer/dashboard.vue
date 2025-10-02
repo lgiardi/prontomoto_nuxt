@@ -177,9 +177,12 @@ definePageMeta({
   layout: false
 })
 
-const { user } = useSupabaseUser()
+const user = ref(null)
 const dealerData = ref(null)
 const loading = ref(true)
+
+// Inizializza Supabase
+const supabase = useSupabaseClient()
 
 // Stats
 const stats = ref({
@@ -197,56 +200,170 @@ const recentActivity = ref([])
 
 // Carica i dati del concessionario
 const loadDealerData = async () => {
-  if (!user.value) return
+  console.log('🔍 loadDealerData chiamata, user.value:', user.value)
+  
+  if (!user.value) {
+    console.log('❌ User non disponibile in loadDealerData')
+    return
+  }
 
   try {
-    const { data, error } = await useSupabase()
+    console.log('📊 Caricamento dati concessionario per user ID:', user.value.id)
+    const { data, error } = await supabase
       .from('concessionari')
       .select('*')
       .eq('id', user.value.id)
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('❌ Errore Supabase in loadDealerData:', error)
+      
+      // Se l'utente non esiste nella tabella concessionari, crealo
+      if (error.code === 'PGRST116') {
+        console.log('🔄 Utente non trovato nella tabella concessionari, creazione...')
+        const { data: newDealer, error: insertError } = await supabase
+          .from('concessionari')
+          .insert({
+            id: user.value.id,
+            nome: user.value.user_metadata?.nome || user.value.email?.split('@')[0] || 'Concessionario',
+            email: user.value.email,
+            telefono: user.value.user_metadata?.telefono || null,
+            citta: user.value.user_metadata?.citta || 'Milano',
+            provincia: user.value.user_metadata?.provincia || 'MI',
+            indirizzo: user.value.user_metadata?.indirizzo || null,
+            cap: user.value.user_metadata?.cap || null,
+            tipo: 'concessionario'
+          })
+          .select()
+          .single()
+
+        if (insertError) {
+          console.error('❌ Errore nella creazione del concessionario:', insertError)
+          throw insertError
+        }
+        
+        console.log('✅ Concessionario creato:', newDealer)
+        dealerData.value = newDealer
+        return
+      }
+      
+      throw error
+    }
+    
+    console.log('✅ Dati concessionario caricati:', data)
     dealerData.value = data
   } catch (error) {
-    console.error('Errore nel caricamento dati concessionario:', error)
+    console.error('❌ Errore nel caricamento dati concessionario:', error)
+    console.error('❌ Stack trace:', error.stack)
   }
 }
 
 // Carica le statistiche
 const loadStats = async () => {
-  // Simula il caricamento delle statistiche
-  stats.value = {
-    motoInVendita: 12,
-    contattiRicevuti: 45,
-    appuntamenti: 8,
-    visualizzazioni: 234
+  if (!user.value) return
+
+  try {
+    console.log('📊 Caricamento statistiche reali...')
+    
+    // 1. Conta le moto in vendita
+    const { count: motoCount, error: motoError } = await supabase
+      .from('moto_concessionari')
+      .select('*', { count: 'exact', head: true })
+      .eq('concessionario_id', user.value.id)
+      .eq('disponibile', true)
+
+    if (motoError) throw motoError
+
+    // 2. Conta i lead ricevuti
+    const { count: leadCount, error: leadError } = await supabase
+      .from('lead')
+      .select('*', { count: 'exact', head: true })
+      .eq('concessionario_id', user.value.id)
+
+    if (leadError) throw leadError
+
+    // 3. Conta gli appuntamenti (lead con status 'contacted')
+    const { count: appuntamentiCount, error: appuntamentiError } = await supabase
+      .from('lead')
+      .select('*', { count: 'exact', head: true })
+      .eq('concessionario_id', user.value.id)
+      .eq('status', 'contacted')
+
+    if (appuntamentiError) throw appuntamentiError
+
+    // 4. Simula le visualizzazioni (per ora)
+    const visualizzazioni = Math.floor(Math.random() * 1000) + 100
+
+    stats.value = {
+      motoInVendita: motoCount || 0,
+      contattiRicevuti: leadCount || 0,
+      appuntamenti: appuntamentiCount || 0,
+      visualizzazioni: visualizzazioni
+    }
+
+    console.log('✅ Statistiche caricate:', stats.value)
+  } catch (error) {
+    console.error('❌ Errore nel caricamento statistiche:', error)
+    // Fallback ai valori di default
+    stats.value = {
+      motoInVendita: 0,
+      contattiRicevuti: 0,
+      appuntamenti: 0,
+      visualizzazioni: 0
+    }
   }
 }
 
 // Carica le top moto
 const loadTopMoto = async () => {
-  // Simula il caricamento delle top moto
-  topMoto.value = [
-    {
-      id: 1,
-      marca: 'Honda',
-      modello: 'CBR 600RR',
-      anno: 2023,
-      km: '0',
-      immagine: 'https://via.placeholder.com/150',
-      visualizzazioni: 45
-    },
-    {
-      id: 2,
-      marca: 'Yamaha',
-      modello: 'R1',
-      anno: 2022,
-      km: '500',
-      immagine: 'https://via.placeholder.com/150',
-      visualizzazioni: 38
+  if (!user.value) return
+
+  try {
+    console.log('📊 Caricamento top moto...')
+    
+    // Recupera le moto del concessionario con i dettagli
+    const { data: motoConcessionari, error: mcError } = await supabase
+      .from('moto_concessionari')
+      .select('*')
+      .eq('concessionario_id', user.value.id)
+      .eq('disponibile', true)
+      .limit(5)
+
+    if (mcError) throw mcError
+
+    if (motoConcessionari.length === 0) {
+      topMoto.value = []
+      return
     }
-  ]
+
+    // Recupera i dettagli delle moto da Sanity
+    const motoIds = motoConcessionari.map(mc => mc.moto_id)
+    const motosFromSanity = await $fetch('/api/motos', {
+      method: 'GET',
+      query: { 
+        ids: motoIds.join(',')
+      }
+    })
+
+    // Combina i dati e simula visualizzazioni/contatti
+    topMoto.value = motoConcessionari.map(mc => {
+      const sanityMoto = motosFromSanity.find(sm => sm._id === mc.moto_id)
+      return {
+        id: mc.id,
+        marca: sanityMoto?.marca || 'Sconosciuta',
+        modello: sanityMoto?.modello || 'Sconosciuto',
+        anno: 2024,
+        km: '0',
+        immagine: sanityMoto?.immagineUrl || 'https://via.placeholder.com/150',
+        visualizzazioni: Math.floor(Math.random() * 200) + 50
+      }
+    })
+
+    console.log('✅ Top moto caricate:', topMoto.value)
+  } catch (error) {
+    console.error('❌ Errore nel caricamento top moto:', error)
+    topMoto.value = []
+  }
 }
 
 // Carica l'attività recente
@@ -284,12 +401,62 @@ const handleLogout = async () => {
 
 // Carica tutti i dati
 onMounted(async () => {
-  await loadDealerData()
-  await loadStats()
-  await loadTopMoto()
-  await loadRecentActivity()
-  
-  loading.value = false
+  try {
+    console.log('🚀 Inizio caricamento dashboard...')
+    
+    // Prova prima con getSession
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    console.log('📊 Sessione ricevuta:', session)
+    console.log('❌ Errore sessione:', sessionError)
+    
+    if (session && session.user) {
+      user.value = session.user
+      console.log('👤 User caricato da sessione:', user.value)
+      console.log('✅ User ID:', user.value?.id)
+      
+      await loadDealerData()
+      await loadStats()
+      await loadTopMoto()
+      await loadRecentActivity()
+      
+      loading.value = false
+      return
+    }
+    
+    // Se non c'è sessione, prova con getUser
+    console.log('🔄 Tentativo con getUser...')
+    const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser()
+    console.log('👤 User da getUser:', currentUser)
+    console.log('❌ Errore getUser:', userError)
+    
+    if (userError) {
+      console.error('❌ Errore nel caricamento utente:', userError)
+      alert('Errore nel caricamento utente. Ricarica la pagina.')
+      return
+    }
+    
+    if (!currentUser) {
+      console.log('❌ Nessun utente trovato, redirect a login')
+      await navigateTo('/auth/login')
+      return
+    }
+    
+    user.value = currentUser
+    console.log('👤 User caricato da getUser:', user.value)
+    console.log('✅ User ID:', user.value?.id)
+    
+    await loadDealerData()
+    await loadStats()
+    await loadTopMoto()
+    await loadRecentActivity()
+    
+    loading.value = false
+  } catch (error) {
+    console.error('❌ Errore generale in dashboard:', error)
+    console.error('❌ Stack trace:', error.stack)
+    console.error('❌ Error message:', error.message)
+    alert('Errore nel caricamento. Ricarica la pagina.')
+  }
 })
 </script>
 

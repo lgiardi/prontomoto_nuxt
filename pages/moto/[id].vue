@@ -834,12 +834,23 @@
         </div>
       </div>
     </div>
+    
+    <!-- Modal Appuntamento -->
+    <AppointmentModal 
+      v-if="selectedConcessionario"
+      :is-open="showAppointmentModal"
+      :concessionario="selectedConcessionario"
+      :servizio="`${moto?.marca} ${moto?.modello}`"
+      @close="showAppointmentModal = false"
+      @submit="handleAppointmentSubmit"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import HeaderMenu from "@/components/HeaderMenu.vue"
+import AppointmentModal from "@/components/AppointmentModal.vue"
 
 // Types
 interface Concessionario {
@@ -1016,9 +1027,18 @@ const contattaConcessionario = (concessionario: Concessionario) => {
   }
 }
 
+// Modal state
+const showAppointmentModal = ref(false)
+const selectedConcessionario = ref<Concessionario | null>(null)
+
 const fissaAppuntamento = (concessionario: Concessionario) => {
-  console.log('Fissa appuntamento con:', concessionario)
-  alert(`Appuntamento fissato con ${concessionario.nome} a ${concessionario.citta}`)
+  selectedConcessionario.value = concessionario
+  showAppointmentModal.value = true
+}
+
+const handleAppointmentSubmit = (appointmentData: any) => {
+  console.log('Appuntamento prenotato:', appointmentData)
+  // Qui implementerai la logica per salvare l'appuntamento nel database
 }
 
 const inviaMessaggio = async (concessionario: Concessionario) => {

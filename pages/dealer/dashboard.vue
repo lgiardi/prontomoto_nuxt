@@ -111,12 +111,12 @@
             Aggiungi Moto
             </NuxtLink>
             <NuxtLink to="/dealer/gestisci-moto" class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition-colors inline-block text-center">
-              Gestisci Moto
+            Gestisci Moto
             </NuxtLink>
           </div>
-          <button class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors">
-            Gestisci Lead
-          </button>
+          <NuxtLink to="/dealer/appuntamenti" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors inline-block text-center">
+            Gestisci Appuntamenti
+          </NuxtLink>
           <button class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition-colors">
             Modifica Profilo
           </button>
@@ -143,6 +143,44 @@
               </div>
         <div v-else class="text-center py-8 text-gray-500">
           <p>Nessuna moto ancora visualizzata</p>
+        </div>
+              </div>
+
+      <!-- Appuntamenti Recenti -->
+      <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold text-gray-900">Appuntamenti Recenti</h2>
+          <NuxtLink to="/dealer/appuntamenti" class="text-[#90c149] hover:text-[#7ba83a] text-sm font-medium">
+            Vedi tutti →
+          </NuxtLink>
+        </div>
+        <div v-if="recentAppointments.length > 0" class="space-y-4">
+          <div v-for="appointment in recentAppointments" :key="appointment.id" class="flex items-center justify-between p-4 border rounded-lg">
+            <div class="flex items-center space-x-4">
+              <div class="w-10 h-10 bg-[#90c149] rounded-full flex items-center justify-center">
+                <span class="text-white text-sm font-bold">{{ appointment.nome.charAt(0) }}</span>
+              </div>
+              <div>
+                <h3 class="font-medium text-gray-900">{{ appointment.nome }} {{ appointment.cognome }}</h3>
+                <p class="text-sm text-gray-500">{{ appointment.servizio }}</p>
+                <p class="text-xs text-gray-400">{{ formatDate(appointment.data_appuntamento) }} alle {{ appointment.orario_appuntamento }}</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span :class="[
+                'px-2 py-1 rounded-full text-xs font-medium',
+                appointment.stato === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                appointment.stato === 'confirmed' ? 'bg-green-100 text-green-800' :
+                appointment.stato === 'completed' ? 'bg-blue-100 text-blue-800' :
+                'bg-red-100 text-red-800'
+              ]">
+                {{ getStatusLabel(appointment.stato) }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div v-else class="text-center py-8 text-gray-500">
+          <p>Nessun appuntamento recente</p>
         </div>
               </div>
 
@@ -197,6 +235,10 @@ const topMoto = ref([])
 
 // Recent activity
 const recentActivity = ref([])
+
+// Appuntamenti
+const showAppointments = ref(false)
+const recentAppointments = ref([])
 
 // Carica i dati del concessionario
 const loadDealerData = async () => {
@@ -366,6 +408,28 @@ const loadTopMoto = async () => {
   }
 }
 
+// Carica gli appuntamenti recenti
+const loadRecentAppointments = async () => {
+  if (!user.value) return
+
+  try {
+    const { data, error } = await supabase
+      .from('appuntamenti')
+      .select('*')
+      .eq('concessionario_id', user.value.id)
+      .order('data_appuntamento', { ascending: true })
+      .order('orario_appuntamento', { ascending: true })
+      .limit(5)
+
+    if (error) throw error
+
+    recentAppointments.value = data || []
+  } catch (error) {
+    console.error('Errore nel caricamento appuntamenti:', error)
+    recentAppointments.value = []
+  }
+}
+
 // Carica l'attività recente
 const loadRecentActivity = async () => {
   // Simula il caricamento dell'attività recente
@@ -386,6 +450,27 @@ const loadRecentActivity = async () => {
       timestamp: '1 giorno fa'
     }
   ]
+}
+
+// Funzioni di utilità
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('it-IT', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+const getStatusLabel = (stato) => {
+  const labels = {
+    'pending': 'In Attesa',
+    'confirmed': 'Confermato',
+    'completed': 'Completato',
+    'cancelled': 'Annullato'
+  }
+  return labels[stato] || stato
 }
 
 // Logout
@@ -417,6 +502,7 @@ onMounted(async () => {
       await loadDealerData()
       await loadStats()
       await loadTopMoto()
+      await loadRecentAppointments()
       await loadRecentActivity()
       
       loading.value = false
@@ -448,6 +534,7 @@ onMounted(async () => {
   await loadDealerData()
   await loadStats()
   await loadTopMoto()
+  await loadRecentAppointments()
   await loadRecentActivity()
   
   loading.value = false

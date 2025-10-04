@@ -108,7 +108,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="flex space-x-4">
             <NuxtLink to="/dealer/aggiungi-moto" class="bg-[#90c149] text-white px-6 py-3 rounded-md hover:bg-[#7ba83a] transition-colors inline-block text-center">
-              Aggiungi Moto
+            Aggiungi Moto
             </NuxtLink>
             <NuxtLink to="/dealer/gestisci-moto" class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition-colors inline-block text-center">
               Gestisci Moto
@@ -305,7 +305,7 @@ const loadStats = async () => {
   } catch (error) {
     console.error('❌ Errore nel caricamento statistiche:', error)
     // Fallback ai valori di default
-    stats.value = {
+  stats.value = {
       motoInVendita: 0,
       contattiRicevuti: 0,
       appuntamenti: 0,
@@ -445,12 +445,12 @@ onMounted(async () => {
     console.log('👤 User caricato da getUser:', user.value)
     console.log('✅ User ID:', user.value?.id)
     
-    await loadDealerData()
-    await loadStats()
-    await loadTopMoto()
-    await loadRecentActivity()
-    
-    loading.value = false
+  await loadDealerData()
+  await loadStats()
+  await loadTopMoto()
+  await loadRecentActivity()
+  
+  loading.value = false
   } catch (error) {
     console.error('❌ Errore generale in dashboard:', error)
     console.error('❌ Stack trace:', error.stack)

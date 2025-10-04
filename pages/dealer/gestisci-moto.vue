@@ -63,26 +63,70 @@
           <div class="flex-1">
             <h3 class="text-xl font-bold text-gray-900">{{ moto.marca }} {{ moto.modello }} <span v-if="moto.allestimento" class="font-normal text-gray-600 text-base">({{ moto.allestimento }})</span></h3>
             <p class="text-gray-600 mt-1">{{ moto.categoria }} • {{ moto.cilindrata }}cc</p>
-            <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
-              <div class="flex items-center text-gray-700">
-                <svg class="w-4 h-4 mr-2 text-[#90c149]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                Prezzo: <span class="font-medium ml-1">€{{ moto.prezzo_speciale?.toLocaleString() || 'N/A' }}</span>
+            <!-- Prezzi -->
+            <div class="mt-3 mb-4 p-3 bg-gray-50 rounded-lg">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center text-gray-700">
+                  <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                  </svg>
+                  <span class="text-sm text-gray-600">Prezzo di Listino:</span>
+                  <span class="font-semibold ml-2 text-gray-800">€{{ moto.prezzo?.toLocaleString() || 'N/A' }}</span>
+                </div>
+                <div class="flex items-center text-gray-700">
+                  <svg class="w-4 h-4 mr-2 text-[#90c149]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                  </svg>
+                  <span class="text-sm text-gray-600">Il Tuo Prezzo:</span>
+                  <span class="font-bold ml-2 text-[#90c149] text-lg">€{{ moto.prezzo_speciale?.toLocaleString() || 'N/A' }}</span>
+                </div>
               </div>
+            </div>
+
+            <!-- Dettagli del Concessionario -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
               <div class="flex items-center text-gray-700">
-                <svg class="w-4 h-4 mr-2 text-[#90c149]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7V4c0-1.105 3.582-2 8-2s8 .895 8 2v3M12 20v-9"></path></svg>
-                Quantità: <span class="font-medium ml-1">{{ moto.quantita }}</span>
+                <svg class="w-4 h-4 mr-2 text-[#90c149]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7V4c0-1.105 3.582-2 8-2s8 .895 8 2v3M12 20v-9"></path>
+                </svg>
+                <span class="text-gray-600">Quantità:</span>
+                <span class="font-semibold ml-1 text-gray-800">{{ moto.quantita || 1 }}</span>
               </div>
+              
               <div class="flex items-center text-gray-700">
-                <svg class="w-4 h-4 mr-2 text-[#90c149]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z"></path></svg>
-                Colore: <span class="font-medium ml-1">{{ moto.colore || 'N/A' }}</span>
+                <svg class="w-4 h-4 mr-2 text-[#90c149]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z"></path>
+                </svg>
+                <span class="text-gray-600">Colore:</span>
+                <span class="font-semibold ml-1 text-gray-800">{{ moto.colore || 'Non specificato' }}</span>
               </div>
+              
               <div v-if="moto.promozioni && Object.values(moto.promozioni).some(p => p)" class="flex items-center text-gray-700">
-                <svg class="w-4 h-4 mr-2 text-[#90c149]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                Promozioni: <span class="font-medium ml-1">{{ Object.values(moto.promozioni).filter(p => p).length }} attive</span>
+                <svg class="w-4 h-4 mr-2 text-[#90c149]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                <span class="text-gray-600">Promozioni:</span>
+                <span class="font-semibold ml-1 text-[#90c149]">{{ Object.values(moto.promozioni).filter(p => p).length }} attive</span>
               </div>
+              
               <div v-if="moto.note" class="flex items-center text-gray-700">
-                <svg class="w-4 h-4 mr-2 text-[#90c149]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                Note: <span class="font-medium ml-1">Presenti</span>
+                <svg class="w-4 h-4 mr-2 text-[#90c149]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                </svg>
+                <span class="text-gray-600">Note:</span>
+                <span class="font-semibold ml-1 text-gray-800">Presenti</span>
+              </div>
+            </div>
+
+            <!-- Promozioni Attive -->
+            <div v-if="moto.promozioni && Object.values(moto.promozioni).some(p => p)" class="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <h4 class="text-sm font-semibold text-green-800 mb-2">Promozioni Attive:</h4>
+              <div class="flex flex-wrap gap-2">
+                <span v-if="moto.promozioni.bollaInclusa" class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Bolla inclusa</span>
+                <span v-if="moto.promozioni.messaSuStrada" class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Messa su strada gratis</span>
+                <span v-if="moto.promozioni.garanziaEstesa" class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Garanzia estesa 2 anni</span>
+                <span v-if="moto.promozioni.primaRevisione" class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Prima revisione gratis</span>
+                <span v-if="moto.promozioni.assicurazioneScontata" class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Assicurazione scontata</span>
               </div>
             </div>
           </div>

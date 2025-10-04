@@ -104,13 +104,23 @@
               <!-- Colore -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Colore *</label>
-                <input 
+                <select 
                   v-model="formData.colore" 
-                  type="text" 
                   required
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#90c149] focus:border-transparent"
-                  placeholder="es. Rosso, Nero, Bianco"
-                />
+                >
+                  <option value="">Seleziona un colore</option>
+                  <option value="Nero">Nero</option>
+                  <option value="Bianco">Bianco</option>
+                  <option value="Rosso">Rosso</option>
+                  <option value="Blu">Blu</option>
+                  <option value="Verde">Verde</option>
+                  <option value="Giallo">Giallo</option>
+                  <option value="Arancione">Arancione</option>
+                  <option value="Grigio">Grigio</option>
+                  <option value="Argento">Argento</option>
+                  <option value="Oro">Oro</option>
+                </select>
               </div>
 
               <!-- Prezzo del Concessionario -->
@@ -197,6 +207,97 @@
             </div>
           </div>
 
+          <!-- Offerte di Finanziamento -->
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900 mb-6">Offerte di Finanziamento</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              
+              <!-- Tasso di Interesse -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tasso di Interesse (%)</label>
+                <input 
+                  v-model.number="formData.tassoInteresse" 
+                  type="number" 
+                  step="0.01"
+                  min="0"
+                  max="20"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#90c149] focus:border-transparent"
+                  placeholder="es. 3.5"
+                />
+              </div>
+
+              <!-- Durata in Mesi -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Durata (mesi)</label>
+                <select 
+                  v-model.number="formData.durataMesi" 
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#90c149] focus:border-transparent"
+                >
+                  <option value="">Seleziona durata</option>
+                  <option value="12">12 mesi</option>
+                  <option value="18">18 mesi</option>
+                  <option value="24">24 mesi</option>
+                  <option value="36">36 mesi</option>
+                  <option value="48">48 mesi</option>
+                  <option value="60">60 mesi</option>
+                </select>
+              </div>
+
+              <!-- Anticipo Percentuale -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Anticipo (%)</label>
+                <input 
+                  v-model.number="formData.anticipoPercentuale" 
+                  type="number" 
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#90c149] focus:border-transparent"
+                  placeholder="es. 20"
+                />
+              </div>
+            </div>
+            
+            <!-- Offerte Speciali -->
+            <div class="mt-6">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Offerte Speciali Finanziamento</label>
+              <div class="space-y-2">
+                <label class="flex items-center">
+                  <input 
+                    v-model="formData.offerteFinanziamento.tassoZero" 
+                    type="checkbox"
+                    class="rounded border-gray-300 text-[#90c149] focus:ring-[#90c149]"
+                  />
+                  <span class="ml-2 text-sm text-gray-700">Tasso zero per i primi 12 mesi</span>
+                </label>
+                <label class="flex items-center">
+                  <input 
+                    v-model="formData.offerteFinanziamento.anticipoRidotto" 
+                    type="checkbox"
+                    class="rounded border-gray-300 text-[#90c149] focus:ring-[#90c149]"
+                  />
+                  <span class="ml-2 text-sm text-gray-700">Anticipo ridotto al 10%</span>
+                </label>
+                <label class="flex items-center">
+                  <input 
+                    v-model="formData.offerteFinanziamento.estinzioneAnticipata" 
+                    type="checkbox"
+                    class="rounded border-gray-300 text-[#90c149] focus:ring-[#90c149]"
+                  />
+                  <span class="ml-2 text-sm text-gray-700">Estinzione anticipata senza penali</span>
+                </label>
+                <label class="flex items-center">
+                  <input 
+                    v-model="formData.offerteFinanziamento.primaRataDifferita" 
+                    type="checkbox"
+                    class="rounded border-gray-300 text-[#90c149] focus:ring-[#90c149]"
+                  />
+                  <span class="ml-2 text-sm text-gray-700">Prima rata dopo 3 mesi</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
           <!-- Submit Button -->
           <div class="flex justify-end space-x-4">
             <NuxtLink to="/dealer/gestisci-moto" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
@@ -257,7 +358,17 @@ const formData = ref({
     assicurazioneScontata: false
   },
   fotoPrincipale: '',
-  note: ''
+  note: '',
+  // Offerte di finanziamento
+  tassoInteresse: null,
+  durataMesi: null,
+  anticipoPercentuale: null,
+  offerteFinanziamento: {
+    tassoZero: false,
+    anticipoRidotto: false,
+    estinzioneAnticipata: false,
+    primaRataDifferita: false
+  }
 })
 
 // Carica i dati del concessionario
@@ -327,6 +438,9 @@ const loadMotoData = async () => {
     }
 
     // 4. Popola il form con i dati esistenti
+    console.log('🎨 Colore dalla moto_concessionari:', motoConcessionario.colore)
+    console.log('📊 Tutti i dati moto_concessionari:', motoConcessionario)
+    
     formData.value = {
       quantita: motoConcessionario.quantita || 1,
       colore: motoConcessionario.colore || '',
@@ -339,8 +453,21 @@ const loadMotoData = async () => {
         assicurazioneScontata: false
       },
       fotoPrincipale: motoConcessionario.foto_principale || '',
-      note: motoConcessionario.note || ''
+      note: motoConcessionario.note || '',
+      // Offerte di finanziamento
+      tassoInteresse: motoConcessionario.tasso_interesse || null,
+      durataMesi: motoConcessionario.durata_mesi || null,
+      anticipoPercentuale: motoConcessionario.anticipo_percentuale || null,
+      offerteFinanziamento: motoConcessionario.offerte_finanziamento || {
+        tassoZero: false,
+        anticipoRidotto: false,
+        estinzioneAnticipata: false,
+        primaRataDifferita: false
+      }
     }
+    
+    console.log('📝 Form data dopo popolamento:', formData.value)
+    console.log('🎨 Colore nel form:', formData.value.colore)
 
     console.log('✅ Moto caricata per modifica:', motoData.value)
     console.log('📝 Form data popolato:', formData.value)
@@ -358,22 +485,39 @@ const updateMoto = async () => {
   try {
     loading.value = true
     console.log('🚀 Aggiornamento moto...')
+    console.log('📝 Dati da aggiornare:', formData.value)
+    console.log('🆔 Moto ID:', route.params.id)
+    console.log('👤 User ID:', user.value.id)
+    
+    // Prepara i dati per l'aggiornamento
+    const updateData = {
+      prezzo_speciale: formData.value.prezzoConcessionario,
+      quantita: formData.value.quantita,
+      colore: formData.value.colore,
+      promozioni: JSON.stringify(formData.value.promozioni),
+      foto_principale: formData.value.fotoPrincipale,
+      note: formData.value.note,
+      // Offerte di finanziamento
+      tasso_interesse: formData.value.tassoInteresse,
+      durata_mesi: formData.value.durataMesi,
+      anticipo_percentuale: formData.value.anticipoPercentuale,
+      offerte_finanziamento: JSON.stringify(formData.value.offerteFinanziamento)
+    }
+    
+    console.log('📊 Dati preparati per update:', updateData)
     
     const { error } = await supabase
       .from('moto_concessionari')
-      .update({
-        prezzo_speciale: formData.value.prezzoConcessionario,
-        quantita: formData.value.quantita,
-        colore: formData.value.colore,
-        promozioni: JSON.stringify(formData.value.promozioni),
-        foto_principale: formData.value.fotoPrincipale,
-        note: formData.value.note
-      })
+      .update(updateData)
       .eq('id', route.params.id)
       .eq('concessionario_id', user.value.id)
 
     if (error) {
       console.error('❌ Errore nell\'aggiornamento:', error)
+      console.error('❌ Error details:', error.details)
+      console.error('❌ Error message:', error.message)
+      console.error('❌ Error code:', error.code)
+      console.error('❌ Error hint:', error.hint)
       throw error
     }
 

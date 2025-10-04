@@ -149,13 +149,23 @@
               <!-- Colore -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Colore *</label>
-                <input 
+                <select 
                   v-model="formData.colore" 
-                  type="text" 
                   required
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#90c149] focus:border-transparent"
-                  placeholder="es. Rosso, Nero, Bianco"
-                />
+                >
+                  <option value="">Seleziona un colore</option>
+                  <option value="Nero">Nero</option>
+                  <option value="Bianco">Bianco</option>
+                  <option value="Rosso">Rosso</option>
+                  <option value="Blu">Blu</option>
+                  <option value="Verde">Verde</option>
+                  <option value="Giallo">Giallo</option>
+                  <option value="Arancione">Arancione</option>
+                  <option value="Grigio">Grigio</option>
+                  <option value="Argento">Argento</option>
+                  <option value="Oro">Oro</option>
+                </select>
               </div>
 
               <!-- Prezzo del Concessionario -->
@@ -342,7 +352,17 @@ const formData = ref({
   },
   fotoPrincipale: '',
   fotoGallery: [''],
-  note: ''
+  note: '',
+  // Offerte di finanziamento
+  tassoInteresse: null,
+  durataMesi: null,
+  anticipoPercentuale: null,
+  offerteFinanziamento: {
+    tassoZero: false,
+    anticipoRidotto: false,
+    estinzioneAnticipata: false,
+    primaRataDifferita: false
+  }
 })
 
 // Load motos from API
@@ -449,31 +469,35 @@ const submitForm = async () => {
       console.log('✅ Concessionario creato:', newDealer)
     }
     
-    // Aggiungi la relazione in Supabase - solo i campi essenziali che esistono
+    // Aggiungi la relazione in Supabase - ora con tutti i campi
     const insertData = {
       moto_id: selectedMoto.value._id,
       concessionario_id: user.value.id,
       disponibile: true,
-      prezzo_speciale: formData.value.prezzoConcessionario
-      // Altri campi commentati perché le colonne non esistono in Supabase
-      // quantita: formData.value.quantita,
-      // colore: formData.value.colore,
-      // promozioni: JSON.stringify(formData.value.promozioni),
-      // foto_principale: formData.value.fotoPrincipale,
-      // foto_gallery: JSON.stringify(formData.value.fotoGallery.filter(url => url.trim())),
-      // note: formData.value.note
+      prezzo_speciale: formData.value.prezzoConcessionario,
+      quantita: formData.value.quantita,
+      colore: formData.value.colore,
+      promozioni: JSON.stringify(formData.value.promozioni),
+      foto_principale: formData.value.fotoPrincipale,
+      foto_gallery: JSON.stringify(formData.value.fotoGallery.filter(url => url.trim())),
+      note: formData.value.note,
+      // Offerte di finanziamento
+      tasso_interesse: formData.value.tassoInteresse,
+      durata_mesi: formData.value.durataMesi,
+      anticipo_percentuale: formData.value.anticipoPercentuale,
+      offerte_finanziamento: JSON.stringify(formData.value.offerteFinanziamento)
     }
     
     console.log('📝 Dati da inserire:', insertData)
     console.log('📝 Moto ID:', selectedMoto.value._id)
     console.log('📝 User ID:', user.value.id)
     console.log('📝 Prezzo:', formData.value.prezzoConcessionario)
-    console.log('📝 Quantità (non salvata):', formData.value.quantita)
-    console.log('📝 Colore (non salvato):', formData.value.colore)
-    console.log('📝 Promozioni (non salvate):', formData.value.promozioni)
-    console.log('📝 Foto principale (non salvata):', formData.value.fotoPrincipale)
-    console.log('📝 Foto gallery (non salvate):', formData.value.fotoGallery)
-    console.log('📝 Note (non salvate):', formData.value.note)
+    console.log('📝 Quantità:', formData.value.quantita)
+    console.log('📝 Colore:', formData.value.colore)
+    console.log('📝 Promozioni:', formData.value.promozioni)
+    console.log('📝 Foto principale:', formData.value.fotoPrincipale)
+    console.log('📝 Foto gallery:', formData.value.fotoGallery)
+    console.log('📝 Note:', formData.value.note)
     
     const { data, error } = await supabase
       .from('moto_concessionari')

@@ -9,13 +9,12 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      // Supabase (per il composable)
-      supabaseUrl: 'https://xffcrstnyfjthlaurlyx.supabase.co',
-      supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmZmNyc3RueWZqdGhsYXVybHl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwNjA4OTgsImV4cCI6MjA3MzYzNjg5OH0.ksZs9k0fYCUZ0nKvF-s8LNL3SQQbppifIbtTVxpyQUE',
-      
       // Sanity
       sanityProjectId: '1i1fbngf',
-      sanityDataset: 'production'
+      sanityDataset: 'production',
+      // Supabase
+      supabaseUrl: 'https://xffcrstnyfjthlaurlyx.supabase.co',
+      supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmZmNyc3RueWZqdGhsYXVybHl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwNjA4OTgsImV4cCI6MjA3MzYzNjg5OH0.ksZs9k0fYCUZ0nKvF-s8LNL3SQQbppifIbtTVxpyQUE'
     },
     // Server-side only (SMTP)
     smtpHost: 'authsmtp.securemail.pro',

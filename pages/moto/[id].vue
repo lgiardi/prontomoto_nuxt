@@ -5,14 +5,9 @@
       <div v-if="loading" class="text-center py-12">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#90c149] mx-auto mb-4"></div>
       <div class="text-lg text-gray-600">Caricamento moto...</div>
-      <div class="text-sm text-gray-500 mt-2">Debug: Loading state</div>
       </div>
       
     <div v-else-if="moto" class="w-full">
-      <!-- Debug info -->
-      <div class="bg-yellow-100 p-2 text-xs text-yellow-800 text-center">
-        Debug: Moto caricata - {{ moto.marca }} {{ moto.modello }}
-      </div>
       <!-- Hero Gallery -->
       <div 
         v-if="moto.immaginiGallery && moto.immaginiGallery.length > 0" 

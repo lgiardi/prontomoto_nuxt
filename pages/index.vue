@@ -65,13 +65,22 @@
                 
               <!-- Immagine -->
               <div 
-                  class="aspect-square cursor-pointer bg-center bg-no-repeat bg-contain" 
-                :style="moto.immagineUrl ? `background-image: url(${moto.immagineUrl})` : ''"
-                @click="goToMoto(moto._id)"
+                  class="aspect-square cursor-pointer bg-center bg-no-repeat bg-contain relative" 
+                @click="goToMoto(moto)"
               >
+                
+                <!-- Immagine con tag img -->
+                <img 
+                  v-if="moto.immagineUrl"
+                  :src="moto.immagineUrl" 
+                  :alt="`${moto.marca} ${moto.modello}`"
+                  class="w-full h-full object-contain"
+                  @error="console.log('Errore caricamento immagine:', moto.immagineUrl)"
+                />
+                
                 <div v-if="!moto.immagineUrl" class="w-full h-full flex items-center justify-center">
                   <span class="text-4xl text-gray-400">🏍️</span>
-                  </div>
+                </div>
                 </div>
               </div>
               
@@ -170,7 +179,7 @@
                 
                 <!-- CTA Vedi Dettagli -->
                 <button 
-                  @click="goToMoto(moto._id)"
+                  @click="goToMoto(moto)"
                   class="w-full bg-[#90c149] text-white py-3 px-4 rounded-xl text-sm font-semibold hover:bg-[#7aa83f] transition-all duration-200 shadow-sm hover:shadow-md"
                 >
                   Vedi Dettagli
@@ -313,8 +322,17 @@ const paginatedMotos = computed(() => {
 })
 
 // Methods
-const goToMoto = (id) => {
-  navigateTo(`/moto/${id}`)
+const goToMoto = (moto) => {
+  // Crea URL basato su categoria e marca-modello
+  const categoria = moto.categoria?.toLowerCase().replace(/\s+/g, '-') || 'moto'
+  const marca = moto.marca?.toLowerCase().replace(/\s+/g, '-') || ''
+  const modello = moto.modello?.toLowerCase().replace(/\s+/g, '-') || ''
+  const slug = `${marca}-${modello}`
+  
+  console.log('Navigating to:', `/${categoria}/${slug}`)
+  console.log('Moto data:', { categoria: moto.categoria, marca: moto.marca, modello: moto.modello })
+  
+  navigateTo(`/${categoria}/${slug}`)
 }
 
 const getConcessionariInCitta = (moto, citta) => {

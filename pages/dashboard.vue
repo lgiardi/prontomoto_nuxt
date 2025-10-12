@@ -110,6 +110,12 @@
               Cerca Moto
             </NuxtLink>
             <NuxtLink 
+              to="/conversazioni" 
+              class="bg-purple-600 text-white px-6 py-3 rounded-md text-center hover:bg-purple-700 transition-colors"
+            >
+              💬 Le Mie Conversazioni
+            </NuxtLink>
+            <NuxtLink 
               to="/favorites" 
               class="bg-gray-600 text-white px-6 py-3 rounded-md text-center hover:bg-gray-700 transition-colors"
             >
@@ -159,7 +165,7 @@ onMounted(async () => {
     const { data: concessionario } = await useSupabase()
       .from('concessionari')
       .select('*')
-      .eq('id', user.value.id)
+      .eq('user_id', user.value.id)
       .single()
     
     userType.value = concessionario ? 'concessionario' : 'cliente'

@@ -20,7 +20,7 @@ export const useUserType = () => {
       const { data: dealerData, error: dealerError } = await supabase
         .from('concessionari')
         .select('*')
-        .eq('id', user.value.id)
+        .eq('user_id', user.value.id)
         .single()
 
       if (dealerData && !dealerError) {

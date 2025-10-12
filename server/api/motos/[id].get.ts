@@ -1,33 +1,8 @@
-import { supabase } from '~/utils/supabase'
-import { createClient } from '@sanity/client'
+import { createClient } from '@supabase/supabase-js'
 
-// Configurazione Sanity per le immagini
-const sanityClient = createClient({
-  projectId: '1i1fbngf',
-  dataset: 'production',
-  useCdn: true,
-  apiVersion: '2023-05-03'
-})
-
-// Funzione per convertire riferimento Sanity in URL
-function getSanityImageUrl(imageRef) {
-  if (!imageRef) {
-    return null
-  }
-  
-  try {
-    const parsed = JSON.parse(imageRef)
-    if (parsed.asset && parsed.asset._ref) {
-      // Estrai l'ID dell'immagine dal riferimento
-      const imageId = parsed.asset._ref.replace('image-', '').replace('-jpg', '')
-      // Costruisci l'URL diretto di Sanity
-      return `https://cdn.sanity.io/images/1i1fbngf/production/${imageId}.jpg`
-    }
-  } catch (e) {
-    console.error('Errore parsing immagine Sanity:', e)
-  }
-  return null
-}
+const supabaseUrl = process.env.SUPABASE_URL || 'https://xffcrstnyfjthlaurlyx.supabase.co'
+const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmZmNyc3RueWZqdGhsYXVybHl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwNjA4OTgsImV4cCI6MjA3MzYzNjg5OH0.ksZs9k0fYCUZ0nKvF-s8LNL3SQQbppifIbtTVxpyQUE'
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 export default defineEventHandler(async (event) => {
     const motoId = getRouterParam(event, 'id')
@@ -44,7 +19,7 @@ export default defineEventHandler(async (event) => {
     const { data: moto, error: motoError } = await supabase
       .from('moto')
       .select('*')
-      .eq('sanity_id', motoId)
+      .eq('id', motoId)
       .single()
     
     if (motoError) {
@@ -78,7 +53,7 @@ export default defineEventHandler(async (event) => {
     
     // Trasforma i dati per mantenere la compatibilità con il frontend
     const motoData = {
-      _id: moto.sanity_id,
+      id: moto.id,
       marca: moto.marca,
       modello: moto.modello,
       allestimento: moto.allestimento,
@@ -125,7 +100,7 @@ export default defineEventHandler(async (event) => {
       is_disponibile: moto.is_disponibile,
       is_promozione: moto.is_promozione,
       concessionari: concessionari?.map(c => ({
-        _id: c.concessionari.id,
+        id: c.concessionari.id,
         nome: c.concessionari.nome,
         citta: c.concessionari.citta,
         provincia: c.concessionari.provincia,

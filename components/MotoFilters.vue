@@ -6,7 +6,7 @@
         <!-- Città Concessionari -->
         <div>
           <label class="block text-sm font-medium mb-1">Città</label>
-          <select v-model="filters.citta" class="w-full p-2 border rounded-lg">
+          <select v-model="localFilters.citta" class="w-full p-2 border rounded-lg">
             <option value="">Tutte le città ({{ stats.citta.length }})</option>
             <option 
               v-for="citta in stats.citta" 
@@ -21,7 +21,7 @@
         <!-- Categoria -->
         <div>
           <label class="block text-sm font-medium mb-1">Categoria</label>
-          <select v-model="filters.categoria" class="w-full p-2 border rounded-lg">
+          <select v-model="localFilters.categoria" class="w-full p-2 border rounded-lg">
             <option value="">Tutte le categorie ({{ stats.categorie.length }})</option>
             <option v-for="cat in stats.categorie" :key="cat.name" :value="cat.name">
               {{ cat.name }} ({{ cat.count }})
@@ -32,7 +32,7 @@
         <!-- Cilindrata -->
         <div>
           <label class="block text-sm font-medium mb-1">Cilindrata</label>
-          <select v-model="filters.cilindrata" class="w-full p-2 border rounded-lg">
+          <select v-model="localFilters.cilindrata" class="w-full p-2 border rounded-lg">
             <option value="">Tutte le cilindrate ({{ stats.cilindrate.length }})</option>
             <option 
               v-for="cil in stats.cilindrate" 
@@ -47,7 +47,7 @@
         <!-- Marca -->
         <div>
           <label class="block text-sm font-medium mb-1">Marca</label>
-          <select v-model="filters.marca" class="w-full p-2 border rounded-lg">
+          <select v-model="localFilters.marca" class="w-full p-2 border rounded-lg">
             <option value="">Tutte le marche ({{ stats.marche.length }})</option>
             <option 
               v-for="marca in stats.marche" 
@@ -62,7 +62,7 @@
         <!-- Modello -->
         <div>
           <label class="block text-sm font-medium mb-1">Modello</label>
-          <select v-model="filters.modello" class="w-full p-2 border rounded-lg">
+          <select v-model="localFilters.modello" class="w-full p-2 border rounded-lg">
             <option value="">Tutti i modelli ({{ stats.modelli.length }})</option>
             <option 
               v-for="modello in stats.modelli" 
@@ -77,7 +77,7 @@
         <!-- Allestimento -->
         <div>
           <label class="block text-sm font-medium mb-1">Allestimento</label>
-          <select v-model="filters.allestimento" class="w-full p-2 border rounded-lg">
+          <select v-model="localFilters.allestimento" class="w-full p-2 border rounded-lg">
             <option value="">Tutti gli allestimenti ({{ stats.allestimenti.length }})</option>
             <option 
               v-for="all in stats.allestimenti" 
@@ -98,7 +98,7 @@
   </template>
   
   <script setup lang="ts">
-  defineProps<{
+  const props = defineProps<{
     filters: {
       categoria: string
       cilindrata: string | number
@@ -116,6 +116,24 @@
       citta: { name: string; count: number }[]
     }
   }>()
+
+  const emit = defineEmits<{
+    'update:filters': [filters: typeof props.filters]
+  }>()
+
+  // Crea una copia locale dei filtri per il v-model
+  const localFilters = reactive({ ...props.filters })
+
+  // Emetti l'evento quando i filtri locali cambiano
+  watch(localFilters, (newFilters) => {
+    console.log('🔄 MotoFilters: Filtri aggiornati:', newFilters)
+    emit('update:filters', newFilters)
+  }, { deep: true })
+
+  // Sincronizza i filtri locali quando cambiano le props
+  watch(() => props.filters, (newFilters) => {
+    Object.assign(localFilters, newFilters)
+  }, { deep: true })
   </script>
   
   

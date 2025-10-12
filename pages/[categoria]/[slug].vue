@@ -95,34 +95,17 @@
               € {{ moto.prezzo.toLocaleString() }}
             </div>
             
-            <!-- Preview Concessionari -->
-            <div class="bg-gray-50 rounded-xl p-4 mb-4">
-              <h3 class="text-lg font-semibold text-gray-900 mb-3">Disponibile in Pronta Consegna</h3>
-              <div class="flex flex-wrap gap-2 mb-3">
+            <!-- Colori Disponibili -->
+            <div v-if="moto.colori && moto.colori.length > 0" class="bg-gray-50 rounded-xl p-4 mb-4">
+              <h4 class="text-sm font-medium text-gray-700 mb-2">Colori disponibili:</h4>
+              <div class="flex flex-wrap gap-2">
                 <span 
-                  v-for="(concessionario, index) in moto.concessionari?.slice(0, 3)" 
+                  v-for="(colore, index) in moto.colori" 
                   :key="index"
-                  class="bg-white px-3 py-1 rounded-full text-sm text-gray-700 border border-gray-200"
+                  class="px-3 py-1 bg-gray-200 rounded-full text-sm text-gray-700"
                 >
-                  {{ concessionario.nome }} - {{ concessionario.citta }}
+                  {{ colore }}
                 </span>
-                <span v-if="moto.concessionari && moto.concessionari.length > 3" class="bg-white px-3 py-1 rounded-full text-sm text-gray-700 border border-gray-200">
-                  +{{ moto.concessionari.length - 3 }} altri
-                </span>
-            </div>
-  
-              <!-- Colori Disponibili -->
-              <div v-if="moto.colori && moto.colori.length > 0" class="mt-3">
-                <h4 class="text-sm font-medium text-gray-700 mb-2">Colori disponibili:</h4>
-                <div class="flex flex-wrap gap-2">
-                  <span 
-                    v-for="(colore, index) in moto.colori" 
-                    :key="index"
-                    class="px-3 py-1 bg-gray-200 rounded-full text-sm text-gray-700"
-                  >
-                    {{ colore }}
-                  </span>
-                </div>
               </div>
             </div>
             </div>
@@ -149,7 +132,7 @@
             </button>
           </div>
   
-          <!-- Filtro Città - COMPATTO PER MOBILE -->
+          <!-- Filtro Città - DROPDOWN -->
           <div class="mb-6">
             <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
               <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
@@ -159,25 +142,30 @@
                 </svg>
                 Seleziona città
               </h3>
-              <div class="grid grid-cols-2 gap-2">
-                <button 
-                  v-for="citta in cittaDisponibili" 
-                  :key="citta"
-                  @click="filtraPerCitta(citta)"
-                  :class="[
-                    'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                    cittaSelezionata === citta 
-                      ? 'bg-[#90c149] text-white' 
-                      : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-                  ]"
+              
+              <div class="mb-3">
+                <select 
+                  v-model="cittaSelezionata"
+                  @change="onCityChange"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#90c149] focus:border-transparent"
                 >
-                  {{ citta }}
-                </button>
+                  <option value="">Tutte le città</option>
+                  <option 
+                    v-for="cittaData in tutteLeCitta" 
+                    :key="cittaData.citta" 
+                    :value="cittaData.citta"
+                  >
+                    {{ cittaData.citta }} ({{ cittaData.count }})
+                  </option>
+                </select>
               </div>
-              <div v-if="cittaSelezionata" class="mt-3 p-2 bg-green-50 border border-green-200 rounded-lg">
-                <p class="text-xs text-green-800">
-                  <span class="font-semibold">{{ cittaSelezionata }}</span> - 
-                  {{ concessionariFiltrati.length }} concessionari
+              
+              <div v-if="cittaSelezionata" class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p class="text-sm text-green-800">
+                  <span class="font-semibold">Hai selezionato i venditori nella città {{ cittaSelezionata }}</span> che hanno in pronta consegna {{ moto.marca }} {{ moto.modello }}
+                </p>
+                <p class="text-xs text-green-600 mt-1">
+                  {{ concessionariFiltrati.length }} concessionari disponibili
                 </p>
               </div>
             </div>
@@ -719,6 +707,7 @@
                                 rows="4"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#90c149] focus:border-transparent resize-none"
                                 placeholder="Ciao, sono interessato a questa moto. Vorrei maggiori informazioni su..."
+                                :key="`messaggio-${moto?._id || 'default'}`"
                               ></textarea>
                             </div>
                             <button 
@@ -843,7 +832,7 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, computed, onMounted, onUnmounted } from 'vue'
+  import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
   import HeaderMenu from "@/components/HeaderMenu.vue"
   import AppointmentModal from "@/components/AppointmentModal.vue"
   
@@ -896,6 +885,7 @@
   const currentDealerImageIndex = ref(0)
   const showImageModal = ref(false)
   const modalImageIndex = ref(0)
+  const route = useRoute()
   const cittaSelezionata = ref<string | null>(null)
   const formContatto = ref({
     nome: '',
@@ -913,7 +903,64 @@
   const cittaDisponibili = computed(() => {
     if (!moto.value?.concessionari) return []
     const citta = moto.value.concessionari.map(c => c.citta)
-    return [...new Set(citta)].sort()
+    const cittaUniche = [...new Set(citta)]
+    
+    // Se c'è una città selezionata, mettila in cima
+    if (cittaSelezionata.value && cittaUniche.includes(cittaSelezionata.value)) {
+      const cittaSelezionataIndex = cittaUniche.indexOf(cittaSelezionata.value)
+      const cittaSelezionataValue = cittaUniche.splice(cittaSelezionataIndex, 1)[0]
+      return [cittaSelezionataValue, ...cittaUniche.sort()]
+    }
+    
+    return cittaUniche.sort()
+  })
+
+  // Lista delle città dal database con conteggi
+  const tutteLeCitta = computed(() => {
+    if (!moto.value?.concessionari) return []
+    
+    // Conta i concessionari per città
+    const cittaCounts = {}
+    moto.value.concessionari.forEach(concessionario => {
+      const citta = concessionario.citta
+      cittaCounts[citta] = (cittaCounts[citta] || 0) + 1
+    })
+    
+    // Crea array di oggetti con città e conteggio
+    const cittaConConteggi = Object.entries(cittaCounts).map(([citta, count]) => ({
+      citta,
+      count
+    }))
+    
+    // Se c'è una città selezionata, mettila in cima
+    if (cittaSelezionata.value) {
+      const cittaSelezionataIndex = cittaConConteggi.findIndex(c => c.citta === cittaSelezionata.value)
+      if (cittaSelezionataIndex !== -1) {
+        const cittaSelezionataValue = cittaConConteggi.splice(cittaSelezionataIndex, 1)[0]
+        return [cittaSelezionataValue, ...cittaConConteggi.sort((a, b) => a.citta.localeCompare(b.citta))]
+      }
+    }
+    
+    return cittaConConteggi.sort((a, b) => a.citta.localeCompare(b.citta))
+  })
+
+  // Funzione per gestire il cambio città
+  const router = useRouter()
+  const onCityChange = () => {
+    // Salva la città nel localStorage
+    if (cittaSelezionata.value) {
+      localStorage.setItem('selectedCity', cittaSelezionata.value)
+      console.log('✅ Città salvata nel localStorage:', cittaSelezionata.value)
+    } else {
+      localStorage.removeItem('selectedCity')
+      console.log('❌ Città rimossa dal localStorage')
+    }
+  }
+
+  // Watch per sincronizzare quando l'URL cambia esternamente
+  watch(() => route.query.citta, (newCitta) => {
+    const val = (newCitta as string) || ''
+    cittaSelezionata.value = val
   })
   
   const concessionariFiltrati = computed(() => {
@@ -1036,31 +1083,45 @@
     // Qui implementerai la logica per salvare l'appuntamento nel database
   }
   
-  const inviaMessaggio = async (concessionario: Concessionario) => {
-    try {
-      // Qui implementerai l'invio del messaggio
-      console.log('Invio messaggio a:', concessionario.nome)
-      console.log('Dati form:', formContatto.value)
-      
-      // Reset del form
-      formContatto.value = {
-        nome: '',
-        email: '',
-        telefono: '',
-        messaggio: ''
-      }
-      
-      alert('Messaggio inviato con successo!')
-    } catch (error) {
-      console.error('Errore nell\'invio del messaggio:', error)
-      alert('Errore nell\'invio del messaggio. Riprova.')
-    }
-  }
+        const inviaMessaggio = async (concessionario: Concessionario) => {
+          try {
+            console.log('💬 Creazione conversazione con:', concessionario.nome)
+            console.log('📝 Dati form:', formContatto.value)
+            console.log('📝 Moto:', moto.value?.marca, moto.value?.modello)
+            
+            // Crea una nuova conversazione
+            const response = await $fetch('/api/conversazioni/create', {
+              method: 'POST',
+              body: {
+                motoId: moto.value?.id, // ID di Supabase
+                concessionarioId: concessionario._id, // ID di Supabase
+                motoMarca: moto.value?.marca,
+                motoModello: moto.value?.modello,
+                clienteNome: formContatto.value.nome,
+                clienteEmail: formContatto.value.email,
+                clienteTelefono: formContatto.value.telefono,
+                messaggioIniziale: formContatto.value.messaggio,
+                clienteId: null // TODO: Collegare con utente autenticato se presente
+              }
+            })
+            
+            console.log('✅ Conversazione creata con successo:', response)
+            
+            // Reset del form
+            formContatto.value = {
+              nome: '',
+              email: '',
+              telefono: '',
+              messaggio: ''
+            }
+            
+            alert('Messaggio inviato con successo! Il concessionario ti contatterà presto. Se hai un account, puoi vedere la conversazione nella tua dashboard.')
+          } catch (error) {
+            console.error('❌ Errore nell\'invio del messaggio:', error)
+            alert('Errore nell\'invio del messaggio. Riprova.')
+          }
+        }
   
-  // Filtro città
-  const filtraPerCitta = (citta: string) => {
-    cittaSelezionata.value = cittaSelezionata.value === citta ? null : citta
-  }
   
 // Fetch data
 onMounted(async () => {
@@ -1069,15 +1130,41 @@ onMounted(async () => {
     const categoria = route.params.categoria as string
     const slug = route.params.slug as string
     
+    // Leggi la città dal localStorage
+    const cittaFromStorage = localStorage.getItem('selectedCity')
+    console.log('Città dal localStorage:', cittaFromStorage)
+    
     console.log('Caricamento moto con categoria:', categoria, 'e slug:', slug)
     
     const response = await $fetch('/api/motos/by-slug', {
       method: 'POST',
-      body: { categoria, slug }
+      body: { categoria, slug, citta: cittaFromStorage }
     })
     console.log('Risposta API:', response)
       
       moto.value = response
+      
+      // Reset del form quando la moto cambia
+      formContatto.value = {
+        nome: '',
+        email: '',
+        telefono: '',
+        messaggio: ''
+      }
+      
+      // Imposta la città selezionata dal localStorage dopo che i dati sono caricati
+      if (cittaFromStorage) {
+        await nextTick() // Aspetta che il DOM sia aggiornato
+        cittaSelezionata.value = cittaFromStorage
+        console.log('✅ Città impostata dal localStorage:', cittaFromStorage)
+        console.log('🏙️ Città disponibili dal database:', moto.value.cittaDisponibili)
+        console.log('🏙️ Città disponibili nel dropdown:', tutteLeCitta.value)
+        console.log('Città selezionata dopo impostazione:', cittaSelezionata.value)
+      } else {
+        console.log('❌ Nessuna città nel localStorage')
+        console.log('🏙️ Città disponibili dal database:', moto.value.cittaDisponibili)
+        console.log('🏙️ Città disponibili nel dropdown:', tutteLeCitta.value)
+      }
       
       if (moto.value?.immaginiGallery && moto.value.immaginiGallery.length > getVisibleImages()) {
         startAutoScroll()

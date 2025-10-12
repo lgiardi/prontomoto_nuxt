@@ -1,36 +1,8 @@
-import { supabase } from '~/utils/supabase'
-import { createClient } from '@sanity/client'
+import { createClient } from '@supabase/supabase-js'
 
-// Configurazione Sanity per le immagini
-const sanityClient = createClient({
-  projectId: '1i1fbngf',
-  dataset: 'production',
-  useCdn: true,
-  apiVersion: '2023-05-03'
-})
-
-// Funzione per convertire riferimento Sanity in URL
-function getSanityImageUrl(imageRef) {
-  if (!imageRef) {
-    return null
-  }
-  
-  try {
-    const parsed = JSON.parse(imageRef)
-    if (parsed.asset && parsed.asset._ref) {
-      // Usa l'API di Sanity per ottenere l'URL corretto
-      const url = sanityClient.image(parsed.asset._ref).url()
-      console.log('Immagine convertita con Sanity API:', parsed.asset._ref, '->', url)
-      return url
-    } else {
-      console.log('Struttura asset non valida:', parsed)
-    }
-  } catch (e) {
-    console.error('Errore parsing immagine Sanity:', e)
-    console.error('Riferimento problematico:', imageRef)
-  }
-  return null
-}
+const supabaseUrl = process.env.SUPABASE_URL || 'https://xffcrstnyfjthlaurlyx.supabase.co'
+const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmZmNyc3RueWZqdGhsYXVybHl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwNjA4OTgsImV4cCI6MjA3MzYzNjg5OH0.ksZs9k0fYCUZ0nKvF-s8LNL3SQQbppifIbtTVxpyQUE'
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 export default defineEventHandler(async (event) => {
   
@@ -40,13 +12,12 @@ export default defineEventHandler(async (event) => {
       .from('moto')
       .select(`
         id,
-        sanity_id,
-    marca,
-    modello,
-    allestimento,
-    categoria,
-    cilindrata,
-    prezzo,
+        marca,
+        modello,
+        allestimento,
+        categoria,
+        cilindrata,
+        prezzo,
         immagine_copertina,
         immagine_copertina_original,
         is_disponibile,
@@ -91,17 +62,17 @@ export default defineEventHandler(async (event) => {
         
         
         return {
-          _id: moto.sanity_id,
+          id: moto.id,
           marca: moto.marca,
           modello: moto.modello,
           allestimento: moto.allestimento,
           categoria: moto.categoria,
           cilindrata: moto.cilindrata,
           prezzo: moto.prezzo,
-          immagineUrl: moto.immagine_copertina, // Ora contiene l'URL reale
+          immagineUrl: moto.immagine_copertina,
           concessionariCount: concessionari?.length || 0,
           concessionari: concessionari?.map(c => ({
-            _id: c.concessionari.id,
+            id: c.concessionari.id,
             nome: c.concessionari.nome,
             citta: c.concessionari.citta,
             provincia: c.concessionari.provincia,

@@ -1,29 +1,7 @@
 <template>
   <div class="min-h-screen w-full bg-gray-50 font-sans">
     <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <!-- Logo -->
-          <div class="flex items-center">
-            <NuxtLink to="/dealer/dashboard" class="flex items-center">
-              <img 
-                src="https://prontomoto.it/wp-content/uploads/2025/06/Risorsa-12.svg" 
-                alt="ProntoMoto Logo" 
-                class="h-8 w-auto"
-              />
-            </NuxtLink>
-          </div>
-
-          <!-- Navigation -->
-          <div class="flex items-center space-x-4">
-            <NuxtLink to="/dealer/dashboard" class="text-gray-600 hover:text-[#90c149] text-sm font-medium">
-              ← Torna alla Dashboard
-            </NuxtLink>
-          </div>
-        </div>
-      </div>
-    </header>
+    <DealerHeader />
 
     <!-- Main Content -->
     <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -322,7 +300,7 @@
 <script setup>
 // Questo middleware protegge la pagina - solo concessionari autenticati possono accedere
 definePageMeta({
-  middleware: 'auth',
+  middleware: 'dealer',
   layout: false
 })
 
@@ -436,44 +414,9 @@ const submitForm = async () => {
   loading.value = true
   
   try {
-    // Prima controlla se l'utente esiste nella tabella concessionari
-    const { data: dealerCheck, error: dealerError } = await supabase
-      .from('concessionari')
-      .select('id')
-      .eq('id', user.value.id)
-      .single()
-
-    if (dealerError && dealerError.code === 'PGRST116') {
-      console.log('🔄 Utente non trovato nella tabella concessionari, creazione...')
-      const { data: newDealer, error: insertError } = await supabase
-        .from('concessionari')
-        .insert({
-          id: user.value.id,
-          nome: user.value.user_metadata?.nome || user.value.email?.split('@')[0] || 'Concessionario',
-          email: user.value.email,
-          telefono: user.value.user_metadata?.telefono || null,
-          citta: user.value.user_metadata?.citta || 'Milano',
-          provincia: user.value.user_metadata?.provincia || 'MI',
-          indirizzo: user.value.user_metadata?.indirizzo || null,
-          cap: user.value.user_metadata?.cap || null,
-          tipo: 'concessionario'
-        })
-        .select()
-        .single()
-
-      if (insertError) {
-        console.error('❌ Errore nella creazione del concessionario:', insertError)
-        throw insertError
-      }
-      
-      console.log('✅ Concessionario creato:', newDealer)
-    }
-    
-    // Aggiungi la relazione in Supabase - ora con tutti i campi
-    const insertData = {
-      moto_id: selectedMoto.value._id,
-      concessionario_id: user.value.id,
-      disponibile: true,
+    // Prepara i dati per l'API
+    const motoData = {
+      moto_id: selectedMoto.value.id,
       prezzo_speciale: formData.value.prezzoConcessionario,
       quantita: formData.value.quantita,
       colore: formData.value.colore,
@@ -481,39 +424,35 @@ const submitForm = async () => {
       foto_principale: formData.value.fotoPrincipale,
       foto_gallery: JSON.stringify(formData.value.fotoGallery.filter(url => url.trim())),
       note: formData.value.note,
-      // Offerte di finanziamento
       tasso_interesse: formData.value.tassoInteresse,
       durata_mesi: formData.value.durataMesi,
       anticipo_percentuale: formData.value.anticipoPercentuale,
       offerte_finanziamento: JSON.stringify(formData.value.offerteFinanziamento)
     }
     
-    console.log('📝 Dati da inserire:', insertData)
-    console.log('📝 Moto ID:', selectedMoto.value._id)
+    console.log('📝 Dati da inviare all\'API:', motoData)
+    console.log('📝 Moto ID:', selectedMoto.value.id)
     console.log('📝 User ID:', user.value.id)
-    console.log('📝 Prezzo:', formData.value.prezzoConcessionario)
-    console.log('📝 Quantità:', formData.value.quantita)
-    console.log('📝 Colore:', formData.value.colore)
-    console.log('📝 Promozioni:', formData.value.promozioni)
-    console.log('📝 Foto principale:', formData.value.fotoPrincipale)
-    console.log('📝 Foto gallery:', formData.value.fotoGallery)
-    console.log('📝 Note:', formData.value.note)
     
-    const { data, error } = await supabase
-      .from('moto_concessionari')
-      .insert(insertData)
-    
-    if (error) {
-      console.error('❌ Errore Supabase:', error)
-      console.error('❌ Error details:', error.details)
-      console.error('❌ Error message:', error.message)
-      console.error('❌ Error code:', error.code)
-      console.error('❌ Error hint:', error.hint)
-      throw error
+    // Usa l'API endpoint per aggiungere la moto
+    console.log('🔄 Chiamata API add-moto...')
+    const result = await $fetch('/api/dealer/add-moto', {
+      method: 'POST',
+      body: {
+        user_id: user.value.id,
+        motoData: motoData
+      }
+    })
+
+    console.log('📊 Risultato API:', result)
+
+    if (!result.success) {
+      console.error('❌ API ha restituito errore:', result.error)
+      throw new Error(result.error || 'Errore nell\'aggiunta della moto')
     }
-    
+
     console.log('✅ Inserimento completato con successo!')
-    console.log('📊 Data ricevuta:', data)
+    console.log('📊 Data ricevuta:', result.data)
     
     // Success message
     alert('✅ Moto aggiunta con successo!')

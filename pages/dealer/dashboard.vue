@@ -113,13 +113,60 @@
             <NuxtLink to="/dealer/gestisci-moto" class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition-colors inline-block text-center">
             Gestisci Moto
             </NuxtLink>
+            <NuxtLink to="/dealer/conversazioni" class="bg-purple-600 text-white px-6 py-3 rounded-md hover:bg-purple-700 transition-colors inline-block text-center">
+            💬 Conversazioni
+            </NuxtLink>
           </div>
           <NuxtLink to="/dealer/appuntamenti" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors inline-block text-center">
             Gestisci Appuntamenti
           </NuxtLink>
-          <button class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition-colors">
-            Modifica Profilo
-          </button>
+        </div>
+      </div>
+
+      <!-- Impostazioni Account -->
+      <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Impostazioni Account</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          <!-- Card Profilo Personale -->
+          <NuxtLink to="/dealer/profilo" class="block">
+            <div class="border border-gray-200 rounded-lg p-6 hover:border-[#90c149] hover:shadow-md transition-all">
+              <div class="flex items-center mb-3">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span class="text-2xl">👤</span>
+                </div>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">Profilo Personale</h3>
+              <p class="text-sm text-gray-600">Modifica email e password di accesso</p>
+            </div>
+          </NuxtLink>
+          
+          <!-- Card Impostazioni Negozio -->
+          <NuxtLink to="/dealer/impostazioni-negozio" class="block">
+            <div class="border border-gray-200 rounded-lg p-6 hover:border-[#90c149] hover:shadow-md transition-all">
+              <div class="flex items-center mb-3">
+                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <span class="text-2xl">🏪</span>
+                </div>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">Impostazioni Negozio</h3>
+              <p class="text-sm text-gray-600">Dati pubblici, contatti e informazioni</p>
+            </div>
+          </NuxtLink>
+          
+          <!-- Card Abbonamento -->
+          <NuxtLink to="/dealer/abbonamento" class="block">
+            <div class="border border-gray-200 rounded-lg p-6 hover:border-[#90c149] hover:shadow-md transition-all">
+              <div class="flex items-center mb-3">
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                  <span class="text-2xl">💳</span>
+                </div>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">Gestione Abbonamento</h3>
+              <p class="text-sm text-gray-600">Piano attuale e upgrade disponibili</p>
+            </div>
+          </NuxtLink>
+          
         </div>
       </div>
 
@@ -191,12 +238,12 @@
           <div v-for="activity in recentActivity" :key="activity.id" class="flex items-center space-x-4 p-4 border rounded-lg">
             <div class="flex-shrink-0">
               <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                <span class="text-gray-600 text-sm">📊</span>
+                <span class="text-gray-600 text-sm">{{ activity.icon || '📊' }}</span>
               </div>
             </div>
             <div class="flex-1">
               <p class="text-sm text-gray-900">{{ activity.description }}</p>
-              <p class="text-xs text-gray-500">{{ activity.timestamp }}</p>
+              <p class="text-xs text-gray-500">{{ formatTimeAgo(activity.timestamp) }}</p>
           </div>
         </div>
       </div>
@@ -211,7 +258,7 @@
 <script setup>
 // Questo middleware protegge la pagina - solo concessionari autenticati possono accedere
 definePageMeta({
-  middleware: 'auth',
+  middleware: 'dealer',
   layout: false
 })
 
@@ -254,7 +301,7 @@ const loadDealerData = async () => {
     const { data, error } = await supabase
       .from('concessionari')
       .select('*')
-      .eq('id', user.value.id)
+      .eq('user_id', user.value.id)
       .single()
 
     if (error) {
@@ -307,11 +354,25 @@ const loadStats = async () => {
   try {
     console.log('📊 Caricamento statistiche reali...')
     
+    // Prima ottieni l'ID del concessionario dalla tabella concessionari
+    const { data: concessionario, error: dealerError } = await supabase
+      .from('concessionari')
+      .select('id')
+      .eq('user_id', user.value.id)
+      .single()
+    
+    if (dealerError) {
+      console.error('❌ Errore nel caricamento concessionario:', dealerError)
+      throw dealerError
+    }
+    
+    console.log('🏢 Concessionario ID per statistiche:', concessionario.id)
+    
     // 1. Conta le moto in vendita
     const { count: motoCount, error: motoError } = await supabase
       .from('moto_concessionari')
       .select('*', { count: 'exact', head: true })
-      .eq('concessionario_id', user.value.id)
+      .eq('concessionario_id', concessionario.id)
       .eq('disponibile', true)
 
     if (motoError) throw motoError
@@ -320,7 +381,7 @@ const loadStats = async () => {
     const { count: leadCount, error: leadError } = await supabase
       .from('lead')
       .select('*', { count: 'exact', head: true })
-      .eq('concessionario_id', user.value.id)
+      .eq('concessionario_id', concessionario.id)
 
     if (leadError) throw leadError
 
@@ -328,7 +389,7 @@ const loadStats = async () => {
     const { count: appuntamentiCount, error: appuntamentiError } = await supabase
       .from('lead')
       .select('*', { count: 'exact', head: true })
-      .eq('concessionario_id', user.value.id)
+      .eq('concessionario_id', concessionario.id)
       .eq('status', 'contacted')
 
     if (appuntamentiError) throw appuntamentiError
@@ -363,11 +424,25 @@ const loadTopMoto = async () => {
   try {
     console.log('📊 Caricamento top moto...')
     
+    // Prima ottieni l'ID del concessionario dalla tabella concessionari
+    const { data: concessionario, error: dealerError } = await supabase
+      .from('concessionari')
+      .select('id')
+      .eq('user_id', user.value.id)
+      .single()
+    
+    if (dealerError) {
+      console.error('❌ Errore nel caricamento concessionario per top moto:', dealerError)
+      throw dealerError
+    }
+    
+    console.log('🏢 Concessionario ID per top moto:', concessionario.id)
+    
     // Recupera le moto del concessionario con i dettagli
     const { data: motoConcessionari, error: mcError } = await supabase
       .from('moto_concessionari')
       .select('*')
-      .eq('concessionario_id', user.value.id)
+      .eq('concessionario_id', concessionario.id)
       .eq('disponibile', true)
       .limit(5)
 
@@ -378,25 +453,22 @@ const loadTopMoto = async () => {
       return
     }
 
-    // Recupera i dettagli delle moto da Sanity
+    // Recupera i dettagli delle moto da Supabase
     const motoIds = motoConcessionari.map(mc => mc.moto_id)
-    const motosFromSanity = await $fetch('/api/motos', {
-      method: 'GET',
-      query: { 
-        ids: motoIds.join(',')
-      }
+    const motosFromSupabase = await $fetch('/api/motos', {
+      method: 'GET'
     })
 
     // Combina i dati e simula visualizzazioni/contatti
     topMoto.value = motoConcessionari.map(mc => {
-      const sanityMoto = motosFromSanity.find(sm => sm._id === mc.moto_id)
+      const supabaseMoto = motosFromSupabase.find(sm => sm.id === mc.moto_id)
       return {
         id: mc.id,
-        marca: sanityMoto?.marca || 'Sconosciuta',
-        modello: sanityMoto?.modello || 'Sconosciuto',
+        marca: supabaseMoto?.marca || 'Sconosciuta',
+        modello: supabaseMoto?.modello || 'Sconosciuto',
         anno: 2024,
         km: '0',
-        immagine: sanityMoto?.immagineUrl || 'https://via.placeholder.com/150',
+        immagine: supabaseMoto?.immagineUrl || 'https://via.placeholder.com/150',
         visualizzazioni: Math.floor(Math.random() * 200) + 50
       }
     })
@@ -413,10 +485,22 @@ const loadRecentAppointments = async () => {
   if (!user.value) return
 
   try {
+    // Prima ottieni l'ID del concessionario dalla tabella concessionari
+    const { data: concessionario, error: dealerError } = await supabase
+      .from('concessionari')
+      .select('id')
+      .eq('user_id', user.value.id)
+      .single()
+    
+    if (dealerError) {
+      console.error('❌ Errore nel caricamento concessionario per appuntamenti:', dealerError)
+      throw dealerError
+    }
+    
     const { data, error } = await supabase
       .from('appuntamenti')
       .select('*')
-      .eq('concessionario_id', user.value.id)
+      .eq('concessionario_id', concessionario.id)
       .order('data_appuntamento', { ascending: true })
       .order('orario_appuntamento', { ascending: true })
       .limit(5)
@@ -432,24 +516,106 @@ const loadRecentAppointments = async () => {
 
 // Carica l'attività recente
 const loadRecentActivity = async () => {
-  // Simula il caricamento dell'attività recente
-  recentActivity.value = [
-    {
-      id: 1,
-      description: 'Nuova moto aggiunta: Honda CBR 600RR',
-      timestamp: '2 ore fa'
-    },
-    {
-      id: 2,
-      description: 'Contatto ricevuto per Yamaha R1',
-      timestamp: '4 ore fa'
-    },
-    {
-      id: 3,
-      description: 'Appuntamento fissato per domani',
-      timestamp: '1 giorno fa'
+  if (!user.value) return
+
+  try {
+    console.log('📊 Caricamento attività recente...')
+    
+    // Prima ottieni l'ID del concessionario dalla tabella concessionari
+    const { data: concessionario, error: dealerError } = await supabase
+      .from('concessionari')
+      .select('id')
+      .eq('user_id', user.value.id)
+      .single()
+    
+    if (dealerError) {
+      console.error('❌ Errore nel caricamento concessionario per attività:', dealerError)
+      throw dealerError
     }
-  ]
+    
+    console.log('🏢 Concessionario ID per attività:', concessionario.id)
+    
+    // Carica le attività recenti dal database
+    const activities = []
+    
+    // 1. Moto aggiunte di recente
+    const { data: recentMotos, error: motosError } = await supabase
+      .from('moto_concessionari')
+      .select('*, moto!inner(marca, modello)')
+      .eq('concessionario_id', concessionario.id)
+      .order('created_at', { ascending: false })
+      .limit(3)
+    
+    if (!motosError && recentMotos) {
+      recentMotos.forEach(moto => {
+        activities.push({
+          id: `moto-${moto.id}`,
+          type: 'moto_added',
+          description: `Nuova moto aggiunta: ${moto.moto.marca} ${moto.moto.modello}`,
+          timestamp: moto.created_at,
+          icon: '🏍️'
+        })
+      })
+    }
+    
+    // 2. Lead ricevuti di recente
+    const { data: recentLeads, error: leadsError } = await supabase
+      .from('lead')
+      .select('*')
+      .eq('concessionario_id', concessionario.id)
+      .order('created_at', { ascending: false })
+      .limit(3)
+    
+    if (!leadsError && recentLeads) {
+      recentLeads.forEach(lead => {
+        activities.push({
+          id: `lead-${lead.id}`,
+          type: 'lead_received',
+          description: `Contatto ricevuto per ${lead.moto_marca} ${lead.moto_modello}`,
+          timestamp: lead.created_at,
+          icon: '📞'
+        })
+      })
+    }
+    
+    // 3. Appuntamenti fissati di recente
+    const { data: recentAppointments, error: appointmentsError } = await supabase
+      .from('appuntamenti')
+      .select('*')
+      .eq('concessionario_id', concessionario.id)
+      .order('created_at', { ascending: false })
+      .limit(3)
+    
+    if (!appointmentsError && recentAppointments) {
+      recentAppointments.forEach(appointment => {
+        activities.push({
+          id: `appointment-${appointment.id}`,
+          type: 'appointment_scheduled',
+          description: `Appuntamento fissato per ${formatDate(appointment.data_appuntamento)}`,
+          timestamp: appointment.created_at,
+          icon: '📅'
+        })
+      })
+    }
+    
+    // Ordina per timestamp e prendi i più recenti
+    activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+    recentActivity.value = activities.slice(0, 5)
+    
+    console.log('✅ Attività recenti caricate:', recentActivity.value.length)
+    
+  } catch (error) {
+    console.error('❌ Errore nel caricamento attività recenti:', error)
+    // Fallback ai dati simulati in caso di errore
+    recentActivity.value = [
+      {
+        id: 1,
+        description: 'Errore nel caricamento attività',
+        timestamp: new Date().toISOString(),
+        icon: '⚠️'
+      }
+    ]
+  }
 }
 
 // Funzioni di utilità
@@ -461,6 +627,27 @@ const formatDate = (dateString) => {
     month: 'long',
     day: 'numeric'
   })
+}
+
+const formatTimeAgo = (dateString) => {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffInSeconds = Math.floor((now - date) / 1000)
+  
+  if (diffInSeconds < 60) {
+    return 'Ora'
+  } else if (diffInSeconds < 3600) {
+    const minutes = Math.floor(diffInSeconds / 60)
+    return `${minutes} minuto${minutes > 1 ? 'i' : ''} fa`
+  } else if (diffInSeconds < 86400) {
+    const hours = Math.floor(diffInSeconds / 3600)
+    return `${hours} ora${hours > 1 ? 'e' : ''} fa`
+  } else if (diffInSeconds < 2592000) {
+    const days = Math.floor(diffInSeconds / 86400)
+    return `${days} giorno${days > 1 ? 'i' : ''} fa`
+  } else {
+    return date.toLocaleDateString('it-IT')
+  }
 }
 
 const getStatusLabel = (stato) => {

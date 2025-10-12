@@ -36,7 +36,7 @@ function createSlug(marca: string, modello: string): string {
 export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event)
-    const { categoria, slug } = body
+    const { categoria, slug, citta } = body
     
     if (!categoria || !slug) {
       throw createError({
@@ -45,14 +45,13 @@ export default defineEventHandler(async (event) => {
       })
     }
     
-    console.log('Cerca moto per:', { categoria, slug })
+    console.log('Cerca moto per:', { categoria, slug, citta })
     
     // Cerca tutte le moto
     const { data: motos, error: motosError } = await supabase
       .from('moto')
       .select(`
         id,
-        sanity_id,
         marca,
         modello,
         allestimento,
@@ -98,7 +97,7 @@ export default defineEventHandler(async (event) => {
       })
     }
     
-    // Recupera i concessionari associati
+    // Recupera TUTTI i concessionari associati (non filtrati per città)
     const { data: concessionari, error: concessionariError } = await supabase
       .from('moto_concessionari')
       .select(`
@@ -112,15 +111,20 @@ export default defineEventHandler(async (event) => {
           email
         )
       `)
-      .eq('moto_id', motoTrovata.id)
+      .eq('moto_id', motoTrovata.id.toString())
     
     if (concessionariError) {
       console.error(`Errore Supabase per concessionari moto ${motoTrovata.id}:`, concessionariError)
     }
     
+    // Estrai le città uniche dai concessionari
+    const cittaDisponibili = [...new Set(concessionari?.map(c => c.concessionari.citta) || [])]
+    console.log('🏙️ Città disponibili per moto:', cittaDisponibili)
+    console.log('🏢 Concessionari trovati:', concessionari?.length || 0)
+    
     // Trasforma i dati per il frontend
     const motoData = {
-      _id: motoTrovata.sanity_id,
+      id: motoTrovata.id,
       marca: motoTrovata.marca,
       modello: motoTrovata.modello,
       allestimento: motoTrovata.allestimento,
@@ -131,8 +135,10 @@ export default defineEventHandler(async (event) => {
       immaginiGallery: motoTrovata.immagini_gallery || [],
       isDisponibile: motoTrovata.is_disponibile,
       isPromozione: motoTrovata.is_promozione,
+      cittaSelezionata: citta || null, // Aggiungi la città selezionata
+      cittaDisponibili: cittaDisponibili, // Aggiungi le città disponibili
       concessionari: concessionari?.map(c => ({
-        _id: c.concessionari.id,
+        id: c.concessionari.id,
         nome: c.concessionari.nome,
         citta: c.concessionari.citta,
         provincia: c.concessionari.provincia,

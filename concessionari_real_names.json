@@ -1,0 +1,955 @@
+[
+  {
+    "_type": "concessionario",
+    "nome": "MotoSport Roma",
+    "descrizione": "Concessionario specializzato in moto sportive e da corsa con showroom di lusso.",
+    "tipoConcessionario": "showroom",
+    "dimensione": "media",
+    "annoFondazione": 1985,
+    "marchiTrattati": [
+      "Ducati",
+      "Yamaha"
+    ],
+    "specializzazione": [
+      "vendita",
+      "officina"
+    ],
+    "telefono": "+39 06 1234567",
+    "email": "info@motosportroma.it",
+    "sitoWeb": "https://motosportroma.it",
+    "pec": "motosportroma@pec.it",
+    "partitaIva": "10000000001",
+    "via": "Via Appia Nuova 123",
+    "citta": "Roma",
+    "cap": "00100",
+    "provincia": "RM",
+    "regione": "Lazio",
+    "latitudine": 41.9,
+    "longitudine": 12.5,
+    "orariApertura": [
+      {
+        "nomeGiorno": "Lunedì",
+        "apertura": "09:00",
+        "chiusura": "18:00",
+        "_key": "1e49a900-4dc5-446a-99a9-59b9484f31e9"
+      },
+      {
+        "nomeGiorno": "Martedì",
+        "apertura": "09:00",
+        "chiusura": "18:00",
+        "_key": "43b76781-e928-4411-a70a-8433b75ed0b5"
+      }
+    ],
+    "servizi": [
+      "nuovo",
+      "usato",
+      "assistenza"
+    ],
+    "recensioni": [
+      {
+        "nomeCliente": "Mario Rossi",
+        "voto": 5,
+        "testo": "Servizio eccellente e personale competente",
+        "data": "2024-01-15T10:00:00Z",
+        "_key": "rec1"
+      }
+    ],
+    "logo": "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=400&q=80",
+    "immaginiShowroom": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80",
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "immaginiOfficina": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "videoPresentazione": "https://youtube.com/watch?v=demo1",
+    "facebook": "https://facebook.com/motosportroma",
+    "instagram": "https://instagram.com/motosportroma",
+    "youtube": "https://youtube.com/motosportroma",
+    "motoDisponibili": [
+      {
+        "_type": "reference",
+        "_ref": "715715ab-72fe-43a0-b4e9-82e0bda2be7c",
+        "_key": "3f80ab80-8b92-41fc-9572-07560a0fd27f"
+      },
+      {
+        "_type": "reference",
+        "_ref": "c0ee6449-ba2f-4d6b-966e-14ec5541fa4b",
+        "_key": "83cb43a2-7881-45c3-9662-d2112d5984a4"
+      },
+      {
+        "_type": "reference",
+        "_ref": "317da0dc-60f6-4512-baea-c57e8fbdb9a8",
+        "_key": "333ba3ec-824e-43b5-b5ab-2b41acd0ca52"
+      },
+      {
+        "_type": "reference",
+        "_ref": "cfc2d893-96f4-4047-ab47-20cd89c250f8",
+        "_key": "c98e8e51-5742-4256-a334-39f7baafcf15"
+      },
+      {
+        "_type": "reference",
+        "_ref": "44f3f556-acd4-43df-b3e7-cf8f65b9ec23",
+        "_key": "01cc4849-b891-4c85-bf47-d4aa1b871275"
+      },
+      {
+        "_type": "reference",
+        "_ref": "34141f91-5bff-4347-ae94-88ac93517fe1",
+        "_key": "bdc0b142-d9b1-40a7-a166-464370f3ba5a"
+      }
+    ]
+  },
+  {
+    "_type": "concessionario",
+    "nome": "Bike Center Milano",
+    "descrizione": "Centro specializzato in moto e scooter con officina autorizzata.",
+    "tipoConcessionario": "medio",
+    "dimensione": "grande",
+    "annoFondazione": 1992,
+    "marchiTrattati": [
+      "Honda",
+      "Kawasaki"
+    ],
+    "specializzazione": [
+      "vendita",
+      "officina"
+    ],
+    "telefono": "+39 02 2345678",
+    "email": "info@bikecentermilano.it",
+    "sitoWeb": "https://bikecentermilano.it",
+    "pec": "bikecentermilano@pec.it",
+    "partitaIva": "10000000002",
+    "via": "Corso Buenos Aires 456",
+    "citta": "Milano",
+    "cap": "20100",
+    "provincia": "MI",
+    "regione": "Lombardia",
+    "latitudine": 45.5,
+    "longitudine": 9.2,
+    "orariApertura": [
+      {
+        "nomeGiorno": "Lunedì",
+        "apertura": "08:30",
+        "chiusura": "19:00",
+        "_key": "2f50a011-5ed6-557b-00aa-60c0595f42fa"
+      },
+      {
+        "nomeGiorno": "Martedì",
+        "apertura": "08:30",
+        "chiusura": "19:00",
+        "_key": "54c87892-fa39-5522-b81b-9544c86ed1c6"
+      }
+    ],
+    "servizi": [
+      "nuovo",
+      "usato",
+      "assistenza",
+      "noleggio"
+    ],
+    "recensioni": [
+      {
+        "nomeCliente": "Giulia Bianchi",
+        "voto": 4,
+        "testo": "Ottimo servizio post-vendita",
+        "data": "2024-02-10T14:30:00Z",
+        "_key": "rec2"
+      }
+    ],
+    "logo": "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=400&q=80",
+    "immaginiShowroom": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "immaginiOfficina": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "videoPresentazione": "https://youtube.com/watch?v=demo2",
+    "facebook": "https://facebook.com/bikecentermilano",
+    "instagram": "https://instagram.com/bikecentermilano",
+    "youtube": "https://youtube.com/bikecentermilano",
+    "motoDisponibili": [
+      {
+        "_type": "reference",
+        "_ref": "ce495a27-ff77-4713-99a2-2c7d71170b0f",
+        "_key": "54fa3815-e157-415a-af71-2f9ebdfdbac4"
+      },
+      {
+        "_type": "reference",
+        "_ref": "4c66a743-bde2-4189-a782-69548ee3e876",
+        "_key": "edcb378c-8af7-46e3-9909-46f28f597391"
+      },
+      {
+        "_type": "reference",
+        "_ref": "1b51690e-2798-42ed-9f0f-351b5cba7f34",
+        "_key": "adc4b4f0-23d6-4433-b323-63e3af0f7788"
+      },
+      {
+        "_type": "reference",
+        "_ref": "5d8b6669-344d-4e1c-aa0f-562bccd747c2",
+        "_key": "424bc6f8-6c2b-48d4-a75b-c0ca482d998d"
+      },
+      {
+        "_type": "reference",
+        "_ref": "f5eb3fc3-9b72-49c3-bec7-c9b26f2f80a4",
+        "_key": "59cb407f-de43-4249-a486-8a456686dac1"
+      },
+      {
+        "_type": "reference",
+        "_ref": "f6a8d363-f121-4fe7-98ac-8ba3d8522546",
+        "_key": "73700446-774e-4b0d-9370-41efb846f28e"
+      }
+    ]
+  },
+  {
+    "_type": "concessionario",
+    "nome": "Speed Moto Napoli",
+    "descrizione": "Concessionario storico di Napoli specializzato in moto sportive.",
+    "tipoConcessionario": "showroom",
+    "dimensione": "media",
+    "annoFondazione": 1978,
+    "marchiTrattati": [
+      "Ducati",
+      "BMW"
+    ],
+    "specializzazione": [
+      "vendita",
+      "officina"
+    ],
+    "telefono": "+39 081 3456789",
+    "email": "info@speedmotonapoli.it",
+    "sitoWeb": "https://speedmotonapoli.it",
+    "pec": "speedmotonapoli@pec.it",
+    "partitaIva": "10000000003",
+    "via": "Via Chiaia 789",
+    "citta": "Napoli",
+    "cap": "80100",
+    "provincia": "NA",
+    "regione": "Campania",
+    "latitudine": 40.8,
+    "longitudine": 14.2,
+    "orariApertura": [
+      {
+        "nomeGiorno": "Lunedì",
+        "apertura": "09:00",
+        "chiusura": "18:30",
+        "_key": "3g61b122-6fe7-668c-11bb-71d1606f53gb"
+      },
+      {
+        "nomeGiorno": "Martedì",
+        "apertura": "09:00",
+        "chiusura": "18:30",
+        "_key": "65d98903-gb4a-6633-c92c-0655d97ed2d7"
+      }
+    ],
+    "servizi": [
+      "nuovo",
+      "usato",
+      "assistenza",
+      "finanziamenti"
+    ],
+    "recensioni": [
+      {
+        "nomeCliente": "Antonio Verdi",
+        "voto": 5,
+        "testo": "Concessionario di fiducia da anni",
+        "data": "2024-01-20T16:00:00Z",
+        "_key": "rec3"
+      }
+    ],
+    "logo": "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=400&q=80",
+    "immaginiShowroom": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "immaginiOfficina": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "videoPresentazione": "https://youtube.com/watch?v=demo3",
+    "facebook": "https://facebook.com/speedmotonapoli",
+    "instagram": "https://instagram.com/speedmotonapoli",
+    "youtube": "https://youtube.com/speedmotonapoli",
+    "motoDisponibili": [
+      {
+        "_type": "reference",
+        "_ref": "b4851e45-b665-403c-acf3-de3ec01b103f",
+        "_key": "30c336d4-ee82-4a16-a864-c2d576a2ceab"
+      },
+      {
+        "_type": "reference",
+        "_ref": "1cf61c81-7a11-4b31-9f28-0d50296943a2",
+        "_key": "ceb5ff6a-1292-4b1a-9402-dc68e99d5382"
+      },
+      {
+        "_type": "reference",
+        "_ref": "3f0912ee-e32e-47e6-9329-3a13adcc98a7",
+        "_key": "5969bd7d-d332-410f-8cef-49c094c36da3"
+      }
+    ]
+  },
+  {
+    "_type": "concessionario",
+    "nome": "Moto Roma Centro",
+    "descrizione": "Concessionario nel cuore di Roma con ampia gamma di moto e scooter.",
+    "tipoConcessionario": "medio",
+    "dimensione": "grande",
+    "annoFondazione": 1988,
+    "marchiTrattati": [
+      "Honda",
+      "Yamaha",
+      "Suzuki"
+    ],
+    "specializzazione": [
+      "vendita",
+      "officina"
+    ],
+    "telefono": "+39 06 4567890",
+    "email": "info@motoromacentro.it",
+    "sitoWeb": "https://motoromacentro.it",
+    "pec": "motoromacentro@pec.it",
+    "partitaIva": "10000000004",
+    "via": "Via del Corso 321",
+    "citta": "Roma",
+    "cap": "00100",
+    "provincia": "RM",
+    "regione": "Lazio",
+    "latitudine": 41.9,
+    "longitudine": 12.5,
+    "orariApertura": [
+      {
+        "nomeGiorno": "Lunedì",
+        "apertura": "09:00",
+        "chiusura": "19:00",
+        "_key": "4h72c233-7gf8-779d-22cc-82e2717f64hc"
+      },
+      {
+        "nomeGiorno": "Martedì",
+        "apertura": "09:00",
+        "chiusura": "19:00",
+        "_key": "76e09014-hc5b-7744-d03d-1766e08ed3e8"
+      }
+    ],
+    "servizi": [
+      "nuovo",
+      "usato",
+      "assistenza",
+      "noleggio",
+      "finanziamenti"
+    ],
+    "recensioni": [
+      {
+        "nomeCliente": "Francesca Neri",
+        "voto": 4,
+        "testo": "Personale molto disponibile",
+        "data": "2024-02-05T11:15:00Z",
+        "_key": "rec4"
+      }
+    ],
+    "logo": "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=400&q=80",
+    "immaginiShowroom": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "immaginiOfficina": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "videoPresentazione": "https://youtube.com/watch?v=demo4",
+    "facebook": "https://facebook.com/motoromacentro",
+    "instagram": "https://instagram.com/motoromacentro",
+    "youtube": "https://youtube.com/motoromacentro",
+    "motoDisponibili": [
+      {
+        "_type": "reference",
+        "_ref": "b748cae7-8e8a-4522-83af-6c6be81178cc",
+        "_key": "e17e1c2c-bf34-46e6-b0df-1311f994cf14"
+      },
+      {
+        "_type": "reference",
+        "_ref": "5466abdd-1d11-43f3-aab1-100866ff168f",
+        "_key": "fda458c5-d52a-44b9-8669-4b7199c2e71e"
+      },
+      {
+        "_type": "reference",
+        "_ref": "60663a85-ded2-4c0f-b6da-e5fb3ab7c052",
+        "_key": "871efcc5-5836-46bc-8214-ae131995feaf"
+      },
+      {
+        "_type": "reference",
+        "_ref": "a686eb75-921d-41ad-a652-60751b6c1b7a",
+        "_key": "e62c914c-859c-4015-b8d4-a9a7f9975c8e"
+      },
+      {
+        "_type": "reference",
+        "_ref": "65c80a46-4187-4739-a0a9-5bd7c667bfb2",
+        "_key": "48b2ed39-3b7c-4baa-b9d9-a658b3d66fa1"
+      },
+      {
+        "_type": "reference",
+        "_ref": "9052f120-74be-4901-846b-d148b755662e",
+        "_key": "47670572-d1d4-4482-9332-c014ea01f025"
+      },
+      {
+        "_type": "reference",
+        "_ref": "4606c5be-77bc-4ebd-9f9e-9eab483ab593",
+        "_key": "b290e433-d0a0-4145-bda6-969fe79e6152"
+      },
+      {
+        "_type": "reference",
+        "_ref": "3e490504-2e24-4dd9-8b4b-1fbd6195deae",
+        "_key": "4c4e6478-bbaf-44c3-9e33-ec9d888be5b2"
+      }
+    ]
+  },
+  {
+    "_type": "concessionario",
+    "nome": "Bike World Torino",
+    "descrizione": "Mondo delle due ruote a Torino con showroom moderno e officina specializzata.",
+    "tipoConcessionario": "showroom",
+    "dimensione": "media",
+    "annoFondazione": 1995,
+    "marchiTrattati": [
+      "Kawasaki",
+      "BMW"
+    ],
+    "specializzazione": [
+      "vendita",
+      "officina"
+    ],
+    "telefono": "+39 011 5678901",
+    "email": "info@bikeworldtorino.it",
+    "sitoWeb": "https://bikeworldtorino.it",
+    "pec": "bikeworldtorino@pec.it",
+    "partitaIva": "10000000005",
+    "via": "Via Po 654",
+    "citta": "Torino",
+    "cap": "10100",
+    "provincia": "TO",
+    "regione": "Piemonte",
+    "latitudine": 45.1,
+    "longitudine": 7.7,
+    "orariApertura": [
+      {
+        "nomeGiorno": "Lunedì",
+        "apertura": "08:00",
+        "chiusura": "18:00",
+        "_key": "5i83d344-8hg9-880e-33dd-93f3828f75id"
+      },
+      {
+        "nomeGiorno": "Martedì",
+        "apertura": "08:00",
+        "chiusura": "18:00",
+        "_key": "87f10125-id6c-8855-e14e-2877f19ed4f9"
+      }
+    ],
+    "servizi": [
+      "nuovo",
+      "usato",
+      "assistenza",
+      "assicurazioni"
+    ],
+    "recensioni": [
+      {
+        "nomeCliente": "Marco Blu",
+        "voto": 5,
+        "testo": "Servizio impeccabile e prezzi competitivi",
+        "data": "2024-01-25T09:30:00Z",
+        "_key": "rec5"
+      }
+    ],
+    "logo": "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=400&q=80",
+    "immaginiShowroom": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "immaginiOfficina": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "videoPresentazione": "https://youtube.com/watch?v=demo5",
+    "facebook": "https://facebook.com/bikeworldtorino",
+    "instagram": "https://instagram.com/bikeworldtorino",
+    "youtube": "https://youtube.com/bikeworldtorino",
+    "motoDisponibili": [
+      {
+        "_type": "reference",
+        "_ref": "9e912e10-76b1-4a99-8294-834c79b55af2",
+        "_key": "c8bfb0f5-5520-4dee-912d-b7bca574b0ea"
+      },
+      {
+        "_type": "reference",
+        "_ref": "149dbe52-442f-4013-8198-9e976284518c",
+        "_key": "4770a456-bf33-4c34-bf7d-3ebb7caf28f0"
+      }
+    ]
+  },
+  {
+    "_type": "concessionario",
+    "nome": "Moto Express Firenze",
+    "descrizione": "Concessionario veloce e affidabile nel centro di Firenze.",
+    "tipoConcessionario": "medio",
+    "dimensione": "piccola",
+    "annoFondazione": 2000,
+    "marchiTrattati": [
+      "Honda",
+      "Suzuki"
+    ],
+    "specializzazione": [
+      "vendita",
+      "officina"
+    ],
+    "telefono": "+39 055 6789012",
+    "email": "info@motoexpressfirenze.it",
+    "sitoWeb": "https://motoexpressfirenze.it",
+    "pec": "motoexpressfirenze@pec.it",
+    "partitaIva": "10000000006",
+    "via": "Via del Duomo 987",
+    "citta": "Firenze",
+    "cap": "50100",
+    "provincia": "FI",
+    "regione": "Toscana",
+    "latitudine": 43.8,
+    "longitudine": 11.3,
+    "orariApertura": [
+      {
+        "nomeGiorno": "Lunedì",
+        "apertura": "09:30",
+        "chiusura": "18:30",
+        "_key": "6j94e455-9ih0-991f-44ee-04g4939f86je"
+      },
+      {
+        "nomeGiorno": "Martedì",
+        "apertura": "09:30",
+        "chiusura": "18:30",
+        "_key": "98g21236-je7d-9966-f25f-3988g20ed5g0"
+      }
+    ],
+    "servizi": [
+      "nuovo",
+      "usato",
+      "assistenza"
+    ],
+    "recensioni": [
+      {
+        "nomeCliente": "Laura Gialli",
+        "voto": 4,
+        "testo": "Ottima assistenza tecnica",
+        "data": "2024-02-15T13:45:00Z",
+        "_key": "rec6"
+      }
+    ],
+    "logo": "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=400&q=80",
+    "immaginiShowroom": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "immaginiOfficina": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "videoPresentazione": "https://youtube.com/watch?v=demo6",
+    "facebook": "https://facebook.com/motoexpressfirenze",
+    "instagram": "https://instagram.com/motoexpressfirenze",
+    "youtube": "https://youtube.com/motoexpressfirenze",
+    "motoDisponibili": [
+      {
+        "_type": "reference",
+        "_ref": "f6a8d363-f121-4fe7-98ac-8ba3d8522546",
+        "_key": "85d68ac7-6f5b-4188-8f97-07c6dc41e154"
+      },
+      {
+        "_type": "reference",
+        "_ref": "ce495a27-ff77-4713-99a2-2c7d71170b0f",
+        "_key": "771c5c56-f3c3-46d5-9b3d-d9b0da9e5944"
+      },
+      {
+        "_type": "reference",
+        "_ref": "3e490504-2e24-4dd9-8b4b-1fbd6195deae",
+        "_key": "84692de3-d946-4810-8e22-a5622857d165"
+      },
+      {
+        "_type": "reference",
+        "_ref": "3f0912ee-e32e-47e6-9329-3a13adcc98a7",
+        "_key": "9b6f0556-e07e-4407-8969-5383b3ca3913"
+      },
+      {
+        "_type": "reference",
+        "_ref": "4606c5be-77bc-4ebd-9f9e-9eab483ab593",
+        "_key": "decc76e4-4e0c-415d-87e4-4c96a72782a4"
+      },
+      {
+        "_type": "reference",
+        "_ref": "a686eb75-921d-41ad-a652-60751b6c1b7a",
+        "_key": "bd20e938-4bad-42b3-84a1-974794f701cb"
+      },
+      {
+        "_type": "reference",
+        "_ref": "65c80a46-4187-4739-a0a9-5bd7c667bfb2",
+        "_key": "22de6f39-c253-485a-b065-f55be0d71ef2"
+      },
+      {
+        "_type": "reference",
+        "_ref": "9052f120-74be-4901-846b-d148b755662e",
+        "_key": "c5f86cf9-8393-465e-93a8-f87224ff1bb3"
+      }
+    ]
+  },
+  {
+    "_type": "concessionario",
+    "nome": "Speed Bike Bologna",
+    "descrizione": "Concessionario specializzato in moto sportive e da corsa a Bologna.",
+    "tipoConcessionario": "showroom",
+    "dimensione": "media",
+    "annoFondazione": 1987,
+    "marchiTrattati": [
+      "Ducati",
+      "Yamaha"
+    ],
+    "specializzazione": [
+      "vendita",
+      "officina"
+    ],
+    "telefono": "+39 051 7890123",
+    "email": "info@speedbikebologna.it",
+    "sitoWeb": "https://speedbikebologna.it",
+    "pec": "speedbikebologna@pec.it",
+    "partitaIva": "10000000007",
+    "via": "Via Indipendenza 147",
+    "citta": "Bologna",
+    "cap": "40100",
+    "provincia": "BO",
+    "regione": "Emilia-Romagna",
+    "latitudine": 44.5,
+    "longitudine": 11.3,
+    "orariApertura": [
+      {
+        "nomeGiorno": "Lunedì",
+        "apertura": "09:00",
+        "chiusura": "19:00",
+        "_key": "7k05f566-0ji1-002g-55ff-15h5040g97kf"
+      },
+      {
+        "nomeGiorno": "Martedì",
+        "apertura": "09:00",
+        "chiusura": "19:00",
+        "_key": "09h32347-kf8e-0077-g36g-4099h31ed6h1"
+      }
+    ],
+    "servizi": [
+      "nuovo",
+      "usato",
+      "assistenza",
+      "finanziamenti"
+    ],
+    "recensioni": [
+      {
+        "nomeCliente": "Roberto Rossi",
+        "voto": 5,
+        "testo": "Concessionario di eccellenza",
+        "data": "2024-01-30T15:20:00Z",
+        "_key": "rec7"
+      }
+    ],
+    "logo": "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=400&q=80",
+    "immaginiShowroom": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "immaginiOfficina": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "videoPresentazione": "https://youtube.com/watch?v=demo7",
+    "facebook": "https://facebook.com/speedbikebologna",
+    "instagram": "https://instagram.com/speedbikebologna",
+    "youtube": "https://youtube.com/speedbikebologna",
+    "motoDisponibili": [
+      {
+        "_type": "reference",
+        "_ref": "60663a85-ded2-4c0f-b6da-e5fb3ab7c052",
+        "_key": "7ab4bf1a-e706-4cd1-b201-d426c42d1b70"
+      },
+      {
+        "_type": "reference",
+        "_ref": "c0ee6449-ba2f-4d6b-966e-14ec5541fa4b",
+        "_key": "70f45b8b-971e-4a29-8653-4a02e6c33cb2"
+      },
+      {
+        "_type": "reference",
+        "_ref": "9e912e10-76b1-4a99-8294-834c79b55af2",
+        "_key": "e24b30c8-c0a3-4e58-aa6f-858ed32a4c44"
+      }
+    ]
+  },
+  {
+    "_type": "concessionario",
+    "nome": "Moto Roma Nord",
+    "descrizione": "Concessionario nella zona nord di Roma con ampio parco moto.",
+    "tipoConcessionario": "medio",
+    "dimensione": "grande",
+    "annoFondazione": 1993,
+    "marchiTrattati": [
+      "Honda",
+      "Kawasaki",
+      "BMW"
+    ],
+    "specializzazione": [
+      "vendita",
+      "officina"
+    ],
+    "telefono": "+39 06 8901234",
+    "email": "info@motoromanord.it",
+    "sitoWeb": "https://motoromanord.it",
+    "pec": "motoromanord@pec.it",
+    "partitaIva": "10000000008",
+    "via": "Via Nomentana 258",
+    "citta": "Roma",
+    "cap": "00100",
+    "provincia": "RM",
+    "regione": "Lazio",
+    "latitudine": 41.9,
+    "longitudine": 12.5,
+    "orariApertura": [
+      {
+        "nomeGiorno": "Lunedì",
+        "apertura": "08:30",
+        "chiusura": "18:30",
+        "_key": "8l16g677-1kj2-113h-66gg-26i6151h08lg"
+      },
+      {
+        "nomeGiorno": "Martedì",
+        "apertura": "08:30",
+        "chiusura": "18:30",
+        "_key": "10i43458-lg9f-1188-h47h-5100i42ed7i2"
+      }
+    ],
+    "servizi": [
+      "nuovo",
+      "usato",
+      "assistenza",
+      "noleggio",
+      "assicurazioni"
+    ],
+    "recensioni": [
+      {
+        "nomeCliente": "Alessandro Verde",
+        "voto": 4,
+        "testo": "Ottima selezione di moto",
+        "data": "2024-02-08T10:10:00Z",
+        "_key": "rec8"
+      }
+    ],
+    "logo": "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=400&q=80",
+    "immaginiShowroom": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "immaginiOfficina": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "videoPresentazione": "https://youtube.com/watch?v=demo8",
+    "facebook": "https://facebook.com/motoromanord",
+    "instagram": "https://instagram.com/motoromanord",
+    "youtube": "https://youtube.com/motoromanord",
+    "motoDisponibili": [
+      {
+        "_type": "reference",
+        "_ref": "cfc2d893-96f4-4047-ab47-20cd89c250f8",
+        "_key": "6a69b60a-abf2-44fc-9d90-fbb81aee7536"
+      },
+      {
+        "_type": "reference",
+        "_ref": "4c66a743-bde2-4189-a782-69548ee3e876",
+        "_key": "4b7465af-0d2a-4fba-b645-15ac924527cd"
+      },
+      {
+        "_type": "reference",
+        "_ref": "34141f91-5bff-4347-ae94-88ac93517fe1",
+        "_key": "187000d7-6a62-4059-9fab-65c911c2f2d8"
+      },
+      {
+        "_type": "reference",
+        "_ref": "b748cae7-8e8a-4522-83af-6c6be81178cc",
+        "_key": "0bd25669-d861-46d9-95b3-daa4d3fb4c48"
+      },
+      {
+        "_type": "reference",
+        "_ref": "44f3f556-acd4-43df-b3e7-cf8f65b9ec23",
+        "_key": "af34ba0c-1c39-4ad2-9418-d7ec50d17961"
+      },
+      {
+        "_type": "reference",
+        "_ref": "5466abdd-1d11-43f3-aab1-100866ff168f",
+        "_key": "312ede59-ee40-4c0a-95aa-eee32da8b00c"
+      },
+      {
+        "_type": "reference",
+        "_ref": "5d8b6669-344d-4e1c-aa0f-562bccd747c2",
+        "_key": "f6f37a52-ea81-41b6-b4e5-1e26f7320f77"
+      },
+      {
+        "_type": "reference",
+        "_ref": "1b51690e-2798-42ed-9f0f-351b5cba7f34",
+        "_key": "c6048907-f9ca-4917-bd3c-ce7277eb5ca0"
+      }
+    ]
+  },
+  {
+    "_type": "concessionario",
+    "nome": "Bike Center Genova",
+    "descrizione": "Centro moto e scooter nel porto di Genova con officina specializzata.",
+    "tipoConcessionario": "medio",
+    "dimensione": "media",
+    "annoFondazione": 1991,
+    "marchiTrattati": [
+      "Suzuki",
+      "Yamaha"
+    ],
+    "specializzazione": [
+      "vendita",
+      "officina"
+    ],
+    "telefono": "+39 010 9012345",
+    "email": "info@bikecentergenova.it",
+    "sitoWeb": "https://bikecentergenova.it",
+    "pec": "bikecentergenova@pec.it",
+    "partitaIva": "10000000009",
+    "via": "Via del Campo 369",
+    "citta": "Genova",
+    "cap": "16100",
+    "provincia": "GE",
+    "regione": "Liguria",
+    "latitudine": 44.4,
+    "longitudine": 8.9,
+    "orariApertura": [
+      {
+        "nomeGiorno": "Lunedì",
+        "apertura": "09:00",
+        "chiusura": "18:00",
+        "_key": "9m27h788-2lk3-224i-77hh-37j7262i19mh"
+      },
+      {
+        "nomeGiorno": "Martedì",
+        "apertura": "09:00",
+        "chiusura": "18:00",
+        "_key": "21j54569-mh0g-2299-i58i-6211j53ed8j3"
+      }
+    ],
+    "servizi": [
+      "nuovo",
+      "usato",
+      "assistenza",
+      "noleggio"
+    ],
+    "recensioni": [
+      {
+        "nomeCliente": "Chiara Bianchi",
+        "voto": 5,
+        "testo": "Servizio professionale e veloce",
+        "data": "2024-01-18T12:00:00Z",
+        "_key": "rec9"
+      }
+    ],
+    "logo": "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=400&q=80",
+    "immaginiShowroom": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "immaginiOfficina": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "videoPresentazione": "https://youtube.com/watch?v=demo9",
+    "facebook": "https://facebook.com/bikecentergenova",
+    "instagram": "https://instagram.com/bikecentergenova",
+    "youtube": "https://youtube.com/bikecentergenova",
+    "motoDisponibili": [
+      {
+        "_type": "reference",
+        "_ref": "715715ab-72fe-43a0-b4e9-82e0bda2be7c",
+        "_key": "2c488c2d-7f0f-4bae-be9b-bbc618ddf267"
+      },
+      {
+        "_type": "reference",
+        "_ref": "f5eb3fc3-9b72-49c3-bec7-c9b26f2f80a4",
+        "_key": "aceffe04-ac41-4505-9a2f-ab6bea92b608"
+      },
+      {
+        "_type": "reference",
+        "_ref": "1cf61c81-7a11-4b31-9f28-0d50296943a2",
+        "_key": "eb1f337f-fcdd-48c1-85f2-617f00b7b25a"
+      }
+    ]
+  },
+  {
+    "_type": "concessionario",
+    "nome": "Moto Sport Venezia",
+    "descrizione": "Concessionario sportivo nel cuore di Venezia con showroom di lusso.",
+    "tipoConcessionario": "showroom",
+    "dimensione": "piccola",
+    "annoFondazione": 1989,
+    "marchiTrattati": [
+      "Ducati",
+      "BMW"
+    ],
+    "specializzazione": [
+      "vendita",
+      "officina"
+    ],
+    "telefono": "+39 041 0123456",
+    "email": "info@motosportvenezia.it",
+    "sitoWeb": "https://motosportvenezia.it",
+    "pec": "motosportvenezia@pec.it",
+    "partitaIva": "10000000010",
+    "via": "Calle Larga San Marco 741",
+    "citta": "Venezia",
+    "cap": "30100",
+    "provincia": "VE",
+    "regione": "Veneto",
+    "latitudine": 45.4,
+    "longitudine": 12.3,
+    "orariApertura": [
+      {
+        "nomeGiorno": "Lunedì",
+        "apertura": "09:30",
+        "chiusura": "18:30",
+        "_key": "0n38i899-3ml4-335j-88ii-48k8373j20ni"
+      },
+      {
+        "nomeGiorno": "Martedì",
+        "apertura": "09:30",
+        "chiusura": "18:30",
+        "_key": "32k65670-ni1h-3300-j69j-7322k64ed9k4"
+      }
+    ],
+    "servizi": [
+      "nuovo",
+      "usato",
+      "assistenza",
+      "finanziamenti"
+    ],
+    "recensioni": [
+      {
+        "nomeCliente": "Giuseppe Neri",
+        "voto": 4,
+        "testo": "Ambiente elegante e personale competente",
+        "data": "2024-02-12T16:30:00Z",
+        "_key": "rec10"
+      }
+    ],
+    "logo": "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=400&q=80",
+    "immaginiShowroom": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "immaginiOfficina": [
+      "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&w=1200&q=80"
+    ],
+    "videoPresentazione": "https://youtube.com/watch?v=demo10",
+    "facebook": "https://facebook.com/motosportvenezia",
+    "instagram": "https://instagram.com/motosportvenezia",
+    "youtube": "https://youtube.com/motosportvenezia",
+    "motoDisponibili": [
+      {
+        "_type": "reference",
+        "_ref": "317da0dc-60f6-4512-baea-c57e8fbdb9a8",
+        "_key": "d4b3794b-9b11-42c3-b733-f011980b9ed6"
+      },
+      {
+        "_type": "reference",
+        "_ref": "149dbe52-442f-4013-8198-9e976284518c",
+        "_key": "62871c6f-6eb3-4a16-a4fb-681ce87f93cd"
+      },
+      {
+        "_type": "reference",
+        "_ref": "b4851e45-b665-403c-acf3-de3ec01b103f",
+        "_key": "fe99536c-49d7-436d-b567-07cff46c8911"
+      }
+    ]
+  }
+]

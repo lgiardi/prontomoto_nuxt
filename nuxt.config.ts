@@ -9,9 +9,6 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      // Sanity
-      sanityProjectId: '1i1fbngf',
-      sanityDataset: 'production',
       // Supabase
       supabaseUrl: 'https://xffcrstnyfjthlaurlyx.supabase.co',
       supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmZmNyc3RueWZqdGhsYXVybHl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwNjA4OTgsImV4cCI6MjA3MzYzNjg5OH0.ksZs9k0fYCUZ0nKvF-s8LNL3SQQbppifIbtTVxpyQUE'
@@ -22,7 +19,9 @@ export default defineNuxtConfig({
     smtpUser: 'info@prontomoto.it',
     smtpPass: 'Judin6lt',
     smtpAdminEmail: 'info@prontomoto.it',
-    smtpSenderName: 'ProntoMoto'
+    smtpSenderName: 'ProntoMoto',
+    // Supabase Service Key per creazione account automatica
+    supabaseServiceRoleKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmZmNyc3RueWZqdGhsYXVybHl4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1ODA2MDg5OCwiZXhwIjoyMDczNjM2ODk4fQ.Kij1kL_Ja1i0zEAguZ0gooRv-YCic-THL-DDfLVubBY'
   }
 })
 

@@ -13,6 +13,7 @@
           <MotoFilters 
             :filters="filters" 
             :stats="stats" 
+            @update:filters="(newFilters) => { console.log('🏠 Homepage: Filtri aggiornati:', newFilters); filters = newFilters }"
             @reset="resetFilters"
           />
       </div>
@@ -252,6 +253,15 @@ const filters = ref({
   citta: ''
 })
 
+// Carica la città dal localStorage all'avvio
+onMounted(() => {
+  const savedCity = localStorage.getItem('selectedCity')
+  if (savedCity) {
+    filters.value.citta = savedCity
+    console.log('✅ Città caricata dal localStorage:', savedCity)
+  }
+})
+
 // Stats for filters
 const stats = ref({
   categorie: [],
@@ -329,8 +339,17 @@ const goToMoto = (moto) => {
   const modello = moto.modello?.toLowerCase().replace(/\s+/g, '-') || ''
   const slug = `${marca}-${modello}`
   
+  // Salva la città selezionata nel localStorage
+  if (filters.value.citta) {
+    localStorage.setItem('selectedCity', filters.value.citta)
+    console.log('✅ Città salvata nel localStorage:', filters.value.citta)
+  } else {
+    localStorage.removeItem('selectedCity')
+    console.log('❌ Nessuna città da salvare')
+  }
+  
   console.log('Navigating to:', `/${categoria}/${slug}`)
-  console.log('Moto data:', { categoria: moto.categoria, marca: moto.marca, modello: moto.modello })
+  console.log('Filtro città attivo:', filters.value.citta)
   
   navigateTo(`/${categoria}/${slug}`)
 }
@@ -422,8 +441,12 @@ const calculateStats = () => {
     if (filters.value.marca && moto.marca !== filters.value.marca) return false
     if (filters.value.modello && moto.modello !== filters.value.modello) return false
     if (filters.value.allestimento && moto.allestimento !== filters.value.allestimento) return false
-    // Non applico il filtro per città quando calcolo le statistiche delle città
-    // altrimenti vedo solo le città che hanno moto con i filtri attuali
+    
+    // Se c'è un filtro città, filtra solo le moto disponibili in quella città
+    if (filters.value.citta) {
+      return moto.concessionari?.some(c => c.citta === filters.value.citta) || false
+    }
+    
     return true
   })
   

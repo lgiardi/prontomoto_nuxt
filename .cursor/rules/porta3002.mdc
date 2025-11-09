@@ -2,8 +2,19 @@
 alwaysApply: true
 ---
 avvia il serve sempre sulla porta 3002
+usa sempre pnpm
 non cambiare mai layout o qualsiasi logica senza la mia utorizzazione , se hai dei dubbi chiedimi sempre una conferma
 rispondi sempre in italiano
 correggi sempe gli errori sul terminal
 non svuotare mail il database supabase senza il mio consenso
 leggi sempre quester egole prima di fare ogni azione
+Per evitare questi problemi in futuro, dovrei:
+Leggere sempre attentamente il file esistente prima di modificarlo
+Fare modifiche incrementali invece di ricreare tutto da zero
+Testare la sintassi prima di confermare le modifiche
+Usare strumenti di validazione per verificare che il codice sia corretto
+quando devo fare delle modifiche importanti Creo sempre un backup del file originale
+Rifaccio il file da zero ma deve essere IDENTICO al backup
+Aggiungo SOLO le modifiche richieste
+Testo internamente che la sintassi sia corretta prima di confermare
+Non devo più fare modifiche parziali che corrompono i file. Se non sono sicuro di poter modificare senza errori, ricreo tutto da zero ma perfettamente identico con solo le modifiche necessarie.

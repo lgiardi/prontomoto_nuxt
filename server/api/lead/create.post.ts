@@ -9,6 +9,9 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     const { 
       motoId, 
+      motoUsataId,
+      servizioConcessionarioId,
+      conversazioneId,
       concessionarioId, 
       motoMarca, 
       motoModello,
@@ -16,44 +19,84 @@ export default defineEventHandler(async (event) => {
       emailCliente, 
       telefonoCliente, 
       messaggio, 
-      tipoRichiesta = 'informazioni' 
+      tipoRichiesta = 'moto_nuova' 
     } = body
 
     // Validazione dei campi obbligatori
-    if (!motoId || !concessionarioId || !nomeCliente || !emailCliente) {
+    if (!concessionarioId || !nomeCliente || !emailCliente) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Campi obbligatori mancanti: motoId, concessionarioId, nomeCliente, emailCliente'
+        statusMessage: 'Campi obbligatori mancanti: concessionarioId, nomeCliente, emailCliente'
       })
+    }
+
+    // Determina il tipo di richiesta se non specificato
+    let finalTipoRichiesta = tipoRichiesta
+    if (!finalTipoRichiesta || finalTipoRichiesta === 'informazioni') {
+      if (motoUsataId) {
+        finalTipoRichiesta = 'moto_usata'
+      } else if (servizioConcessionarioId) {
+        finalTipoRichiesta = 'servizio'
+      } else if (motoId) {
+        finalTipoRichiesta = 'moto_nuova'
+      }
     }
 
     console.log('📝 Creazione nuovo lead:', {
       motoId,
+      motoUsataId,
+      servizioConcessionarioId,
+      conversazioneId,
       concessionarioId,
       motoMarca,
       motoModello,
       nomeCliente,
       emailCliente,
-      tipoRichiesta
+      tipoRichiesta: finalTipoRichiesta
     })
 
+    // Prepara i dati del lead
+    const leadData: any = {
+      conversazione_id: conversazioneId || null,
+      concessionario_id: concessionarioId,
+      nome_cliente: nomeCliente,
+      email_cliente: emailCliente,
+      telefono_cliente: telefonoCliente || null,
+      messaggio: messaggio || null,
+      tipo_richiesta: finalTipoRichiesta,
+      status: 'nuovo',
+      priorita: 'media',
+      fonte: 'sito_web'
+    }
+
+    // Aggiungi i campi specifici in base al tipo di richiesta
+    if (finalTipoRichiesta === 'moto_nuova' && motoId) {
+      leadData.moto_id = motoId
+      leadData.moto_marca = motoMarca || null
+      leadData.moto_modello = motoModello || null
+    } else if (finalTipoRichiesta === 'moto_usata' && motoUsataId) {
+      leadData.moto_usata_id = motoUsataId
+      leadData.moto_marca = motoMarca || null
+      leadData.moto_modello = motoModello || null
+    } else if (finalTipoRichiesta === 'servizio' && servizioConcessionarioId) {
+      leadData.servizio_concessionario_id = servizioConcessionarioId
+      // Per servizi, marca/modello possono essere null
+      if (motoMarca) leadData.moto_marca = motoMarca
+      if (motoModello) leadData.moto_modello = motoModello
+    } else {
+      // Fallback: se c'è motoId ma tipo non specificato, usa moto_nuova
+      if (motoId) {
+        leadData.moto_id = motoId
+        leadData.moto_marca = motoMarca || null
+        leadData.moto_modello = motoModello || null
+        leadData.tipo_richiesta = 'moto_nuova'
+      }
+    }
+
     // Inserisci il lead nel database
-    const { data: leadData, error: leadError } = await supabase
+    const { data: leadResult, error: leadError } = await supabase
       .from('lead')
-      .insert({
-        moto_id: motoId,
-        concessionario_id: concessionarioId,
-        moto_marca: motoMarca,
-        moto_modello: motoModello,
-        nome_cliente: nomeCliente,
-        email_cliente: emailCliente,
-        telefono_cliente: telefonoCliente,
-        messaggio: messaggio,
-        tipo_richiesta: tipoRichiesta,
-        status: 'nuovo',
-        priorita: 'media',
-        fonte: 'sito_web'
-      })
+      .insert(leadData)
       .select()
       .single()
 
@@ -66,25 +109,38 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    console.log('✅ Lead creato con successo:', leadData.id)
+    console.log('✅ Lead creato con successo:', leadResult.id)
 
     // Se il tipo richiesta è 'appuntamento', crea anche un appuntamento
     if (tipoRichiesta === 'appuntamento') {
-      const { data: appointmentData, error: appointmentError } = await supabase
+      const appointmentData: any = {
+        lead_id: leadResult.id,
+        conversazione_id: conversazioneId || null,
+        concessionario_id: concessionarioId,
+        cliente_nome: nomeCliente,
+        cliente_email: emailCliente,
+        cliente_telefono: telefonoCliente || null,
+        tipo_appuntamento: 'visita',
+        status: 'programmato',
+        note: messaggio || null
+      }
+
+      // Aggiungi i campi specifici in base al tipo
+      if (finalTipoRichiesta === 'moto_nuova' && motoId) {
+        appointmentData.moto_id = motoId
+        appointmentData.moto_marca = motoMarca || null
+        appointmentData.moto_modello = motoModello || null
+      } else if (finalTipoRichiesta === 'moto_usata' && motoUsataId) {
+        appointmentData.moto_usata_id = motoUsataId
+        appointmentData.moto_marca = motoMarca || null
+        appointmentData.moto_modello = motoModello || null
+      } else if (finalTipoRichiesta === 'servizio' && servizioConcessionarioId) {
+        appointmentData.servizio_concessionario_id = servizioConcessionarioId
+      }
+
+      const { data: appointmentResult, error: appointmentError } = await supabase
         .from('appuntamenti')
-        .insert({
-          lead_id: leadData.id,
-          concessionario_id: concessionarioId,
-          cliente_nome: nomeCliente,
-          cliente_email: emailCliente,
-          cliente_telefono: telefonoCliente,
-          moto_id: motoId,
-          moto_marca: motoMarca,
-          moto_modello: motoModello,
-          tipo_appuntamento: 'visita',
-          status: 'programmato',
-          note: messaggio
-        })
+        .insert(appointmentData)
         .select()
         .single()
 
@@ -92,13 +148,13 @@ export default defineEventHandler(async (event) => {
         console.error('❌ Errore creazione appuntamento:', appointmentError)
         // Non bloccare il processo se l'appuntamento non viene creato
       } else {
-        console.log('✅ Appuntamento creato con successo:', appointmentData.id)
+        console.log('✅ Appuntamento creato con successo:', appointmentResult.id)
       }
     }
 
     return {
       success: true,
-      leadId: leadData.id,
+      leadId: leadResult.id,
       message: 'Lead creato con successo'
     }
 

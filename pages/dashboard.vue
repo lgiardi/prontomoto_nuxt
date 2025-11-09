@@ -102,12 +102,18 @@
         <!-- Quick Actions -->
         <div class="bg-white rounded-lg shadow p-6 mb-8">
           <h2 class="text-xl font-semibold text-gray-900 mb-4">Azioni Rapide</h2>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <NuxtLink 
               to="/" 
               class="bg-[#90c149] text-white px-6 py-3 rounded-md text-center hover:bg-[#7ba83a] transition-colors"
             >
               Cerca Moto
+            </NuxtLink>
+            <NuxtLink 
+              to="/dashboard/moto-usate" 
+              class="bg-orange-600 text-white px-6 py-3 rounded-md text-center hover:bg-orange-700 transition-colors"
+            >
+              🏍️ Le Mie Moto Usate
             </NuxtLink>
             <NuxtLink 
               to="/conversazioni" 

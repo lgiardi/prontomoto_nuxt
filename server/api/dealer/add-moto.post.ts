@@ -25,40 +25,36 @@ export default defineEventHandler(async (event) => {
     let dealerId = null
     const { data: dealerCheck, error: dealerError } = await supabaseAdmin
       .from('concessionari')
-      .select('id')
+      .select('id, nome, status')
       .eq('user_id', user_id)
       .single()
 
     if (dealerError && dealerError.code === 'PGRST116') {
-      console.log('User not found in concessionari table, creating...')
-      const { data: newDealer, error: insertError } = await supabaseAdmin
-        .from('concessionari')
-        .insert({
-          user_id: user_id,
-          nome: 'Concessionario',
-          email: 'temp@example.com',
-          status: 'pending',
-          subscription_plan: 'basic',
-          subscription_status: 'inactive',
-          is_attivo: true,
-          data_iscrizione: new Date().toISOString()
-        })
-        .select()
-        .single()
-
-      if (insertError) {
-        console.error('Error creating dealer:', insertError)
-        return { success: false, error: insertError.message }
+      console.log('User not found in concessionari table')
+      return { 
+        success: false, 
+        error: 'Concessionario non trovato. Contatta il supporto per attivare il tuo account.' 
       }
-      
-      dealerId = newDealer.id
-      console.log('Dealer created:', newDealer)
-    } else if (dealerCheck) {
-      dealerId = dealerCheck.id
-      console.log('Existing dealer:', dealerCheck)
-    } else {
-      return { success: false, error: 'Error loading dealer' }
+    } else if (dealerError) {
+      console.error('Error loading dealer:', dealerError)
+      return { success: false, error: 'Errore nel caricamento del concessionario' }
     }
+
+    if (!dealerCheck) {
+      return { success: false, error: 'Concessionario non trovato' }
+    }
+
+    // Verifica che il concessionario sia attivo
+    if (dealerCheck.status !== 'active') {
+      console.log(`❌ Concessionario ${dealerCheck.nome} non attivo. Status: ${dealerCheck.status}`)
+      return { 
+        success: false, 
+        error: `Concessionario non attivo. Status attuale: ${dealerCheck.status}. Contatta il supporto per attivare il tuo account.` 
+      }
+    }
+
+    dealerId = dealerCheck.id
+    console.log('✅ Concessionario attivo trovato:', dealerCheck.nome)
 
     // Aggiungi la relazione moto_concessionari
     const insertData = {

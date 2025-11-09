@@ -33,41 +33,41 @@
             <h2 class="text-xl font-semibold text-gray-900 mb-6">Moto Selezionata</h2>
             <div class="p-6 bg-green-50 border border-green-200 rounded-lg">
               <h3 class="text-xl font-bold text-green-800 mb-4">Moto da Modificare</h3>
-              <div class="flex items-start space-x-6">
-                <img 
+          <div class="flex items-start space-x-6">
+            <img 
                   :src="selectedMoto.immagineUrl || 'https://via.placeholder.com/120x90'" 
                   :alt="selectedMoto.marca + ' ' + selectedMoto.modello"
-                  class="w-32 h-24 object-cover rounded-lg"
-                />
-                <div class="flex-1">
+              class="w-32 h-24 object-cover rounded-lg"
+            />
+            <div class="flex-1">
                   <h4 class="text-2xl font-bold text-green-900 mb-2">
                     {{ selectedMoto.marca }} {{ selectedMoto.modello }}
-                  </h4>
+              </h4>
                   <p v-if="selectedMoto.allestimento" class="text-lg text-green-700 mb-2">
                     {{ selectedMoto.allestimento }}
-                  </p>
-                  <div class="grid grid-cols-2 gap-4 text-sm">
-                    <div>
+              </p>
+              <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
                       <span class="font-medium text-green-800">Categoria:</span>
                       <span class="text-green-700 ml-2">{{ selectedMoto.categoria }}</span>
                     </div>
                     <div>
                       <span class="font-medium text-green-800">Cilindrata:</span>
                       <span class="text-green-700 ml-2">{{ selectedMoto.cilindrata }}cc</span>
-                    </div>
-                    <div>
+                </div>
+                <div>
                       <span class="font-medium text-green-800">Prezzo Listino:</span>
                       <span class="text-green-700 ml-2">€{{ selectedMoto.prezzo?.toLocaleString() || 'N/A' }}</span>
-                    </div>
-                    <div>
+                </div>
+                <div>
                       <span class="font-medium text-green-800">Peso:</span>
                       <span class="text-green-700 ml-2">{{ selectedMoto.pesoASecco || 'N/A' }} kg</span>
                     </div>
-                  </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
           <!-- Dati del Concessionario (MODIFICABILI) -->
           <div>
@@ -79,7 +79,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Quantità Disponibile *</label>
                 <input 
                   v-model="formData.quantita"
-                  type="number"
+                  type="number" 
                   min="1"
                   required
                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#90c149] focus:border-[#90c149]"
@@ -91,7 +91,7 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Colore *</label>
                 <input 
-                  v-model="formData.colore"
+                  v-model="formData.colore" 
                   type="text"
                   required
                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#90c149] focus:border-[#90c149]"
@@ -104,15 +104,15 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Prezzo di Vendita *</label>
                 <div class="relative">
                   <span class="absolute left-3 top-2 text-gray-500">€</span>
-                  <input 
+                <input 
                     v-model="formData.prezzoConcessionario"
-                    type="number"
+                  type="number" 
                     min="0"
                     step="0.01"
-                    required
+                  required
                     class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#90c149] focus:border-[#90c149]"
                     placeholder="0.00"
-                  />
+                />
                 </div>
                 <p class="text-xs text-gray-500 mt-1">Prezzo listino: €{{ selectedMoto.prezzo?.toLocaleString() || 'N/A' }}</p>
               </div>
@@ -164,7 +164,7 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">URL Foto Principale</label>
                 <input 
-                  v-model="formData.fotoPrincipale"
+                  v-model="formData.fotoPrincipale" 
                   type="url"
                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#90c149] focus:border-[#90c149]"
                   placeholder="https://esempio.com/foto.jpg"
@@ -192,7 +192,7 @@
             >
               Annulla
             </NuxtLink>
-            <button
+            <button 
               type="submit"
               :disabled="submitting"
               class="px-6 py-2 bg-[#90c149] text-white rounded-md hover:bg-[#7ba83a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -202,7 +202,7 @@
           </div>
         </form>
       </div>
-    </div>
+      </div>
   </div>
 </template>
 
@@ -391,11 +391,11 @@ onMounted(async () => {
   user.value = currentUser
   
   if (!user.value) {
-    await navigateTo('/auth/login')
-    return
-  }
-  
-  await loadMotoData()
+      await navigateTo('/auth/login')
+      return
+    }
+    
+    await loadMotoData()
 })
 </script>
 

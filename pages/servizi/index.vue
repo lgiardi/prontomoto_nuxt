@@ -49,7 +49,7 @@
         <!-- Results Header -->
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-2xl font-bold text-gray-900">
-            {{ filteredServizi.length }} servizi trovati
+            {{ servizi.length }} servizi trovati
           </h2>
           <div class="flex items-center space-x-4">
             <select v-model="sortBy" class="border rounded-lg px-3 py-2">
@@ -60,31 +60,28 @@
           </div>
         </div>
         
-        <!-- Servizi Grid - Stile Scheda Moto -->
-        <div v-if="filteredServizi.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Servizi Grid -->
+        <div v-if="servizi.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div 
-            v-for="servizio in paginatedServizi" 
+            v-for="servizio in servizi" 
             :key="servizio.id"
             class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100"
-            @click="goToServizio(servizio.slug)"
+            @click="goToServizio(servizio)"
           >
             <!-- Header con gradiente -->
             <div class="h-24 bg-gradient-to-r from-[#90c149] to-[#7ba83a] flex items-center justify-center">
-              <span class="text-white font-bold text-lg">{{ servizio.categoria }}</span>
+              <span class="text-white font-bold text-lg">{{ servizio.servizi_catalogo.categoria }}</span>
             </div>
             
             <!-- Contenuto principale -->
             <div class="p-5">
-              <!-- Titolo e rating -->
+              <!-- Titolo -->
               <div class="flex items-start justify-between mb-3">
                 <h3 class="font-bold text-lg text-gray-900 group-hover:text-[#90c149] transition-colors">
-                  {{ servizio.nome }}
+                  {{ servizio.servizi_catalogo.nome }}
                 </h3>
-                <div class="flex items-center gap-1">
-                  <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                  </svg>
-                  <span class="text-sm font-medium text-gray-700">{{ servizio.rating }}</span>
+                <div class="text-2xl">
+                  {{ servizio.servizi_catalogo.icona }}
                 </div>
               </div>
               
@@ -96,28 +93,39 @@
               <!-- Prezzo -->
               <div class="mb-4">
                 <div class="text-2xl font-bold text-gray-900">
-                  Da €{{ servizio.prezzoMin }}
+                  €{{ servizio.prezzo_da }}
+                  <span v-if="servizio.prezzo_a" class="text-lg text-gray-500">
+                    - €{{ servizio.prezzo_a }}
+                  </span>
                 </div>
-                <div class="text-sm text-gray-500">a partire da</div>
+                <div v-if="servizio.durata_minuti" class="text-sm text-gray-500">
+                  Durata: {{ servizio.durata_minuti }} min
+                </div>
               </div>
               
-              <!-- Info disponibilità -->
+              <!-- Info concessionari (array come moto nuove) -->
               <div class="mb-4">
                 <div class="flex items-center gap-2 mb-2">
                   <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span class="text-sm text-gray-600">{{ servizio.disponibilita }}</span>
+                  <span class="text-sm text-gray-600">
+                    {{ servizio.concessionari?.length || 0 }} 
+                    {{ servizio.concessionari?.length === 1 ? 'concessionario' : 'concessionari' }}
+                  </span>
                 </div>
-                <div class="flex items-center gap-1 text-sm text-gray-500">
+                <div v-if="servizio.concessionari && servizio.concessionari.length > 0" class="flex items-center gap-1 text-sm text-gray-500">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                   </svg>
-                  <span>{{ servizio.concessionari }} concessionari disponibili</span>
+                  <span>
+                    {{ [...new Set(servizio.concessionari.map(c => c.citta))].join(', ') }}
+                  </span>
                 </div>
               </div>
               
               <!-- Pulsante -->
               <button class="w-full bg-[#90c149] text-white py-3 px-4 rounded-lg hover:bg-[#7ba83a] transition-colors font-medium">
-                Vedi Concessionari
+                Vedi Dettagli
               </button>
             </div>
           </div>
@@ -160,10 +168,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 
 // Reactive data
-const loading = ref(false)
 const currentPage = ref(1)
 const itemsPerPage = 12
 const sortBy = ref('nome')
@@ -180,110 +187,21 @@ const stats = ref({
   categorie: ['Tagliando', 'Manutenzione', 'Riparazione', 'Revisione', 'Gomme', 'Assicurazione']
 })
 
-// Mock data
-const servizi = ref([
-  {
-    id: 1,
-    nome: 'Tagliando Moto',
-    descrizione: 'Manutenzione completa per la tua moto',
-    icon: '🔧',
-    rating: 4.8,
-    recensioni: 127,
-    prezzoMin: 120,
-    disponibilita: 'Disponibile oggi',
-    categoria: 'Tagliando',
-    citta: 'Roma',
-    slug: 'tagliando',
-    concessionari: 15
-  },
-  {
-    id: 2,
-    nome: 'Manutenzione Generale',
-    descrizione: 'Controllo e riparazione componenti',
-    icon: '⚙️',
-    rating: 4.9,
-    recensioni: 89,
-    prezzoMin: 150,
-    disponibilita: 'Disponibile domani',
-    categoria: 'Manutenzione',
-    citta: 'Milano',
-    slug: 'manutenzione',
-    concessionari: 12
-  },
-  {
-    id: 3,
-    nome: 'Riparazione Freni',
-    descrizione: 'Sostituzione pastiglie e controllo sistema',
-    icon: '🛑',
-    rating: 4.7,
-    recensioni: 203,
-    prezzoMin: 80,
-    disponibilita: 'Disponibile oggi',
-    categoria: 'Riparazione',
-    citta: 'Napoli',
-    slug: 'riparazione-freni',
-    concessionari: 8
-  },
-  {
-    id: 4,
-    nome: 'Revisione Tecnica',
-    descrizione: 'Controllo completo per il bollo',
-    icon: '📋',
-    rating: 4.6,
-    recensioni: 156,
-    prezzoMin: 200,
-    disponibilita: 'Prenotabile',
-    categoria: 'Revisione',
-    citta: 'Torino',
-    slug: 'revisione',
-    concessionari: 20
-  },
-  {
-    id: 5,
-    nome: 'Cambio Gomme',
-    descrizione: 'Montaggio e bilanciamento pneumatici',
-    icon: '🛞',
-    rating: 4.8,
-    recensioni: 98,
-    prezzoMin: 60,
-    disponibilita: 'Disponibile oggi',
-    categoria: 'Gomme',
-    citta: 'Firenze',
-    slug: 'cambio-gomme',
-    concessionari: 25
-  },
-  {
-    id: 6,
-    nome: 'Assicurazione Moto',
-    descrizione: 'Polizze competitive per la tua moto',
-    icon: '🛡️',
-    rating: 4.5,
-    recensioni: 234,
-    prezzoMin: 300,
-    disponibilita: 'Sempre disponibile',
-    categoria: 'Assicurazione',
-    citta: 'Bologna',
-    slug: 'assicurazione',
-    concessionari: 18
-  }
-])
+// Real data from API
+const servizi = ref([])
+const loading = ref(true)
 
 // Computed properties
 const filteredServizi = computed(() => {
-  let filtered = servizi.value
-
+  let filtered = [...servizi.value]
+  
+  // Filtro città lato client (come moto nuove) - mostra servizi che hanno almeno un concessionario nella città
   if (filters.value.citta) {
     filtered = filtered.filter(servizio => 
-      servizio.citta.toLowerCase().includes(filters.value.citta.toLowerCase())
+      servizio.concessionari?.some(c => c.citta === filters.value.citta)
     )
   }
-
-  if (filters.value.categoria) {
-    filtered = filtered.filter(servizio => 
-      servizio.categoria.toLowerCase().includes(filters.value.categoria.toLowerCase())
-    )
-  }
-
+  
   return filtered
 })
 
@@ -298,24 +216,54 @@ const paginatedServizi = computed(() => {
 })
 
 // Methods
+const loadServizi = async () => {
+  try {
+    loading.value = true
+    
+    const query = {}
+    if (filters.value.citta) query.citta = filters.value.citta
+    if (filters.value.categoria) query.categoria = filters.value.categoria
+    
+    const response = await $fetch('/api/servizi', { query })
+    
+    if (response.success) {
+      servizi.value = response.data
+      
+      // Aggiorna le statistiche
+      if (response.meta?.stats) {
+        stats.value.citta = response.meta.stats.citta
+        stats.value.categorie = response.meta.stats.categorie
+      }
+    }
+  } catch (error) {
+    console.error('Errore caricamento servizi:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
 const resetFilters = () => {
   filters.value = {
     citta: '',
     categoria: ''
   }
   currentPage.value = 1
+  loadServizi()
 }
 
-const goToServizio = (slug) => {
+const goToServizio = (servizio) => {
+  // Usa lo slug del servizio catalogo invece dell'ID (come moto nuove)
+  const slug = servizio.servizi_catalogo?.slug || servizio.id
   navigateTo(`/servizi/${slug}`)
 }
 
+// Watch filters changes
+watch(filters, () => {
+  loadServizi()
+}, { deep: true })
+
 // Lifecycle
 onMounted(() => {
-  // Simulate loading
-  loading.value = true
-  setTimeout(() => {
-    loading.value = false
-  }, 1000)
+  loadServizi()
 })
 </script>

@@ -1,375 +1,244 @@
 <template>
-  <div v-if="isOpen" class="fixed inset-0 z-50 overflow-y-auto">
-    <!-- Overlay -->
-    <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" @click="closeModal"></div>
-    
-    <!-- Modal -->
-    <div class="flex min-h-full items-center justify-center p-4">
-      <div class="relative bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+  <div v-if="isOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click.self="$emit('close')">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
         <!-- Header -->
-        <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl">
-          <div class="flex items-center justify-between">
-            <h3 class="text-xl font-bold text-gray-900">
-              Fissa Appuntamento
-            </h3>
+      <div class="flex justify-between items-center p-6 border-b">
+        <h2 class="text-xl font-semibold text-gray-900">Prenota Appuntamento</h2>
             <button 
-              @click="closeModal"
-              class="text-gray-400 hover:text-gray-600 transition-colors"
+          @click="$emit('close')"
+          class="text-gray-400 hover:text-gray-600"
             >
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
               </svg>
             </button>
           </div>
+
+      <!-- Form -->
+      <form @submit.prevent="submitForm" class="p-6 space-y-4">
+        <!-- Servizio/Moto Info -->
+        <div class="bg-gray-50 rounded-lg p-4 mb-4">
+          <h3 class="font-semibold text-gray-900 mb-2">{{ servizioNome }}</h3>
+          <p class="text-sm text-gray-600">{{ concessionario.nome }} - {{ concessionario.citta }}</p>
+          <p v-if="servizioPrezzo" class="text-lg font-bold text-gray-900 mt-2">
+            €{{ servizioPrezzo }}
+          </p>
+          <p v-if="servizioDurata" class="text-sm text-gray-500 mt-1">
+            Durata stimata: {{ servizioDurata }} minuti
+          </p>
         </div>
         
-        <!-- Content -->
-        <div class="p-6">
-          <!-- Info Concessionario -->
-          <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 bg-gradient-to-r from-[#90c149] to-[#7ba83a] rounded-full flex items-center justify-center">
-                <span class="text-white font-bold text-lg">{{ concessionario.nome.charAt(0) }}</span>
-              </div>
+        <!-- Nome -->
               <div>
-                <h4 class="font-semibold text-gray-900">{{ concessionario.nome }}</h4>
-                <p class="text-sm text-gray-600">{{ concessionario.indirizzo }}</p>
-                <div class="flex items-center gap-1 mt-1">
-                  <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                  </svg>
-                  <span class="text-sm text-gray-600">{{ concessionario.rating }} ({{ concessionario.recensioni }} recensioni)</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Form Prenotazione -->
-          <form @submit.prevent="submitAppointment" class="space-y-6">
-            <!-- Dati Utente -->
-            <div class="grid md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Nome *
-                </label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
                 <input 
-                  v-model="formData.nome"
+            v-model="form.nome"
                   type="text" 
                   required
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-[#90c149] focus:ring-2 focus:ring-[#90c149]/20"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#90c149] focus:border-transparent"
                   placeholder="Il tuo nome"
                 />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Cognome *
-                </label>
-                <input 
-                  v-model="formData.cognome"
-                  type="text" 
-                  required
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-[#90c149] focus:ring-2 focus:ring-[#90c149]/20"
-                  placeholder="Il tuo cognome"
-                />
-              </div>
             </div>
             
-            <div class="grid md:grid-cols-2 gap-4">
+        <!-- Email -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Email *
-                </label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                 <input 
-                  v-model="formData.email"
+            v-model="form.email"
                   type="email" 
                   required
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-[#90c149] focus:ring-2 focus:ring-[#90c149]/20"
-                  placeholder="tua@email.com"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#90c149] focus:border-transparent"
+            placeholder="la.tua@email.com"
                 />
               </div>
+
+        <!-- Telefono -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Telefono *
-                </label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Telefono *</label>
                 <input 
-                  v-model="formData.telefono"
+            v-model="form.telefono"
                   type="tel" 
                   required
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-[#90c149] focus:ring-2 focus:ring-[#90c149]/20"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#90c149] focus:border-transparent"
                   placeholder="+39 123 456 7890"
                 />
-              </div>
             </div>
             
-            <!-- Selezione Data -->
+        <!-- Data Preferita -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Scegli la Data *
-              </label>
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <button
-                  v-for="data in dateDisponibili"
-                  :key="data.value"
-                  type="button"
-                  @click="selezionaData(data)"
-                  :class="[
-                    'p-3 text-sm rounded-lg border transition-colors',
-                    selectedData?.value === data.value
-                      ? 'border-[#90c149] bg-[#90c149] text-white'
-                      : 'border-gray-300 hover:border-[#90c149] hover:bg-gray-50'
-                  ]"
-                >
-                  <div class="font-medium">{{ data.giorno }}</div>
-                  <div class="text-xs opacity-75">{{ data.data }}</div>
-                </button>
-              </div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Data Preferita *</label>
+          <input
+            v-model="form.dataPreferita"
+            type="date"
+            required
+            :min="minDate"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#90c149] focus:border-transparent"
+          />
             </div>
             
-            <!-- Selezione Orario -->
-            <div v-if="selectedData">
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Scegli l'Orario *
-              </label>
-              
-              <!-- Loading indicator -->
-              <div v-if="loadingSlots" class="text-center py-4">
-                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-[#90c149] mx-auto mb-2"></div>
-                <div class="text-sm text-gray-600">Caricamento orari disponibili...</div>
+        <!-- Orario Preferito -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Orario Preferito</label>
+          <select
+            v-model="form.orarioPreferito"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#90c149] focus:border-transparent"
+          >
+            <option value="">Seleziona orario</option>
+            <option value="mattina">Mattina (9:00 - 12:00)</option>
+            <option value="pomeriggio">Pomeriggio (14:00 - 18:00)</option>
+            <option value="sera">Sera (18:00 - 20:00)</option>
+          </select>
               </div>
               
-              <!-- Orari disponibili -->
-              <div v-else-if="orariDisponibili.length > 0" class="grid grid-cols-3 md:grid-cols-4 gap-2">
-                <button
-                  v-for="orario in orariDisponibili"
-                  :key="orario"
-                  type="button"
-                  @click="selezionaOrario(orario)"
-                  :class="[
-                    'p-3 text-sm rounded-lg border transition-colors',
-                    selectedOrario === orario
-                      ? 'border-[#90c149] bg-[#90c149] text-white'
-                      : 'border-gray-300 hover:border-[#90c149] hover:bg-gray-50'
-                  ]"
-                >
-                  {{ orario }}
-                </button>
-              </div>
-              
-              <!-- Nessun orario disponibile -->
-              <div v-else class="text-center py-4 text-gray-500">
-                <div class="text-sm">Nessun orario disponibile per questa data</div>
-              </div>
-            </div>
-            
-            <!-- Note Aggiuntive -->
+        <!-- Note -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Note Aggiuntive
-              </label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Note Aggiuntive</label>
               <textarea 
-                v-model="formData.note"
+            v-model="form.note"
                 rows="3"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:border-[#90c149] focus:ring-2 focus:ring-[#90c149]/20"
-                placeholder="Descrivi eventuali esigenze particolari..."
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#90c149] focus:border-transparent"
+            placeholder="Eventuali note o richieste particolari..."
               ></textarea>
             </div>
             
-            <!-- Riepilogo -->
-            <div v-if="selectedData && selectedOrario" class="p-4 bg-[#90c149]/10 rounded-lg">
-              <h4 class="font-semibold text-gray-900 mb-2">Riepilogo Appuntamento</h4>
-              <div class="text-sm text-gray-600 space-y-1">
-                <div><strong>Data:</strong> {{ selectedData.giorno }} {{ selectedData.data }}</div>
-                <div><strong>Orario:</strong> {{ selectedOrario }}</div>
-                <div><strong>Concessionario:</strong> {{ concessionario.nome }}</div>
-                <div><strong>Servizio:</strong> {{ servizio }}</div>
-              </div>
-            </div>
-            
-            <!-- Pulsanti -->
-            <div class="flex gap-3 pt-4">
+        <!-- Actions -->
+        <div class="flex justify-end space-x-3 pt-4">
               <button 
                 type="button"
-                @click="closeModal"
-                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            @click="$emit('close')"
+            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 Annulla
               </button>
               <button 
                 type="submit"
-                :disabled="!selectedData || !selectedOrario || loading"
-                class="flex-1 px-4 py-2 bg-[#90c149] text-white rounded-lg hover:bg-[#7ba83a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <span v-if="loading">Prenotando...</span>
-                <span v-else>Conferma Appuntamento</span>
+            :disabled="loading"
+            class="px-6 py-2 bg-[#90c149] text-white rounded-lg hover:bg-[#7ba83a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span v-if="loading" class="flex items-center">
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Prenotazione...
+            </span>
+            <span v-else>Prenota</span>
               </button>
             </div>
           </form>
-        </div>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 
 const props = defineProps({
-  isOpen: {
-    type: Boolean,
-    default: false
-  },
   concessionario: {
     type: Object,
     required: true
   },
   servizio: {
-    type: String,
+    type: [Object, String],
     required: true
+  },
+  isOpen: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['close', 'submit'])
+const emit = defineEmits(['close', 'booked'])
 
-// Form data
-const formData = ref({
+// Reactive data
+const loading = ref(false)
+const form = ref({
   nome: '',
-  cognome: '',
   email: '',
   telefono: '',
+  dataPreferita: '',
+  orarioPreferito: '',
   note: ''
 })
 
-// Selezione data e orario
-const selectedData = ref(null)
-const selectedOrario = ref(null)
-const loading = ref(false)
-
-// Date disponibili (prossimi 7 giorni)
-const dateDisponibili = computed(() => {
-  const dates = []
-  const today = new Date()
-  
-  for (let i = 1; i <= 7; i++) {
-    const date = new Date(today)
-    date.setDate(today.getDate() + i)
-    
-    const giorno = date.toLocaleDateString('it-IT', { weekday: 'long' })
-    const data = date.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' })
-    
-    dates.push({
-      value: date.toISOString().split('T')[0],
-      giorno: giorno.charAt(0).toUpperCase() + giorno.slice(1),
-      data: data
-    })
-  }
-  
-  return dates
+// Computed
+const minDate = computed(() => {
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  return tomorrow.toISOString().split('T')[0]
 })
 
-// Orari disponibili dal backend
-const orariDisponibili = ref([])
-const loadingSlots = ref(false)
+// Gestisce sia servizio (oggetto) che moto (stringa)
+const servizioNome = computed(() => {
+  if (typeof props.servizio === 'string') {
+    return props.servizio // Per moto, è direttamente la stringa marca+modello
+  }
+  // Per servizi, usa la struttura oggetto
+  return props.servizio?.servizi_catalogo?.nome || props.servizio?.nome || 'Servizio'
+})
 
-// Carica gli slot disponibili quando si seleziona una data
-const loadAvailableSlots = async (data) => {
-  if (!data || !props.concessionario.id) return
-  
-  loadingSlots.value = true
-  orariDisponibili.value = []
-  
+const servizioPrezzo = computed(() => {
+  if (typeof props.servizio === 'string') return null
+  return props.servizio?.prezzo_da || props.servizio?.prezzo || null
+})
+
+const servizioDurata = computed(() => {
+  if (typeof props.servizio === 'string') return null
+  return props.servizio?.durata_minuti || null
+})
+
+// Methods
+const submitForm = async () => {
   try {
-    const response = await $fetch('/api/appointments/slots', {
-      method: 'GET',
-      query: {
-        concessionario_id: props.concessionario.id,
-        data: data.value
-      }
-    })
-    
-    if (response.success) {
-      orariDisponibili.value = response.data.slot_disponibili
-    }
-  } catch (error) {
-    console.error('Errore nel caricamento slot:', error)
-    // Fallback a slot predefiniti
-    orariDisponibili.value = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00']
-  } finally {
-    loadingSlots.value = false
-  }
-}
-
-// Metodi
-const selezionaData = (data) => {
-  selectedData.value = data
-  selectedOrario.value = null // Reset orario quando cambia data
-  loadAvailableSlots(data) // Carica gli slot disponibili
-}
-
-const selezionaOrario = (orario) => {
-  selectedOrario.value = orario
-}
-
-const closeModal = () => {
-  emit('close')
-  resetForm()
-}
-
-const resetForm = () => {
-  formData.value = {
-    nome: '',
-    cognome: '',
-    email: '',
-    telefono: '',
-    note: ''
-  }
-  selectedData.value = null
-  selectedOrario.value = null
-}
-
-const submitAppointment = async () => {
   loading.value = true
   
-  try {
-    const appointmentData = {
-      nome: formData.value.nome,
-      cognome: formData.value.cognome,
-      email: formData.value.email,
-      telefono: formData.value.telefono,
-      note: formData.value.note,
-      data_appuntamento: selectedData.value.value,
-      orario_appuntamento: selectedOrario.value,
-      concessionario_id: props.concessionario.id,
-      servizio: props.servizio
-    }
+    // Determina se è un servizio o una moto
+    const isServizio = typeof props.servizio === 'object' && props.servizio?.servizi_catalogo
+    const nomeServizioMoto = servizioNome.value
     
-    // Chiamata API per creare l'appuntamento
-    const response = await $fetch('/api/appointments', {
+    // Crea messaggio per appuntamento
+    const messaggio = `Richiesta appuntamento per ${nomeServizioMoto}:
+    
+Data preferita: ${form.value.dataPreferita}
+Orario preferito: ${form.value.orarioPreferito || 'Nessuna preferenza'}
+Note: ${form.value.note || 'Nessuna nota'}`
+
+    // Prepara il body in base al tipo
+    const body = {
+      concessionarioId: props.concessionario.id || props.concessionario._id,
+        clienteNome: form.value.nome,
+        clienteEmail: form.value.email,
+        clienteTelefono: form.value.telefono,
+        messaggioIniziale: messaggio
+      }
+    
+    // Se è un servizio, aggiungi servizioId
+    if (isServizio) {
+      body.servizioId = props.servizio.id
+      body.servizioNome = nomeServizioMoto
+    } else {
+      // Per moto, dovremmo avere motoId e motoMarca/modello passati separatamente
+      // Per ora usiamo solo il nome come titolo
+      body.titolo = `Richiesta appuntamento per ${nomeServizioMoto}`
+    }
+
+    const response = await $fetch('/api/conversazioni/create', {
       method: 'POST',
-      body: appointmentData
+      body: body
     })
     
     if (response.success) {
-      emit('submit', response.data)
-      closeModal()
-      
-      // Mostra conferma
-      alert('Appuntamento prenotato con successo!')
+      emit('submit', response)
+      emit('booked', response.data)
     } else {
-      throw new Error(response.message || 'Errore nella prenotazione')
+      throw new Error(response.error || 'Errore nella prenotazione')
     }
     
   } catch (error) {
-    console.error('Errore nella prenotazione:', error)
-    alert(error.data?.message || 'Errore nella prenotazione. Riprova.')
+    console.error('Errore prenotazione:', error)
+    alert(error.message || 'Errore nella prenotazione')
   } finally {
     loading.value = false
   }
 }
-
-// Reset form quando si chiude il modal
-watch(() => props.isOpen, (isOpen) => {
-  if (!isOpen) {
-    resetForm()
-  }
-})
 </script>

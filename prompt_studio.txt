@@ -1,0 +1,21 @@
+# Prompt CONTEXT SOLO — Lettura dal repo (Nuxt + nuxt.config.ts, niente .env)
+
+Scopo: imposta SOLO il contesto del progetto e fermati. NON dare consigli, NON proporre cambiamenti, NON fare domande. Attendi le mie istruzioni dopo la tua risposta.
+
+Istruzioni:
+1) Leggi DAL REPO (filesystem): `./package.json` e `./nuxt.config.ts` (fonti di verità per stack, versioni, script e configurazione). NON richiedere che io li incolli.
+2) NON usare `.env`: considera solo valori e chiavi presenti in `nuxt.config.ts` (in particolare `modules`, `runtimeConfig` e `runtimeConfig.public`).
+3) Se un dato non è deducibile, scrivi `ND` senza ipotesi.
+4) Rispondi in MAX 10 righe con questo FORMATO ESATTO (in italiano, nessun testo extra):
+   - Stack: <framework/librerie + versioni principali da package.json>
+   - Runtime: <versione Node raccomandata se deducibile, altrimenti ND>
+   - Script/PM: <script npm e package manager rilevato da lockfile>
+   - Moduli chiave: <da package.json / nuxt.config.ts>
+   - Config (nuxt.config.ts): <modules attivi + chiavi runtimeConfig/public>
+   - Origine variabili: nuxt.config.ts (NO .env)
+   - Note ESM: <"type: module" sì/no>
+   - Entrypoint/Dir: <cartelle/entry principali se deducibili, altrimenti ND>
+   - Verifica run: <comando di avvio ESISTENTE, senza alternative>
+   - Stato: PRONTO PER ISTRUZIONI
+5) NON aggiungere raccomandazioni, roadmap, patch o alternative. Limita la risposta al formato sopra.
+6) usa sempre 3002 upabase è configurato li

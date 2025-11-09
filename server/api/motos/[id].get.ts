@@ -32,23 +32,117 @@ export default defineEventHandler(async (event) => {
     }
     
     // Recupera i concessionari associati a questa moto
-    const { data: concessionari, error: concessionariError } = await supabase
+    // moto_id in moto_concessionari è VARCHAR, quindi prova entrambi i formati
+    console.log(`🔍 Cercando concessionari per moto: ${moto.marca} ${moto.modello} (ID: ${moto.id}, tipo: ${typeof moto.id})`)
+    
+    let concessionari = null
+    let concessionariError = null
+    
+    // Prova prima con moto.id come stringa
+    const result1 = await supabase
       .from('moto_concessionari')
       .select(`
         concessionario_id,
+        disponibile,
+        prezzo_speciale,
+        moto_id,
         concessionari!inner(
           id,
-        nome,
-        citta,
-        provincia,
-        telefono,
-        email
+          nome,
+          citta,
+          provincia,
+          telefono,
+          email,
+          status
         )
       `)
-      .eq('moto_id', moto.id)
+      .eq('moto_id', moto.id.toString())
+      .eq('disponibile', true)
     
-    if (concessionariError) {
-      console.error(`Errore Supabase per concessionari moto ${moto.id}:`, concessionariError)
+    if (result1.error) {
+      console.error(`❌ Errore con moto.id.toString():`, result1.error)
+      concessionariError = result1.error
+    } else {
+      concessionari = result1.data
+    }
+    
+    // Se non trova nulla, prova anche senza filtro disponibile per vedere cosa c'è
+    if ((!concessionari || concessionari.length === 0) && moto.id) {
+      const result2 = await supabase
+        .from('moto_concessionari')
+        .select(`
+          concessionario_id,
+          disponibile,
+          prezzo_speciale,
+          moto_id,
+          concessionari!inner(
+            id,
+            nome,
+            citta,
+            provincia,
+            telefono,
+            email,
+            status
+          )
+        `)
+        .eq('moto_id', moto.id.toString())
+      
+      if (!result2.error && result2.data && result2.data.length > 0) {
+        console.log(`⚠️ Trovati ${result2.data.length} concessionari ma non tutti disponibili`)
+        concessionari = result2.data.filter(c => c.disponibile === true)
+      }
+      
+      // Se ancora non trova nulla, prova con l'UUID direttamente
+      if ((!concessionari || concessionari.length === 0)) {
+        const result3 = await supabase
+          .from('moto_concessionari')
+          .select(`
+            concessionario_id,
+            disponibile,
+            prezzo_speciale,
+            moto_id,
+            concessionari!inner(
+              id,
+              nome,
+              citta,
+              provincia,
+              telefono,
+              email,
+              status
+            )
+          `)
+          .eq('moto_id', moto.id)
+          .eq('disponibile', true)
+        
+        if (!result3.error && result3.data && result3.data.length > 0) {
+          concessionari = result3.data
+          console.log(`✅ Trovati ${concessionari.length} concessionari usando moto.id (UUID)`)
+        }
+      }
+    }
+    
+    if (concessionariError && (!concessionari || concessionari.length === 0)) {
+      console.error(`❌ Errore Supabase per concessionari moto ${moto.id}:`, concessionariError)
+    }
+    
+    console.log(`📊 Concessionari trovati (raw): ${concessionari?.length || 0}`)
+    if (concessionari && concessionari.length > 0) {
+      console.log(`📋 Esempi moto_id nel DB:`, [...new Set(concessionari.map(c => c.moto_id))])
+      console.log(`📋 Concessionari:`, concessionari.map(c => ({
+        nome: c.concessionari?.nome,
+        citta: c.concessionari?.citta,
+        status: c.concessionari?.status
+      })))
+    }
+    
+    // Filtra manualmente i concessionari attivi
+    const concessionariAttivi = concessionari?.filter(c => c.concessionari?.status === 'active') || []
+    
+    console.log(`✅ Concessionari attivi filtrati: ${concessionariAttivi.length}`)
+    if (concessionariAttivi.length > 0) {
+      console.log(`🏙️ Città disponibili:`, [...new Set(concessionariAttivi.map(c => c.concessionari.citta))])
+    } else if (concessionari && concessionari.length > 0) {
+      console.log(`⚠️ Ci sono ${concessionari.length} concessionari ma nessuno attivo!`)
     }
     
     // Trasforma i dati per mantenere la compatibilità con il frontend
@@ -99,15 +193,17 @@ export default defineEventHandler(async (event) => {
       raffreddamento: moto.raffreddamento,
       is_disponibile: moto.is_disponibile,
       is_promozione: moto.is_promozione,
-      concessionari: concessionari?.map(c => ({
+      concessionari: concessionariAttivi.map(c => ({
+        _id: c.concessionari.id, // Usa _id per compatibilità con il frontend
         id: c.concessionari.id,
         nome: c.concessionari.nome,
         citta: c.concessionari.citta,
         provincia: c.concessionari.provincia,
         telefono: c.concessionari.telefono,
         email: c.concessionari.email,
+        prezzo_speciale: c.prezzo_speciale,
         immagineUrl: null // Colonna immagine non disponibile
-      })) || []
+      }))
     }
     
     return motoData

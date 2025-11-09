@@ -2,11 +2,20 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.SUPABASE_URL || 'https://xffcrstnyfjthlaurlyx.supabase.co'
 const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmZmNyc3RueWZqdGhsYXVybHl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwNjA4OTgsImV4cCI6MjA3MzYzNjg5OH0.ksZs9k0fYCUZ0nKvF-s8LNL3SQQbppifIbtTVxpyQUE'
-const supabase = createClient(supabaseUrl, supabaseKey)
+
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false
+  }
+})
 
 export default defineEventHandler(async (event) => {
   
   try {
+    console.log('🔗 Supabase URL:', supabaseUrl)
+    console.log('🔑 Supabase Key presente:', !!supabaseKey)
+    
     // Recupera tutte le moto da Supabase
     const { data: motos, error: motosError } = await supabase
       .from('moto')

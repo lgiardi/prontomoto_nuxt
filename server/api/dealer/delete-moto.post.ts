@@ -26,10 +26,10 @@ export default defineEventHandler(async (event) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Prima verifica che il concessionario esista
+    // Prima verifica che il concessionario esista e sia attivo
     const { data: concessionario, error: dealerError } = await supabase
       .from('concessionari')
-      .select('id')
+      .select('id, nome, status')
       .eq('user_id', userId)
       .single()
 
@@ -37,6 +37,14 @@ export default defineEventHandler(async (event) => {
       throw createError({
         statusCode: 404,
         statusMessage: 'Concessionario non trovato'
+      })
+    }
+
+    // Verifica che il concessionario sia attivo
+    if (concessionario.status !== 'active') {
+      throw createError({
+        statusCode: 403,
+        statusMessage: `Concessionario non attivo. Status attuale: ${concessionario.status}. Contatta il supporto per attivare il tuo account.`
       })
     }
 

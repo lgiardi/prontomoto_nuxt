@@ -319,7 +319,7 @@ const deleteMoto = async (motoId) => {
     console.log('✅ Risposta API eliminazione:', response)
     alert('Moto eliminata con successo!')
     await loadDealerMotos() // Ricarica la lista delle moto
-    
+
   } catch (error) {
     console.error('❌ Errore nell\'eliminazione della moto:', error)
     alert('Errore nell\'eliminazione della moto: ' + error.message)

@@ -377,10 +377,16 @@
         </div>
 
           <!-- Lista Concessionari -->
-          <div v-if="concessionariFiltrati && concessionariFiltrati.length > 0" class="space-y-8">
+          <div v-if="!moto.concessionari || moto.concessionari.length === 0" class="text-center py-12">
+            <div class="text-gray-500 text-lg">
+              <p>Nessun concessionario disponibile per questa moto al momento.</p>
+            </div>
+          </div>
+          
+          <div v-else-if="concessionariFiltrati && concessionariFiltrati.length > 0" class="space-y-8">
             <div 
               v-for="(concessionario, index) in concessionariFiltrati" 
-              :key="concessionario._id"
+              :key="concessionario._id || concessionario.id || index"
               class="bg-white rounded-2xl md:rounded-3xl shadow-lg md:shadow-2xl overflow-hidden hover:shadow-xl md:hover:shadow-3xl transition-all duration-500 mb-6"
             >
               <!-- Header Concessionario - MOBILE FIRST -->
@@ -422,15 +428,17 @@
                       </div>
                       
                       <!-- Prezzo del Concessionario -->
-                      <div class="bg-gradient-to-r from-[#90c149] to-[#7aa83f] rounded-xl p-4 text-white mb-4">
+                      <div v-if="concessionario.prezzo_speciale || moto.prezzo" class="bg-gradient-to-r from-[#90c149] to-[#7aa83f] rounded-xl p-4 text-white mb-4">
                         <div class="flex items-center justify-between">
                           <div>
                             <div class="text-sm opacity-90">Prezzo del Concessionario</div>
-                            <div class="text-2xl font-bold">€ 4.890</div>
-                            <div class="text-sm opacity-90">Prezzo di listino: € 5.200</div>
+                            <div class="text-2xl font-bold">€ {{ (concessionario.prezzo_speciale || moto.prezzo)?.toLocaleString('it-IT') }}</div>
+                            <div v-if="concessionario.prezzo_speciale && moto.prezzo && concessionario.prezzo_speciale < moto.prezzo" class="text-sm opacity-90">
+                              Prezzo di listino: € {{ moto.prezzo.toLocaleString('it-IT') }}
+                            </div>
                           </div>
-                          <div class="text-right">
-                            <div class="text-lg font-bold">-€ 310</div>
+                          <div v-if="concessionario.prezzo_speciale && moto.prezzo && concessionario.prezzo_speciale < moto.prezzo" class="text-right">
+                            <div class="text-lg font-bold">-€ {{ (moto.prezzo - concessionario.prezzo_speciale).toLocaleString('it-IT') }}</div>
                             <div class="text-sm opacity-90">Risparmio</div>
                           </div>
                         </div>
@@ -1068,10 +1076,14 @@ onMounted(async () => {
     const route = useRoute()
     const motoId = route.params.id as string
     
-    console.log('Caricamento moto con ID:', motoId)
+    console.log('🔍 Caricamento moto con ID:', motoId)
     
     const response = await $fetch(`/api/motos/${motoId}`)
-    console.log('Risposta API:', response)
+    console.log('✅ Risposta API ricevuta:', response)
+    console.log('📊 Concessionari nella risposta:', response.concessionari?.length || 0)
+    if (response.concessionari && response.concessionari.length > 0) {
+      console.log('🏢 Concessionari:', response.concessionari.map(c => `${c.nome} - ${c.citta}`))
+    }
     
     moto.value = response
     
@@ -1079,7 +1091,7 @@ onMounted(async () => {
       startAutoScroll()
     }
   } catch (error) {
-    console.error('Errore nel caricamento della moto:', error)
+    console.error('❌ Errore nel caricamento della moto:', error)
     moto.value = null
   } finally {
     loading.value = false

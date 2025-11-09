@@ -819,14 +819,15 @@
         </div>
       </div>
       
-      <!-- Modal Appuntamento -->
-      <AppointmentModal 
-        v-if="selectedConcessionario"
+      <!-- Modal Appuntamento Unificato -->
+      <UnifiedAppointmentModal 
+        v-if="selectedConcessionario && moto"
         :is-open="showAppointmentModal"
         :concessionario="selectedConcessionario"
-        :servizio="`${moto?.marca} ${moto?.modello}`"
+        tipo="moto_nuova"
+        :moto="moto"
         @close="showAppointmentModal = false"
-        @submit="handleAppointmentSubmit"
+        @booked="handleAppointmentSubmit"
       />
     </div>
   </template>
@@ -834,7 +835,7 @@
   <script setup lang="ts">
   import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
   import HeaderMenu from "@/components/HeaderMenu.vue"
-  import AppointmentModal from "@/components/AppointmentModal.vue"
+  import UnifiedAppointmentModal from "@/components/UnifiedAppointmentModal.vue"
   
   // Types
   interface Concessionario {

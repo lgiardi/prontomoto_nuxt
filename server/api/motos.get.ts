@@ -13,6 +13,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 export default defineEventHandler(async (event) => {
   
   try {
+    console.log('🚀 API /api/motos chiamata')
     console.log('🔗 Supabase URL:', supabaseUrl)
     console.log('🔑 Supabase Key presente:', !!supabaseKey)
     
@@ -35,7 +36,7 @@ export default defineEventHandler(async (event) => {
       .eq('is_disponibile', true)
     
     if (motosError) {
-      console.error('Errore Supabase nel recupero moto:', motosError)
+      console.error('❌ Errore Supabase nel recupero moto:', motosError)
       throw createError({
         statusCode: 500,
         statusMessage: 'Errore del server durante il recupero delle moto.',
@@ -43,54 +44,83 @@ export default defineEventHandler(async (event) => {
       })
     }
     
+    if (!motos || motos.length === 0) {
+      console.warn('⚠️ Nessuna moto trovata nel database')
+      return []
+    }
+    
+    console.log('✅ Moto trovate:', motos.length)
+    
     // Per ogni moto, recupera i concessionari associati
     const motosWithConcessionari = await Promise.all(
       motos.map(async (moto) => {
-        const { data: concessionari, error: concessionariError } = await supabase
-          .from('moto_concessionari')
-          .select(`
-            concessionario_id,
-            concessionari!inner(
-              id,
-    nome,
-    citta,
-    provincia,
-    telefono,
-              email
-            )
-          `)
-          .eq('moto_id', moto.id)
-        
-        if (concessionariError) {
-          console.error(`Errore Supabase per moto ${moto.id}:`, concessionariError)
+        try {
+          // Prova con moto.id come stringa
+          const { data: concessionari, error: concessionariError } = await supabase
+            .from('moto_concessionari')
+            .select(`
+              concessionario_id,
+              concessionari!inner(
+                id,
+                nome,
+                citta,
+                provincia,
+                telefono,
+                email
+              )
+            `)
+            .eq('moto_id', moto.id.toString())
+          
+          if (concessionariError) {
+            console.error(`❌ Errore Supabase per moto ${moto.id} (${moto.marca} ${moto.modello}):`, concessionariError)
+            // Continua comunque senza concessionari
+          }
+          
           return {
-            ...moto,
+            _id: moto.id, // Aggiungi _id per compatibilità
+            id: moto.id,
+            marca: moto.marca,
+            modello: moto.modello,
+            allestimento: moto.allestimento,
+            categoria: moto.categoria,
+            cilindrata: moto.cilindrata,
+            prezzo: moto.prezzo,
+            immagineUrl: moto.immagine_copertina,
+            immaginiGallery: [], // Aggiungi per compatibilità
+            concessionariCount: concessionari?.length || 0,
+            concessionari: concessionari?.map(c => ({
+              _id: c.concessionari.id, // Aggiungi _id per compatibilità
+              id: c.concessionari.id,
+              nome: c.concessionari.nome,
+              citta: c.concessionari.citta,
+              provincia: c.concessionari.provincia,
+              telefono: c.concessionari.telefono,
+              email: c.concessionari.email
+            })) || []
+          }
+        } catch (error) {
+          console.error(`❌ Errore nel processare moto ${moto.id}:`, error)
+          // Restituisci la moto senza concessionari in caso di errore
+          return {
+            _id: moto.id,
+            id: moto.id,
+            marca: moto.marca,
+            modello: moto.modello,
+            allestimento: moto.allestimento,
+            categoria: moto.categoria,
+            cilindrata: moto.cilindrata,
+            prezzo: moto.prezzo,
+            immagineUrl: moto.immagine_copertina,
+            immaginiGallery: [],
+            concessionariCount: 0,
             concessionari: []
           }
         }
-        
-        
-        return {
-          id: moto.id,
-          marca: moto.marca,
-          modello: moto.modello,
-          allestimento: moto.allestimento,
-          categoria: moto.categoria,
-          cilindrata: moto.cilindrata,
-          prezzo: moto.prezzo,
-          immagineUrl: moto.immagine_copertina,
-          concessionariCount: concessionari?.length || 0,
-          concessionari: concessionari?.map(c => ({
-            id: c.concessionari.id,
-            nome: c.concessionari.nome,
-            citta: c.concessionari.citta,
-            provincia: c.concessionari.provincia,
-            telefono: c.concessionari.telefono,
-            email: c.concessionari.email
-          })) || []
-        }
       })
     )
+    
+    console.log('✅ Moto con concessionari processate:', motosWithConcessionari.length)
+    console.log('📊 Prima moto processata:', motosWithConcessionari[0])
     
     return motosWithConcessionari
     

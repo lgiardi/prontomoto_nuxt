@@ -17,7 +17,7 @@ export default defineNuxtConfig({
     smtpHost: 'authsmtp.securemail.pro',
     smtpPort: '465',
     smtpUser: 'info@prontomoto.it',
-    smtpPass: 'Judin6lt',
+    smtpPass: 'Judin6lt#123',
     smtpAdminEmail: 'info@prontomoto.it',
     smtpSenderName: 'ProntoMoto',
     // Supabase Service Key per creazione account automatica

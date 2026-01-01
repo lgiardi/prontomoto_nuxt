@@ -1,8 +1,17 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.SUPABASE_URL || 'https://xffcrstnyfjthlaurlyx.supabase.co'
-const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmZmNyc3RueWZqdGhsYXVybHl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwNjA4OTgsImV4cCI6MjA3MzYzNjg5OH0.ksZs9k0fYCUZ0nKvF-s8LNL3SQQbppifIbtTVxpyQUE'
-const supabase = createClient(supabaseUrl, supabaseKey)
+const config = useRuntimeConfig()
+const supabaseUrl = config.public.supabaseUrl
+const supabaseAnonKey = config.public.supabaseAnonKey
+const supabaseServiceKey = config.supabaseServiceRoleKey
+
+// Usa service key per bypassare RLS
+const supabase = supabaseServiceKey ? createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+}) : createClient(supabaseUrl, supabaseAnonKey)
 
 export default defineEventHandler(async (event) => {
   try {
@@ -35,10 +44,14 @@ export default defineEventHandler(async (event) => {
       .order('ultimo_messaggio_at', { ascending: false })
       .range(offset, offset + limit - 1)
 
-    // Filtra per cliente
-    if (clienteId) {
+    // Filtra per cliente: cerca per ID se disponibile, altrimenti per email
+    // Se entrambi sono disponibili, cerca per entrambi (OR)
+    if (clienteId && clienteEmail) {
+      // Cerca conversazioni dove cliente_id corrisponde O cliente_email corrisponde
+      conversazioniQuery = conversazioniQuery.or(`cliente_id.eq.${clienteId},cliente_email.eq.${clienteEmail}`)
+    } else if (clienteId) {
       conversazioniQuery = conversazioniQuery.eq('cliente_id', clienteId)
-    } else {
+    } else if (clienteEmail) {
       conversazioniQuery = conversazioniQuery.eq('cliente_email', clienteEmail)
     }
 
@@ -59,9 +72,11 @@ export default defineEventHandler(async (event) => {
       .select('*', { count: 'exact', head: true })
       .eq('status', status)
 
-    if (clienteId) {
+    if (clienteId && clienteEmail) {
+      countQuery = countQuery.or(`cliente_id.eq.${clienteId},cliente_email.eq.${clienteEmail}`)
+    } else if (clienteId) {
       countQuery = countQuery.eq('cliente_id', clienteId)
-    } else {
+    } else if (clienteEmail) {
       countQuery = countQuery.eq('cliente_email', clienteEmail)
     }
 

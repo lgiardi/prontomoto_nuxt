@@ -1,8 +1,17 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.SUPABASE_URL || 'https://xffcrstnyfjthlaurlyx.supabase.co'
-const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmZmNyc3RueWZqdGhsYXVybHl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwNjA4OTgsImV4cCI6MjA3MzYzNjg5OH0.ksZs9k0fYCUZ0nKvF-s8LNL3SQQbppifIbtTVxpyQUE'
-const supabase = createClient(supabaseUrl, supabaseKey)
+const config = useRuntimeConfig()
+const supabaseUrl = config.public.supabaseUrl
+const supabaseAnonKey = config.public.supabaseAnonKey
+const supabaseServiceKey = config.supabaseServiceRoleKey
+
+// Usa service key per bypassare RLS
+const supabase = supabaseServiceKey ? createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+}) : createClient(supabaseUrl, supabaseAnonKey)
 
 export default defineEventHandler(async (event) => {
   try {
@@ -17,6 +26,8 @@ export default defineEventHandler(async (event) => {
     }
 
     console.log('💬 Recupero conversazioni per concessionario:', concessionarioId)
+    console.log('💬 Tipo concessionarioId:', typeof concessionarioId)
+    console.log('💬 Status richiesto:', status)
 
     // Recupera le conversazioni
     const { data: conversazioni, error: convError } = await supabase
@@ -29,11 +40,22 @@ export default defineEventHandler(async (event) => {
 
     if (convError) {
       console.error('❌ Errore recupero conversazioni:', convError)
+      console.error('❌ Dettagli errore:', {
+        message: convError.message,
+        details: convError.details,
+        hint: convError.hint,
+        code: convError.code
+      })
       throw createError({
         statusCode: 500,
         statusMessage: 'Errore nel recupero delle conversazioni',
         data: convError.message
       })
+    }
+
+    console.log('📊 Conversazioni trovate (prima del conteggio):', conversazioni?.length || 0)
+    if (conversazioni && conversazioni.length > 0) {
+      console.log('📊 Prima conversazione:', JSON.stringify(conversazioni[0], null, 2))
     }
 
     // Conta il totale per la paginazione

@@ -480,11 +480,13 @@ const calculateStats = () => {
     }
     
     // Città
-    moto.concessionari.forEach(concessionario => {
-      if (concessionario.citta) {
-        citta[concessionario.citta] = (citta[concessionario.citta] || 0) + 1
-      }
-    })
+    if (moto.concessionari && Array.isArray(moto.concessionari)) {
+      moto.concessionari.forEach(concessionario => {
+        if (concessionario && concessionario.citta) {
+          citta[concessionario.citta] = (citta[concessionario.citta] || 0) + 1
+        }
+      })
+    }
   })
   
   stats.value = {
@@ -500,11 +502,19 @@ const calculateStats = () => {
 // Load data
 onMounted(async () => {
   try {
+    console.log('🚀 Caricamento moto dalla home page...')
     const data = await $fetch('/api/motos')
+    console.log('✅ Dati ricevuti:', data)
+    console.log('📊 Numero moto ricevute:', data?.length || 0)
     motos.value = data || []
+    if (motos.value.length > 0) {
+      console.log('✅ Prima moto:', motos.value[0])
+    }
     calculateStats()
   } catch (error) {
-    console.error('Errore nel caricamento moto:', error)
+    console.error('❌ Errore nel caricamento moto:', error)
+    console.error('❌ Dettagli errore:', error.message, error.stack)
+    alert('Errore nel caricamento delle moto. Controlla la console per i dettagli.')
   } finally {
     loading.value = false
   }

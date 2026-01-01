@@ -2,7 +2,17 @@ import { createClient } from '@supabase/supabase-js'
 import { sendNewMessageToDealer, sendReplyToCustomer } from '~/utils/emailService'
 
 const config = useRuntimeConfig()
-const supabase = createClient(config.public.supabaseUrl, config.public.supabaseAnonKey)
+const supabaseUrl = config.public.supabaseUrl
+const supabaseAnonKey = config.public.supabaseAnonKey
+const supabaseServiceKey = config.supabaseServiceRoleKey
+
+// Usa service key per bypassare RLS
+const supabase = supabaseServiceKey ? createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+}) : createClient(supabaseUrl, supabaseAnonKey)
 
 export default defineEventHandler(async (event) => {
   try {
@@ -53,6 +63,35 @@ export default defineEventHandler(async (event) => {
 
     console.log('✅ Messaggio inviato:', nuovoMessaggio.id)
 
+    // Aggiorna conversazione con ultimo messaggio
+    const preview = messaggio.length > 100 
+      ? messaggio.substring(0, 100) + '...' 
+      : messaggio
+    
+    const updateData = {
+      ultimo_messaggio_at: new Date().toISOString(),
+      ultimo_messaggio_preview: preview
+    }
+    
+    if (mittenteTipo === 'cliente') {
+      updateData.cliente_ha_letto = true
+      updateData.concessionario_ha_letto = false
+    } else {
+      updateData.concessionario_ha_letto = true
+      updateData.cliente_ha_letto = false
+    }
+    
+    const { error: updateConvError } = await supabase
+      .from('conversazioni')
+      .update(updateData)
+      .eq('id', conversazioneId)
+    
+    if (updateConvError) {
+      console.error('⚠️ Errore aggiornamento conversazione con ultimo messaggio:', updateConvError)
+    } else {
+      console.log('✅ Conversazione aggiornata con ultimo messaggio')
+    }
+
     // Recupera i dati della conversazione per l'email
     const { data: conversazione, error: convError } = await supabase
       .from('conversazioni')
@@ -70,6 +109,15 @@ export default defineEventHandler(async (event) => {
     if (!convError && conversazione) {
       // Invia email di notifica al destinatario
       try {
+        // Prepara la configurazione SMTP
+        const emailConfig = {
+          smtpHost: config.smtpHost,
+          smtpPort: config.smtpPort,
+          smtpUser: config.smtpUser,
+          smtpPass: config.smtpPass,
+          smtpSenderName: config.smtpSenderName || 'ProntoMoto'
+        }
+        
         if (mittenteTipo === 'concessionario') {
           // Il concessionario ha risposto, notifica il cliente
           await sendReplyToCustomer({
@@ -77,7 +125,7 @@ export default defineEventHandler(async (event) => {
             concessionario_nome: conversazione.concessionari.nome,
             concessionario_email: conversazione.concessionari.email,
             concessionario_citta: conversazione.concessionari.citta
-          }, nuovoMessaggio)
+          }, nuovoMessaggio, emailConfig)
           console.log('✅ Email di risposta inviata al cliente')
         } else {
           // Il cliente ha risposto, notifica il concessionario
@@ -86,11 +134,12 @@ export default defineEventHandler(async (event) => {
             concessionario_nome: conversazione.concessionari.nome,
             concessionario_email: conversazione.concessionari.email,
             concessionario_citta: conversazione.concessionari.citta
-          }, nuovoMessaggio)
+          }, nuovoMessaggio, emailConfig)
           console.log('✅ Email di nuovo messaggio inviata al concessionario')
         }
       } catch (emailError) {
         console.error('❌ Errore invio email:', emailError)
+        console.error('❌ Stack trace:', emailError.stack)
         // Non bloccare il processo se l'email fallisce
       }
     }

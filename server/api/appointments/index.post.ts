@@ -135,8 +135,36 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // TODO: Invia email di conferma al cliente
-    // TODO: Invia notifica al concessionario
+    // Recupera i dati del concessionario per l'email
+    const { data: concessionarioData, error: dealerError } = await supabase
+      .from('concessionari')
+      .select('nome, email')
+      .eq('id', validatedData.concessionario_id)
+      .single()
+
+    // Invia email di notifica (non bloccante)
+    if (!dealerError && concessionarioData) {
+      try {
+        const config = useRuntimeConfig()
+        const { sendAppointmentNotificationToDealer, sendAppointmentConfirmationToCustomer } = await import('~/utils/emailService')
+        
+        // Notifica al concessionario
+        await sendAppointmentNotificationToDealer({
+          ...nuovoAppuntamento,
+          concessionario_nome: concessionarioData.nome,
+          concessionario_email: concessionarioData.email
+        }, config)
+        
+        // Conferma al cliente
+        await sendAppointmentConfirmationToCustomer({
+          ...nuovoAppuntamento,
+          concessionario_nome: concessionarioData.nome
+        }, config)
+      } catch (emailError) {
+        console.error('❌ Errore invio email appuntamento:', emailError)
+        // Non bloccare il processo se l'email fallisce
+      }
+    }
 
     return {
       success: true,

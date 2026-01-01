@@ -108,7 +108,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 
 const props = defineProps({
   isOpen: {
@@ -145,13 +145,98 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'sent'])
 
+// Supabase
+const supabase = useSupabaseClient()
+const user = useSupabaseUser()
+
 // Reactive data
 const loading = ref(false)
 const form = ref({
   nome: '',
   email: '',
   telefono: '',
-  messaggio: ''
+  messaggio: 'Salve,\n\nsono interessato al veicolo che hai messo in vendita. È ancora disponibile?\n\nCordiali saluti'
+})
+
+// Carica i dati dell'utente quando il modal si apre
+const loadUserData = async () => {
+  console.log('👤 UnifiedContactModal - Caricamento dati utente...', {
+    hasUser: !!user.value,
+    userId: user.value?.id,
+    userEmail: user.value?.email
+  })
+  
+  if (user.value) {
+    try {
+      // Recupera i dati dell'utente dalla tabella utenti
+      const { data: utenteData, error } = await supabase
+        .from('utenti')
+        .select('nome, email, telefono')
+        .eq('id', user.value.id)
+        .maybeSingle()
+      
+      console.log('👤 Dati recuperati da utenti:', { utenteData, error })
+      
+      if (!error && utenteData) {
+        // Precompila con i dati dal database
+        form.value.nome = utenteData.nome || ''
+        form.value.email = utenteData.email || user.value.email || ''
+        form.value.telefono = utenteData.telefono || ''
+        console.log('✅ Form precompilato con dati da database:', form.value)
+      } else {
+        // Fallback: usa i dati dall'utente autenticato
+        form.value.email = user.value.email || ''
+        form.value.nome = user.value.user_metadata?.nome || user.value.user_metadata?.full_name || ''
+        form.value.telefono = user.value.user_metadata?.telefono || ''
+        console.log('✅ Form precompilato con dati da user metadata:', form.value)
+      }
+    } catch (error) {
+      console.error('❌ Errore caricamento dati utente:', error)
+      // Fallback: usa i dati dall'utente autenticato
+      form.value.email = user.value?.email || ''
+      form.value.nome = user.value?.user_metadata?.nome || user.value?.user_metadata?.full_name || ''
+      console.log('✅ Form precompilato con fallback:', form.value)
+    }
+  } else {
+    console.log('⚠️ Nessun utente loggato')
+  }
+}
+
+// Carica i dati quando il modal si apre
+watch(() => props.isOpen, async (isOpen) => {
+  console.log('👁️ Watch isOpen cambiato:', isOpen, 'User:', !!user.value)
+  if (isOpen) {
+    // Aspetta un attimo per assicurarsi che il modal sia completamente aperto
+    await nextTick()
+    if (user.value) {
+      await loadUserData()
+    } else {
+      // Prova a recuperare l'utente se non è ancora disponibile
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      if (currentUser) {
+        user.value = currentUser
+        await loadUserData()
+      }
+    }
+  }
+}, { immediate: true })
+
+// Carica anche al mount se l'utente è già loggato
+onMounted(async () => {
+  console.log('🔧 onMounted - isOpen:', props.isOpen, 'User:', !!user.value)
+  if (props.isOpen) {
+    await nextTick()
+    if (user.value) {
+      await loadUserData()
+    } else {
+      // Prova a recuperare l'utente
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      if (currentUser) {
+        user.value = currentUser
+        await loadUserData()
+      }
+    }
+  }
 })
 
 // Computed
@@ -217,13 +302,31 @@ const submitForm = async () => {
   try {
     loading.value = true
 
+    // Verifica che il concessionario abbia un ID valido
+    // Normalizza: usa id se disponibile, altrimenti _id
+    const concessionarioId = props.concessionario.id || props.concessionario._id || props.concessionario.concessionario_id
+    if (!concessionarioId) {
+      console.error('❌ UnifiedContactModal: concessionarioId mancante', props.concessionario)
+      console.error('❌ Struttura oggetto concessionario:', JSON.stringify(props.concessionario, null, 2))
+      alert('Errore: dati concessionario non validi')
+      return
+    }
+    
+    console.log('📤 UnifiedContactModal - Concessionario ID normalizzato:', {
+      id: props.concessionario.id,
+      _id: props.concessionario._id,
+      concessionario_id: props.concessionario.concessionario_id,
+      usato: concessionarioId,
+      tipo: typeof concessionarioId
+    })
+
     // Prepara il body in base al tipo
     const body = {
       // Usa sempre id del concessionario (UUID dalla tabella concessionari)
-      concessionarioId: props.concessionario.id || props.concessionario._id,
+      concessionarioId: concessionarioId,
       clienteNome: form.value.nome,
       clienteEmail: form.value.email,
-      clienteTelefono: form.value.telefono,
+      clienteTelefono: form.value.telefono || null,
       messaggioIniziale: form.value.messaggio
     }
 
@@ -241,28 +344,66 @@ const submitForm = async () => {
       body.servizioNome = props.servizio.servizi_catalogo?.nome || props.servizio.nome
     }
 
+    console.log('📤 UnifiedContactModal - Invio dati:', {
+      tipo: props.tipo,
+      concessionarioId: body.concessionarioId,
+      hasMotoId: !!body.motoId,
+      hasMotoUsataId: !!body.motoUsataId,
+      hasServizioId: !!body.servizioId,
+      clienteEmail: body.clienteEmail,
+      hasMessaggio: !!body.messaggioIniziale
+    })
+
     // Crea conversazione
+    console.log('📤 Invio richiesta a /api/conversazioni/create...')
     const response = await $fetch('/api/conversazioni/create', {
       method: 'POST',
       body: body
+    }).catch(error => {
+      console.error('❌ Errore fetch:', error)
+      throw error
     })
 
-    if (response.success) {
-      emit('sent', response.data)
+    console.log('✅ Risposta ricevuta:', response)
+
+    if (response && response.success) {
+      emit('sent', response)
       // Reset form
       form.value = {
         nome: '',
         email: '',
         telefono: '',
-        messaggio: ''
+        messaggio: 'Salve,\n\nsono interessato al veicolo che hai messo in vendita. È ancora disponibile?\n\nCordiali saluti'
       }
+      // Chiudi il modal dopo il successo
+      emit('close')
+      alert('✅ Richiesta inviata con successo!\n\n📧 Riceverai un\'email con:\n- I dettagli della conversazione\n- Le credenziali per accedere (se è un nuovo account)\n- Il link per seguire la conversazione\n\n💬 Puoi continuare a chattare con il venditore dalla tua area utente!')
     } else {
-      throw new Error(response.error || 'Errore nell\'invio della richiesta')
+      throw new Error(response?.error || response?.statusMessage || 'Errore nell\'invio della richiesta')
     }
 
   } catch (error) {
-    console.error('Errore invio richiesta:', error)
-    alert(error.message || error.data?.message || 'Errore nell\'invio della richiesta')
+    console.error('❌ Errore invio richiesta:', error)
+    console.error('❌ Dettagli errore completo:', {
+      message: error.message,
+      statusCode: error.statusCode,
+      statusMessage: error.statusMessage,
+      data: error.data,
+      response: error.response
+    })
+    
+    let errorMessage = 'Errore nell\'invio della richiesta'
+    if (error.data?.message) {
+      errorMessage = error.data.message
+    } else if (error.statusMessage) {
+      errorMessage = error.statusMessage
+    } else if (error.message) {
+      errorMessage = error.message
+    } else if (error.data?.details) {
+      errorMessage = `Errore: ${error.data.details}`
+    }
+    
+    alert(errorMessage)
   } finally {
     loading.value = false
   }

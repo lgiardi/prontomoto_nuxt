@@ -67,56 +67,24 @@
           />
         </div>
 
-        <!-- Telefono -->
+        <!-- Telefono (opzionale per uso interno) -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Telefono *</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Telefono</label>
           <input 
             v-model="form.telefono"
             type="tel" 
-            required
             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#90c149] focus:border-transparent"
-            placeholder="+39 123 456 7890"
+            placeholder="+39 123 456 7890 (opzionale)"
           />
         </div>
             
-        <!-- Data Appuntamento -->
+        <!-- Slot Selector -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Data Appuntamento *</label>
-          <input
-            v-model="form.dataAppuntamento"
-            type="date"
-            required
-            :min="minDate"
-            @change="loadAvailableSlots"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#90c149] focus:border-transparent"
+          <label class="block text-sm font-medium text-gray-700 mb-1">Data e Orario Appuntamento *</label>
+          <SlotSelector
+            :concessionario-id="concessionarioId"
+            @slot-selected="handleSlotSelected"
           />
-          <p v-if="loadingSlots" class="text-xs text-gray-500 mt-1">Caricamento orari disponibili...</p>
-        </div>
-            
-        <!-- Orario Appuntamento -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Orario Appuntamento *</label>
-          <select
-            v-model="form.orarioAppuntamento"
-            :disabled="!form.dataAppuntamento || loadingSlots || availableSlots.length === 0"
-            required
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#90c149] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-          >
-            <option value="">{{ availableSlots.length === 0 && form.dataAppuntamento ? 'Nessun orario disponibile' : 'Seleziona orario' }}</option>
-            <option 
-              v-for="slot in availableSlots" 
-              :key="slot" 
-              :value="slot"
-            >
-              {{ slot }}
-            </option>
-          </select>
-          <p v-if="form.dataAppuntamento && availableSlots.length === 0 && !loadingSlots" class="text-xs text-red-500 mt-1">
-            Nessun orario disponibile per questa data. Seleziona un'altra data.
-          </p>
-          <p v-if="form.dataAppuntamento && availableSlots.length > 0" class="text-xs text-gray-500 mt-1">
-            {{ availableSlots.length }} orario{{ availableSlots.length === 1 ? '' : 'i' }} disponibile{{ availableSlots.length === 1 ? '' : 'i' }}
-          </p>
         </div>
               
         <!-- Note -->
@@ -141,7 +109,7 @@
           </button>
           <button 
             type="submit"
-            :disabled="loading || !form.dataAppuntamento || !form.orarioAppuntamento || availableSlots.length === 0"
+            :disabled="loading || !form.dataAppuntamento || !form.orarioAppuntamento"
             class="px-6 py-2 bg-[#90c149] text-white rounded-lg hover:bg-[#7ba83a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span v-if="loading" class="flex items-center">
@@ -160,7 +128,8 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import SlotSelector from './SlotSelector.vue'
 
 const props = defineProps({
   isOpen: {
@@ -197,10 +166,12 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'booked'])
 
+// Supabase
+const supabase = useSupabaseClient()
+const user = useSupabaseUser()
+
 // Reactive data
 const loading = ref(false)
-const loadingSlots = ref(false)
-const availableSlots = ref([])
 const form = ref({
   nome: '',
   cognome: '',
@@ -211,13 +182,102 @@ const form = ref({
   note: ''
 })
 
-// Computed
-const minDate = computed(() => {
-  const tomorrow = new Date()
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  return tomorrow.toISOString().split('T')[0]
+// Carica i dati dell'utente quando il modal si apre
+const loadUserData = async () => {
+  console.log('👤 UnifiedAppointmentModal - Caricamento dati utente...', {
+    hasUser: !!user.value,
+    userId: user.value?.id,
+    userEmail: user.value?.email
+  })
+  
+  if (user.value) {
+    try {
+      // Recupera i dati dell'utente dalla tabella utenti
+      const { data: utenteData, error } = await supabase
+        .from('utenti')
+        .select('nome, email, telefono')
+        .eq('id', user.value.id)
+        .maybeSingle()
+      
+      console.log('👤 Dati recuperati da utenti:', { utenteData, error })
+      
+      if (!error && utenteData) {
+        // Precompila con i dati dal database
+        const nomeCompleto = utenteData.nome || ''
+        const partiNome = nomeCompleto.split(' ')
+        form.value.nome = partiNome[0] || ''
+        form.value.cognome = partiNome.slice(1).join(' ') || ''
+        form.value.email = utenteData.email || user.value.email || ''
+        form.value.telefono = utenteData.telefono || ''
+        console.log('✅ Form precompilato con dati da database:', form.value)
+      } else {
+        // Fallback: usa i dati dall'utente autenticato
+        const nomeCompleto = user.value.user_metadata?.nome || user.value.user_metadata?.full_name || ''
+        const partiNome = nomeCompleto.split(' ')
+        form.value.nome = partiNome[0] || ''
+        form.value.cognome = partiNome.slice(1).join(' ') || ''
+        form.value.email = user.value.email || ''
+        form.value.telefono = user.value.user_metadata?.telefono || ''
+        console.log('✅ Form precompilato con dati da user metadata:', form.value)
+      }
+    } catch (error) {
+      console.error('❌ Errore caricamento dati utente:', error)
+      // Fallback: usa i dati dall'utente autenticato
+      const nomeCompleto = user.value?.user_metadata?.nome || user.value?.user_metadata?.full_name || ''
+      const partiNome = nomeCompleto.split(' ')
+      form.value.nome = partiNome[0] || ''
+      form.value.cognome = partiNome.slice(1).join(' ') || ''
+      form.value.email = user.value?.email || ''
+      console.log('✅ Form precompilato con fallback:', form.value)
+    }
+  } else {
+    console.log('⚠️ Nessun utente loggato')
+  }
+}
+
+// Carica i dati quando il modal si apre
+watch(() => props.isOpen, async (isOpen) => {
+  console.log('👁️ Watch isOpen cambiato:', isOpen, 'User:', !!user.value)
+  if (isOpen) {
+    // Aspetta un attimo per assicurarsi che il modal sia completamente aperto
+    await nextTick()
+    if (user.value) {
+      await loadUserData()
+    } else {
+      // Prova a recuperare l'utente se non è ancora disponibile
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      if (currentUser) {
+        user.value = currentUser
+        await loadUserData()
+      }
+    }
+  }
+}, { immediate: true })
+
+// Carica anche al mount se l'utente è già loggato
+onMounted(async () => {
+  console.log('🔧 onMounted - isOpen:', props.isOpen, 'User:', !!user.value)
+  if (props.isOpen) {
+    await nextTick()
+    if (user.value) {
+      await loadUserData()
+    } else {
+      // Prova a recuperare l'utente
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      if (currentUser) {
+        user.value = currentUser
+        await loadUserData()
+      }
+    }
+  }
 })
 
+// Computed per concessionarioId
+const concessionarioId = computed(() => {
+  return props.concessionario.id || props.concessionario._id
+})
+
+// Computed
 const itemTitle = computed(() => {
   if (props.tipo === 'moto_nuova' && props.moto) {
     return `${props.moto.marca} ${props.moto.modello}`
@@ -267,60 +327,53 @@ const getCondizioneText = (condizione) => {
   return condizioni[condizione] || condizione
 }
 
-const loadAvailableSlots = async () => {
-  if (!form.value.dataAppuntamento) {
-    availableSlots.value = []
-    form.value.orarioAppuntamento = ''
-    return
-  }
-
-  try {
-    loadingSlots.value = true
-    availableSlots.value = []
-    form.value.orarioAppuntamento = ''
-
-    // Usa sempre id del concessionario (UUID dalla tabella concessionari)
-    const concessionarioId = props.concessionario.id || props.concessionario._id
-    
-    const response = await $fetch('/api/appointments/slots', {
-      method: 'GET',
-      query: {
-        concessionario_id: concessionarioId,
-        data: form.value.dataAppuntamento
-      }
-    })
-
-    if (response.success && response.data.slot_disponibili) {
-      availableSlots.value = response.data.slot_disponibili
-    } else {
-      availableSlots.value = []
-    }
-  } catch (error) {
-    console.error('Errore caricamento slot disponibili:', error)
-    availableSlots.value = []
-    alert('Errore nel caricamento degli orari disponibili. Riprova più tardi.')
-  } finally {
-    loadingSlots.value = false
-  }
+const handleSlotSelected = (slot) => {
+  form.value.dataAppuntamento = slot.data
+  form.value.orarioAppuntamento = slot.orario
 }
 
 const submitForm = async () => {
   try {
     loading.value = true
 
-    // Usa sempre id del concessionario (UUID dalla tabella concessionari)
-    const concessionarioId = props.concessionario.id || props.concessionario._id
+    // Validazione
+    if (!form.value.nome || !form.value.cognome || !form.value.email) {
+      alert('Compila tutti i campi obbligatori')
+      loading.value = false
+      return
+    }
+
+    if (!form.value.dataAppuntamento || !form.value.orarioAppuntamento) {
+      alert('Seleziona data e orario per l\'appuntamento')
+      loading.value = false
+      return
+    }
+
+    if (!concessionarioId.value) {
+      console.error('❌ UnifiedAppointmentModal: concessionarioId mancante', props.concessionario)
+      alert('Errore: dati concessionario non validi')
+      loading.value = false
+      return
+    }
+
+    console.log('📤 UnifiedAppointmentModal - Invio dati appuntamento:', {
+      tipo: props.tipo,
+      concessionarioId: concessionarioId.value,
+      data: form.value.dataAppuntamento,
+      orario: form.value.orarioAppuntamento,
+      clienteEmail: form.value.email
+    })
 
     // Prepara il body per l'API appuntamenti
     const body = {
       nome: form.value.nome,
       cognome: form.value.cognome,
       email: form.value.email,
-      telefono: form.value.telefono,
-      note: form.value.note,
+      telefono: form.value.telefono || null,
+      note: form.value.note || null,
       data_appuntamento: form.value.dataAppuntamento,
       orario_appuntamento: form.value.orarioAppuntamento,
-      concessionario_id: concessionarioId
+      concessionario_id: concessionarioId.value
     }
 
     // Aggiungi i campi specifici per tipo
@@ -343,7 +396,7 @@ const submitForm = async () => {
       // Crea anche un lead/conversazione per tracciare la richiesta
       try {
         const leadBody = {
-          concessionarioId: concessionarioId,
+          concessionarioId: concessionarioId.value,
           clienteNome: form.value.nome,
           clienteEmail: form.value.email,
           clienteTelefono: form.value.telefono,
@@ -384,7 +437,6 @@ const submitForm = async () => {
         orarioAppuntamento: '',
         note: ''
       }
-      availableSlots.value = []
     } else {
       throw new Error(response.error || 'Errore nella prenotazione')
     }
@@ -409,7 +461,6 @@ watch(() => props.isOpen, (newValue) => {
       orarioAppuntamento: '',
       note: ''
     }
-    availableSlots.value = []
   }
 })
 </script>

@@ -80,7 +80,7 @@
               </div>
               <div class="ml-4">
                 <h3 class="text-lg font-medium text-yellow-900">Preferiti</h3>
-                <p class="text-2xl font-bold text-yellow-600">0</p>
+                <p class="text-2xl font-bold text-yellow-600">{{ stats.preferiti }}</p>
               </div>
             </div>
           </div>
@@ -92,8 +92,8 @@
                 <span class="text-2xl">📞</span>
               </div>
               <div class="ml-4">
-                <h3 class="text-lg font-medium text-purple-900">Contatti</h3>
-                <p class="text-2xl font-bold text-purple-600">0</p>
+                <h3 class="text-lg font-medium text-purple-900">Conversazioni</h3>
+                <p class="text-2xl font-bold text-purple-600">{{ stats.conversazioni }}</p>
               </div>
             </div>
           </div>
@@ -161,30 +161,59 @@ definePageMeta({
 })
 
 const { user } = useSupabaseUser()
+const supabase = useSupabaseClient()
 const loading = ref(true)
-const userType = ref('')
+const userType = ref('cliente')
+
+// Statistiche
+const stats = ref({
+  preferiti: 0,
+  conversazioni: 0,
+  motoVisualizzate: 0,
+  ricerche: 0
+})
 
 // Verifica il tipo di utente
 onMounted(async () => {
-  if (user.value) {
-    // Controlla se è un concessionario
-    const { data: concessionario } = await useSupabase()
-      .from('concessionari')
-      .select('*')
-      .eq('user_id', user.value.id)
-      .single()
-    
-    userType.value = concessionario ? 'concessionario' : 'cliente'
-    
-    // Se è un concessionario, reindirizza alla dashboard specifica
-    if (concessionario) {
-      setTimeout(() => {
-        navigateTo('/dealer/dashboard')
-      }, 2000) // 2 secondi di attesa per mostrare il messaggio
+  try {
+    if (user.value) {
+      console.log('👤 Verifica tipo utente per:', user.value.email)
+      
+      // Controlla se è un concessionario
+      const { data: concessionario, error: dealerError } = await supabase
+        .from('concessionari')
+        .select('*')
+        .eq('user_id', user.value.id)
+        .maybeSingle()
+      
+      if (dealerError) {
+        console.error('❌ Errore verifica concessionario:', dealerError)
+      }
+      
+      if (concessionario) {
+        userType.value = 'concessionario'
+        console.log('🏪 Utente è un concessionario, reindirizzamento...')
+        // Se è un concessionario, reindirizza alla dashboard specifica
+        await navigateTo('/dealer/dashboard')
+        return
+      } else {
+        userType.value = 'cliente'
+        console.log('👤 Utente è un cliente privato')
+        // Carica le statistiche per il cliente
+        await caricaStatistiche()
+      }
+    } else {
+      console.warn('⚠️ Nessun utente trovato')
+      await navigateTo('/auth/login')
+      return
     }
+  } catch (error) {
+    console.error('❌ Errore verifica tipo utente:', error)
+    // In caso di errore, assume che sia un cliente
+    userType.value = 'cliente'
+  } finally {
+    loading.value = false
   }
-  
-  loading.value = false
 })
 
 const handleLogout = async () => {
@@ -194,6 +223,52 @@ const handleLogout = async () => {
     await navigateTo('/')
   } catch (error) {
     console.error('Errore durante il logout:', error)
+  }
+}
+
+// Carica le statistiche
+const caricaStatistiche = async () => {
+  if (!user.value) return
+
+  try {
+    // Recupera l'ID utente dalla tabella utenti
+    const { data: utenteData } = await supabase
+      .from('utenti')
+      .select('id')
+      .eq('id', user.value.id)
+      .maybeSingle()
+
+    const utenteId = utenteData?.id || user.value.id
+
+    // Carica preferiti
+    try {
+      const preferitiResponse = await $fetch('/api/preferiti', {
+        query: { utenteId }
+      })
+      if (preferitiResponse.success) {
+        stats.value.preferiti = preferitiResponse.total || 0
+      }
+    } catch (error) {
+      console.error('Errore caricamento preferiti:', error)
+    }
+
+    // Carica conversazioni
+    try {
+      const conversazioniResponse = await $fetch('/api/conversazioni/cliente', {
+        query: {
+          clienteId: user.value.id,
+          clienteEmail: user.value.email,
+          status: 'attiva'
+        }
+      })
+      if (conversazioniResponse.success) {
+        stats.value.conversazioni = conversazioniResponse.total || 0
+      }
+    } catch (error) {
+      console.error('Errore caricamento conversazioni:', error)
+    }
+  } catch (error) {
+    console.error('Errore caricamento statistiche:', error)
   }
 }
 </script>

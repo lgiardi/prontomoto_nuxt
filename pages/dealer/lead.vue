@@ -44,11 +44,10 @@
             <label class="block text-sm font-medium text-gray-700 mb-2">Stato</label>
             <select v-model="filters.status" @change="loadLeads" class="w-full p-2 border rounded-lg">
               <option value="">Tutti gli stati</option>
-              <option value="nuovo">Nuovo</option>
-              <option value="contattato">Contattato</option>
-              <option value="interessato">Interessato</option>
-              <option value="non_interessato">Non Interessato</option>
-              <option value="venduto">Venduto</option>
+              <option value="new">Nuovo</option>
+              <option value="contacted">Contattato</option>
+              <option value="converted">Convertito</option>
+              <option value="lost">Perso</option>
             </select>
           </div>
           
@@ -56,10 +55,17 @@
             <label class="block text-sm font-medium text-gray-700 mb-2">Tipo Richiesta</label>
             <select v-model="filters.tipoRichiesta" @change="loadLeads" class="w-full p-2 border rounded-lg">
               <option value="">Tutti i tipi</option>
-              <option value="informazioni">Informazioni</option>
-              <option value="preventivo">Preventivo</option>
-              <option value="appuntamento">Appuntamento</option>
-              <option value="acquisto">Acquisto</option>
+              <optgroup label="Categoria">
+                <option value="moto_nuova">🏍️ Moto Nuova</option>
+                <option value="moto_usata">🛵 Moto Usata</option>
+                <option value="servizio">🔧 Servizio</option>
+              </optgroup>
+              <optgroup label="Tipo Richiesta">
+                <option value="informazioni">ℹ️ Informazioni</option>
+                <option value="preventivo">💰 Preventivo</option>
+                <option value="appuntamento">📅 Appuntamento</option>
+                <option value="acquisto">🛒 Acquisto</option>
+              </optgroup>
             </select>
           </div>
           
@@ -113,12 +119,29 @@
           </div>
           
           <div class="mb-4">
-            <p class="text-sm text-gray-600 mb-2">
-              <strong>Moto:</strong> {{ lead.moto_marca }} {{ lead.moto_modello }}
-            </p>
-            <p class="text-sm text-gray-600 mb-2">
-              <strong>Tipo Richiesta:</strong> {{ getTipoRichiestaLabel(lead.tipo_richiesta) }}
-            </p>
+            <!-- Badge Tipo Richiesta (Moto Nuova/Usata/Servizio) -->
+            <div class="mb-3">
+              <span :class="getTipoRichiestaBadgeClass(lead.tipo_richiesta)" class="px-3 py-1 rounded-full text-xs font-bold uppercase">
+                {{ getTipoRichiestaBadgeLabel(lead.tipo_richiesta) }}
+              </span>
+            </div>
+            
+            <!-- Dettagli Richiesta -->
+            <div class="bg-gray-50 rounded-lg p-3 mb-2">
+              <p v-if="lead.tipo_richiesta === 'moto_nuova' || lead.tipo_richiesta === 'moto_usata'" class="text-sm text-gray-700 mb-1">
+                <strong>Moto:</strong> {{ lead.moto_marca || 'N/A' }} {{ lead.moto_modello || 'N/A' }}
+              </p>
+              <p v-if="lead.tipo_richiesta === 'servizio' && lead.servizio_nome" class="text-sm text-gray-700 mb-1">
+                <strong>Servizio:</strong> {{ lead.servizio_nome }}
+              </p>
+              <p v-if="lead.tipo_richiesta === 'moto_usata'" class="text-xs text-gray-500">
+                Moto Usata
+              </p>
+              <p v-if="lead.tipo_richiesta === 'moto_nuova'" class="text-xs text-gray-500">
+                Moto Nuova
+              </p>
+            </div>
+            
             <p class="text-sm text-gray-600">
               <strong>Data:</strong> {{ formatDate(lead.created_at) }}
             </p>
@@ -136,8 +159,10 @@
                 @change="updateLeadStatus(lead)"
                 class="text-sm border rounded px-2 py-1"
               >
-                <option value="nuovo">Nuovo</option>
-                <option value="contattato">Contattato</option>
+                <option value="new">Nuovo</option>
+                <option value="contacted">Contattato</option>
+                <option value="converted">Convertito</option>
+                <option value="lost">Perso</option>
                 <option value="interessato">Interessato</option>
                 <option value="non_interessato">Non Interessato</option>
                 <option value="venduto">Venduto</option>
@@ -156,7 +181,7 @@
             
             <div class="flex space-x-2">
               <button 
-                @click="openLeadModal(lead)"
+                @click="openConversationModal(lead)"
                 class="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors"
               >
                 Rispondi
@@ -180,41 +205,21 @@
       </div>
     </main>
 
-    <!-- Lead Modal -->
-    <div v-if="showLeadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg p-6 w-full max-w-2xl mx-4">
-        <h3 class="text-lg font-semibold mb-4">Rispondi al Lead</h3>
-        
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Risposta</label>
-          <textarea 
-            v-model="leadResponse"
-            rows="4"
-            class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#90c149] focus:border-transparent"
-            placeholder="Scrivi la tua risposta al cliente..."
-          ></textarea>
-        </div>
-        
-        <div class="flex justify-end space-x-3">
-          <button 
-            @click="closeLeadModal"
-            class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Annulla
-          </button>
-          <button 
-            @click="sendLeadResponse"
-            class="px-4 py-2 bg-[#90c149] text-white rounded-lg hover:bg-[#7aa83f] transition-colors"
-          >
-            Invia Risposta
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- Conversation Modal -->
+    <ConversationModal
+      v-if="selectedConversationId && dealerData"
+      :is-open="showConversationModal"
+      :conversazione-id="selectedConversationId"
+      :concessionario-id="dealerData.id"
+      @close="closeConversationModal"
+      @message-sent="handleMessageSent"
+    />
   </div>
 </template>
 
 <script setup>
+import ConversationModal from '~/components/ConversationModal.vue'
+
 // Middleware per proteggere la pagina
 definePageMeta({
   middleware: 'auth',
@@ -229,9 +234,8 @@ const user = useSupabaseUser()
 const loading = ref(true)
 const leads = ref([])
 const dealerData = ref(null)
-const showLeadModal = ref(false)
-const selectedLead = ref(null)
-const leadResponse = ref('')
+const showConversationModal = ref(false)
+const selectedConversationId = ref(null)
 
 // Filtri
 const filters = ref({
@@ -242,28 +246,94 @@ const filters = ref({
 
 // Carica i dati del concessionario
 const loadDealerData = async () => {
-  if (!user.value) return
+  if (!user.value) {
+    console.warn('⚠️ User non disponibile in loadDealerData')
+    return
+  }
 
   try {
-    const { data, error } = await supabase
+    console.log('🔍 Caricamento dati concessionario per user:', user.value.id)
+    
+    // Prima prova a trovare il concessionario esistente
+    const { data: existingDealer, error: findError } = await supabase
       .from('concessionari')
       .select('*')
       .eq('user_id', user.value.id)
+      .maybeSingle()
+
+    if (findError && findError.code !== 'PGRST116') {
+      console.error('❌ Errore nel trovare concessionario:', findError)
+      throw findError
+    }
+
+    if (existingDealer) {
+      console.log('✅ Concessionario trovato:', {
+        id: existingDealer.id,
+        nome: existingDealer.nome,
+        tipoId: typeof existingDealer.id
+      })
+      dealerData.value = existingDealer
+      return
+    }
+
+    console.log('⚠️ Concessionario non trovato, creazione automatica...')
+    
+    // Crea automaticamente un concessionario se non esiste
+    const { data: newDealer, error: createError } = await supabase
+      .from('concessionari')
+      .insert({
+        user_id: user.value.id,
+        nome: user.value.user_metadata?.full_name || user.value.email?.split('@')[0] || 'Concessionario',
+        email: user.value.email,
+        telefono: '',
+        citta: '',
+        provincia: '',
+        status: 'active',
+        subscription_plan: 'basic',
+        subscription_status: 'active'
+      })
+      .select()
       .single()
 
-    if (error) throw error
-    dealerData.value = data
+    if (createError) {
+      console.error('❌ Errore nella creazione concessionario:', createError)
+      throw createError
+    }
+    
+    console.log('✅ Concessionario creato:', {
+      id: newDealer.id,
+      nome: newDealer.nome,
+      tipoId: typeof newDealer.id
+    })
+    dealerData.value = newDealer
   } catch (error) {
-    console.error('Errore nel caricamento dati concessionario:', error)
+    console.error('❌ Errore nel caricamento dati concessionario:', error)
+    console.error('❌ Dettagli errore:', {
+      message: error.message,
+      code: error.code,
+      details: error.details
+    })
+    // Non bloccare, ma mostra un messaggio all'utente
+    loading.value = false
+    throw error
   }
 }
 
 // Carica i lead
 const loadLeads = async () => {
-  if (!dealerData.value) return
+  if (!dealerData.value) {
+    console.warn('⚠️ dealerData non disponibile, attendo...')
+    return
+  }
 
   try {
     loading.value = true
+    
+    console.log('📊 Caricamento lead per concessionario:', {
+      id: dealerData.value.id,
+      tipo: typeof dealerData.value.id,
+      nome: dealerData.value.nome
+    })
     
     const queryParams = new URLSearchParams({
       concessionarioId: dealerData.value.id
@@ -273,12 +343,40 @@ const loadLeads = async () => {
     if (filters.value.tipoRichiesta) queryParams.append('tipoRichiesta', filters.value.tipoRichiesta)
     if (filters.value.priorita) queryParams.append('priorita', filters.value.priorita)
     
+    console.log('📊 Query params:', queryParams.toString())
+    
     const response = await $fetch(`/api/lead?${queryParams}`)
-    leads.value = response.leads || []
+    
+    console.log('📊 Risposta API lead:', {
+      success: response.success,
+      total: response.total,
+      leadsCount: response.leads?.length || 0
+    })
+    
+    if (response.success) {
+      leads.value = response.leads || []
+      console.log('✅ Lead caricati:', leads.value.length, 'di', response.total || 0)
+      
+      if (leads.value.length === 0 && response.total === 0) {
+        console.log('ℹ️ Nessun lead trovato per questo concessionario')
+      }
+    } else {
+      console.error('❌ Risposta API non valida:', response)
+      leads.value = []
+    }
     
   } catch (error) {
-    console.error('Errore nel caricamento lead:', error)
+    console.error('❌ Errore nel caricamento lead:', error)
+    console.error('❌ Dettagli errore:', {
+      message: error.message,
+      statusCode: error.statusCode,
+      data: error.data
+    })
     leads.value = []
+    // Mostra un messaggio all'utente se possibile
+    if (error.statusCode === 400 || error.statusCode === 500) {
+      alert('Errore nel caricamento dei lead. Controlla la console per i dettagli.')
+    }
   } finally {
     loading.value = false
   }
@@ -310,43 +408,30 @@ const updateLeadPriority = async (lead) => {
   }
 }
 
-// Apri modal lead
-const openLeadModal = (lead) => {
-  selectedLead.value = lead
-  showLeadModal.value = true
-}
-
-// Chiudi modal lead
-const closeLeadModal = () => {
-  showLeadModal.value = false
-  selectedLead.value = null
-  leadResponse.value = ''
-}
-
-// Invia risposta lead
-const sendLeadResponse = async () => {
-  if (!selectedLead.value || !leadResponse.value.trim()) return
-
-  try {
-    await $fetch(`/api/lead/${selectedLead.value.id}`, {
-      method: 'PUT',
-      body: { 
-        rispostaConcessionario: leadResponse.value,
-        status: 'contattato'
-      }
-    })
-    
-    // Aggiorna il lead locale
-    selectedLead.value.risposta_concessionario = leadResponse.value
-    selectedLead.value.status = 'contattato'
-    selectedLead.value.data_risposta = new Date().toISOString()
-    
-    closeLeadModal()
-    alert('Risposta inviata con successo!')
-  } catch (error) {
-    console.error('Errore invio risposta:', error)
-    alert('Errore nell\'invio della risposta. Riprova.')
+// Apri modale conversazione
+const openConversationModal = (lead) => {
+  if (!lead.conversazione_id) {
+    alert('Errore: questo lead non ha una conversazione associata. Contatta il supporto.')
+    console.error('❌ Lead senza conversazione_id:', lead)
+    return
   }
+  
+  selectedConversationId.value = lead.conversazione_id
+  showConversationModal.value = true
+  console.log('💬 Apertura modale conversazione:', lead.conversazione_id)
+}
+
+// Chiudi modale conversazione
+const closeConversationModal = () => {
+  showConversationModal.value = false
+  selectedConversationId.value = null
+}
+
+// Gestisci messaggio inviato
+const handleMessageSent = async (messaggio) => {
+  console.log('✅ Messaggio inviato, ricarico i lead...')
+  // Ricarica i lead per aggiornare lo stato
+  await loadLeads()
 }
 
 // Reset filtri
@@ -362,8 +447,10 @@ const resetFilters = () => {
 // Funzioni di utilità
 const getStatusLabel = (status) => {
   const labels = {
-    'nuovo': 'Nuovo',
-    'contattato': 'Contattato',
+    'new': 'Nuovo',
+    'contacted': 'Contattato',
+    'converted': 'Convertito',
+    'lost': 'Perso',
     'interessato': 'Interessato',
     'non_interessato': 'Non Interessato',
     'venduto': 'Venduto'
@@ -373,8 +460,10 @@ const getStatusLabel = (status) => {
 
 const getStatusBadgeClass = (status) => {
   const classes = {
-    'nuovo': 'bg-blue-100 text-blue-800',
-    'contattato': 'bg-yellow-100 text-yellow-800',
+    'new': 'bg-blue-100 text-blue-800',
+    'contacted': 'bg-yellow-100 text-yellow-800',
+    'converted': 'bg-green-100 text-green-800',
+    'lost': 'bg-red-100 text-red-800',
     'interessato': 'bg-green-100 text-green-800',
     'non_interessato': 'bg-red-100 text-red-800',
     'venduto': 'bg-purple-100 text-purple-800'
@@ -405,9 +494,38 @@ const getTipoRichiestaLabel = (tipo) => {
     'informazioni': 'Informazioni',
     'preventivo': 'Preventivo',
     'appuntamento': 'Appuntamento',
-    'acquisto': 'Acquisto'
+    'acquisto': 'Acquisto',
+    'moto_nuova': 'Moto Nuova',
+    'moto_usata': 'Moto Usata',
+    'servizio': 'Servizio'
   }
   return labels[tipo] || tipo
+}
+
+const getTipoRichiestaBadgeLabel = (tipo) => {
+  const labels = {
+    'moto_nuova': '🏍️ Moto Nuova',
+    'moto_usata': '🛵 Moto Usata',
+    'servizio': '🔧 Servizio',
+    'informazioni': 'ℹ️ Informazioni',
+    'preventivo': '💰 Preventivo',
+    'appuntamento': '📅 Appuntamento',
+    'acquisto': '🛒 Acquisto'
+  }
+  return labels[tipo] || tipo
+}
+
+const getTipoRichiestaBadgeClass = (tipo) => {
+  const classes = {
+    'moto_nuova': 'bg-blue-100 text-blue-800',
+    'moto_usata': 'bg-purple-100 text-purple-800',
+    'servizio': 'bg-green-100 text-green-800',
+    'informazioni': 'bg-gray-100 text-gray-800',
+    'preventivo': 'bg-yellow-100 text-yellow-800',
+    'appuntamento': 'bg-orange-100 text-orange-800',
+    'acquisto': 'bg-red-100 text-red-800'
+  }
+  return classes[tipo] || 'bg-gray-100 text-gray-800'
 }
 
 const formatDate = (dateString) => {
@@ -433,8 +551,47 @@ const handleLogout = async () => {
 
 // Inizializzazione
 onMounted(async () => {
-  await loadDealerData()
-  await loadLeads()
+  try {
+    // Aspetta che l'utente sia caricato
+    if (!user.value) {
+      console.warn('⚠️ User non disponibile, attendo...')
+      // Prova a recuperare l'utente
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      if (currentUser) {
+        user.value = currentUser
+      } else {
+        console.error('❌ Utente non autenticato')
+        await navigateTo('/auth/login')
+        return
+      }
+    }
+    
+    console.log('👤 User disponibile:', user.value.id)
+    
+    // Carica i dati del concessionario
+    await loadDealerData()
+    
+    // Verifica che dealerData sia stato caricato
+    if (!dealerData.value) {
+      console.error('❌ dealerData non disponibile dopo loadDealerData')
+      loading.value = false
+      alert('Errore nel caricamento dei dati del concessionario. Ricarica la pagina.')
+      return
+    }
+    
+    console.log('✅ dealerData caricato:', {
+      id: dealerData.value.id,
+      nome: dealerData.value.nome
+    })
+    
+    // Carica i lead
+    await loadLeads()
+  } catch (error) {
+    console.error('❌ Errore inizializzazione pagina lead:', error)
+    console.error('❌ Stack trace:', error.stack)
+    loading.value = false
+    alert('Errore nel caricamento della pagina. Controlla la console per i dettagli.')
+  }
 })
 </script>
 

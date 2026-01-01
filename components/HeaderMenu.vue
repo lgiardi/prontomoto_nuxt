@@ -15,10 +15,6 @@
 
         <!-- Menu Navigation -->
         <nav class="hidden md:flex space-x-8">
-          <NuxtLink to="/moto" class="text-black hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors">
-            Cerca Moto, Scooter e Servizi in tutta Italia
-          </NuxtLink>
-          
           <!-- Nuovo Dropdown -->
           <div class="relative" @mouseenter="showNuovo = true" @mouseleave="showNuovo = false">
             <button class="text-black hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors flex items-center">
@@ -137,13 +133,6 @@
               </div>
             </div>
           </div>
-          
-          <NuxtLink to="/assicurazioni" class="text-black hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors">
-            Assicurazioni
-          </NuxtLink>
-          <NuxtLink to="/finanziamenti" class="text-black hover:text-[#90c149] px-3 py-2 text-sm font-medium transition-colors">
-            Finanziamenti
-          </NuxtLink>
         </nav>
 
         <!-- CTA Buttons -->
@@ -290,10 +279,6 @@
       <!-- Mobile menu -->
       <div v-if="mobileMenuOpen" class="md:hidden">
         <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-gray-200">
-          <NuxtLink to="/moto" class="text-black hover:text-[#90c149] block px-3 py-2 text-base font-medium">
-            Cerca Moto, Scooter e Servizi in tutta Italia
-          </NuxtLink>
-          
           <!-- Mobile Nuovo -->
           <div class="px-3 py-2">
             <div class="text-black font-medium text-base mb-2">Nuovo</div>
@@ -373,12 +358,6 @@
             </div>
           </div>
           
-          <NuxtLink to="/assicurazioni" class="text-black hover:text-[#90c149] block px-3 py-2 text-base font-medium">
-            Assicurazioni
-          </NuxtLink>
-          <NuxtLink to="/finanziamenti" class="text-black hover:text-[#90c149] block px-3 py-2 text-base font-medium">
-            Finanziamenti
-          </NuxtLink>
           <div class="pt-4 space-y-2">
             <div v-if="user" class="space-y-2">
               <div class="text-center text-sm text-gray-600 py-2 border-b border-gray-200">

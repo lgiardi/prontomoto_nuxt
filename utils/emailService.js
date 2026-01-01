@@ -2,21 +2,60 @@ import nodemailer from 'nodemailer'
 
 // Configurazione SMTP
 const createTransporter = (config) => {
-  return nodemailer.createTransport({
+  const port = parseInt(config.smtpPort)
+  const isSecure = port === 465
+  
+  console.log('📧 Creazione transporter SMTP:', {
     host: config.smtpHost,
-    port: parseInt(config.smtpPort),
-    secure: true, // true per 465, false per altri porti
-    auth: {
-      user: config.smtpUser,
-      pass: config.smtpPass
-    }
+    port: port,
+    secure: isSecure,
+    user: config.smtpUser,
+    hasPassword: !!config.smtpPass,
+    passwordLength: config.smtpPass?.length || 0
   })
+  
+  // Prova prima con la configurazione standard
+  let transporterConfig = {
+    host: config.smtpHost,
+    port: port,
+    secure: isSecure, // true per 465 (SSL), false per altri porti (STARTTLS)
+    auth: {
+      user: config.smtpUser.trim(), // Rimuovi spazi
+      pass: config.smtpPass.trim() // Rimuovi spazi
+    },
+    tls: {
+      // Disabilita la verifica del certificato per server SMTP con certificati autofirmati
+      rejectUnauthorized: false
+    },
+    // Opzioni aggiuntive per compatibilità
+    connectionTimeout: 20000, // 20 secondi
+    greetingTimeout: 20000,
+    socketTimeout: 20000,
+    debug: false, // Disabilita debug verbose (troppo output)
+    logger: false // Disabilita logger verbose
+  }
+  
+  // Se non è SSL (porta 465), richiedi STARTTLS
+  if (!isSecure) {
+    transporterConfig.requireTLS = true
+  }
+  
+  return nodemailer.createTransport(transporterConfig)
 }
 
 // Template email per nuovo messaggio al concessionario
 export const sendNewMessageToDealer = async (conversazione, messaggio, config) => {
   try {
     const transporter = createTransporter(config)
+    
+    // Verifica la connessione prima di inviare
+    try {
+      await transporter.verify()
+      console.log('✅ Connessione SMTP verificata per sendNewMessageToDealer')
+    } catch (verifyError) {
+      console.error('❌ Errore verifica connessione SMTP:', verifyError)
+      throw verifyError
+    }
     
     const mailOptions = {
       from: `"${config.smtpSenderName}" <${config.smtpUser}>`,
@@ -242,6 +281,27 @@ export const sendWelcomeEmailToCustomer = async (conversazione, messaggio, confi
               
               <p><strong>📬 Quando il venditore risponderà, riceverai una notifica sulla tua email.</strong></p>
               
+              ${conversazione.account_creato && conversazione.password ? `
+              <div style="background: #e7f3ff; border: 2px solid #90c149; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #90c149; margin-top: 0;">🔑 I tuoi dati di accesso</h3>
+                <p style="font-size: 16px; margin: 10px 0;">
+                  <strong>Email:</strong> ${conversazione.cliente_email}<br>
+                  <strong>Password:</strong> <code style="background: white; padding: 5px 10px; border-radius: 4px; font-size: 18px; font-weight: bold; color: #90c149;">${conversazione.password}</code>
+                </p>
+                <p style="font-size: 14px; color: #666; margin-top: 15px;">
+                  <strong>⚠️ Importante:</strong> Salva queste credenziali in un posto sicuro. Potrai usarle per accedere alla tua area utente e seguire tutte le tue conversazioni.
+                </p>
+              </div>
+              ` : `
+              <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <p style="font-size: 14px; color: #666;">
+                  <strong>🔑 Hai già un account?</strong><br>
+                  Se hai già un account con questa email, puoi accedere normalmente.<br>
+                  <a href="https://prontomoto.it/auth/login" style="color: #90c149;">Accedi qui</a>
+                </p>
+              </div>
+              `}
+              
               <div style="text-align: center;">
                 <a href="https://prontomoto.it/conversazioni/${conversazione.id}" class="button">
                   💬 Segui la conversazione
@@ -250,9 +310,7 @@ export const sendWelcomeEmailToCustomer = async (conversazione, messaggio, confi
               
               <div style="text-align: center; margin-top: 20px;">
                 <p style="font-size: 14px; color: #666;">
-                  <strong>🔑 I tuoi dati di accesso:</strong><br>
-                  Email: ${conversazione.cliente_email}<br>
-                  <a href="https://prontomoto.it/dashboard" style="color: #90c149;">Accedi alla tua area utente</a>
+                  <a href="https://prontomoto.it/conversazioni" style="color: #90c149; font-weight: bold;">📬 Vedi tutte le tue conversazioni</a>
                 </p>
               </div>
               
@@ -281,6 +339,21 @@ export const sendWelcomeEmailToCustomer = async (conversazione, messaggio, confi
 export const sendNewConversationNotification = async (conversazione, messaggio, config) => {
   try {
     const transporter = createTransporter(config)
+    
+    // Verifica la connessione prima di inviare
+    try {
+      await transporter.verify()
+      console.log('✅ Connessione SMTP verificata per sendNewConversationNotification')
+    } catch (verifyError) {
+      console.error('❌ Errore verifica connessione SMTP:', verifyError)
+      console.error('❌ Dettagli errore verifica:', {
+        message: verifyError.message,
+        code: verifyError.code,
+        command: verifyError.command,
+        response: verifyError.response
+      })
+      throw verifyError
+    }
     
     const mailOptions = {
       from: `"${config.smtpSenderName}" <${config.smtpUser}>`,
@@ -370,6 +443,192 @@ export const sendNewConversationNotification = async (conversazione, messaggio, 
     
   } catch (error) {
     console.error('❌ Errore invio email nuova conversazione:', error)
+    console.error('❌ Dettagli errore completo:', {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode,
+      stack: error.stack?.substring(0, 500)
+    })
+    throw error
+  }
+}
+
+// Template email per notifica appuntamento al concessionario
+export const sendAppointmentNotificationToDealer = async (appuntamento, config) => {
+  try {
+    const transporter = createTransporter(config)
+    
+    const dataFormattata = new Date(appuntamento.data_appuntamento).toLocaleDateString('it-IT', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+    
+    const mailOptions = {
+      from: `"${config.smtpSenderName}" <${config.smtpUser}>`,
+      to: appuntamento.concessionario_email,
+      subject: `📅 Nuovo appuntamento prenotato - ${appuntamento.cliente_nome || appuntamento.nome}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Nuovo Appuntamento - ProntoMoto</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #90c149; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }
+            .appointment-info { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #90c149; }
+            .button { display: inline-block; background: #90c149; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+            .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+            .urgent { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 6px; margin: 20px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🏍️ ProntoMoto</h1>
+              <h2>📅 Nuovo Appuntamento Prenotato!</h2>
+            </div>
+            
+            <div class="content">
+              <div class="urgent">
+                <h3>📅 Appuntamento da confermare</h3>
+                <p>Un cliente ha prenotato un appuntamento. Verifica e conferma quando possibile!</p>
+              </div>
+              
+              <p>Ciao <strong>${appuntamento.concessionario_nome}</strong>,</p>
+              
+              <p>Hai ricevuto una nuova prenotazione di appuntamento:</p>
+              
+              <div class="appointment-info">
+                <h3>📋 Dettagli Appuntamento</h3>
+                <p><strong>📅 Data:</strong> ${dataFormattata}</p>
+                <p><strong>🕐 Orario:</strong> ${appuntamento.orario_appuntamento}</p>
+                <p><strong>👤 Cliente:</strong> ${appuntamento.cliente_nome || appuntamento.nome} ${appuntamento.cognome || ''}</p>
+                <p><strong>📧 Email:</strong> ${appuntamento.cliente_email || appuntamento.email}</p>
+                ${appuntamento.cliente_telefono || appuntamento.telefono ? `<p><strong>📞 Telefono:</strong> ${appuntamento.cliente_telefono || appuntamento.telefono}</p>` : ''}
+                ${appuntamento.moto_marca && appuntamento.moto_modello ? `<p><strong>🏍️ Moto:</strong> ${appuntamento.moto_marca} ${appuntamento.moto_modello}</p>` : ''}
+                ${appuntamento.note ? `<p><strong>📝 Note:</strong> ${appuntamento.note}</p>` : ''}
+              </div>
+              
+              <div style="text-align: center;">
+                <a href="https://prontomoto.it/dealer/appuntamenti" class="button">
+                  📅 Gestisci Appuntamenti
+                </a>
+              </div>
+              
+              <div class="footer">
+                <p>Questo messaggio è stato inviato automaticamente da ProntoMoto</p>
+                <p>Se non vuoi più ricevere queste notifiche, contatta il supporto</p>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    }
+    
+    const result = await transporter.sendMail(mailOptions)
+    console.log('✅ Email appuntamento inviata al concessionario:', result.messageId)
+    return result
+    
+  } catch (error) {
+    console.error('❌ Errore invio email appuntamento al concessionario:', error)
+    throw error
+  }
+}
+
+// Template email per conferma appuntamento al cliente
+export const sendAppointmentConfirmationToCustomer = async (appuntamento, config) => {
+  try {
+    const transporter = createTransporter(config)
+    
+    const dataFormattata = new Date(appuntamento.data_appuntamento).toLocaleDateString('it-IT', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+    
+    const mailOptions = {
+      from: `"${config.smtpSenderName}" <${config.smtpUser}>`,
+      to: appuntamento.cliente_email || appuntamento.email,
+      subject: `📅 Appuntamento prenotato con ${appuntamento.concessionario_nome} - ProntoMoto`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Appuntamento Confermato - ProntoMoto</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #90c149; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }
+            .appointment-info { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #90c149; }
+            .button { display: inline-block; background: #90c149; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+            .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+            .success { background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 6px; margin: 20px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🏍️ ProntoMoto</h1>
+              <h2>📅 Appuntamento Prenotato!</h2>
+            </div>
+            
+            <div class="content">
+              <div class="success">
+                <h3>✅ Appuntamento Confermato!</h3>
+                <p>La tua prenotazione è stata registrata con successo.</p>
+              </div>
+              
+              <p>Ciao <strong>${appuntamento.cliente_nome || appuntamento.nome}</strong>,</p>
+              
+              <p>Il tuo appuntamento è stato prenotato con successo. Ecco i dettagli:</p>
+              
+              <div class="appointment-info">
+                <h3>📋 Dettagli Appuntamento</h3>
+                <p><strong>📅 Data:</strong> ${dataFormattata}</p>
+                <p><strong>🕐 Orario:</strong> ${appuntamento.orario_appuntamento}</p>
+                <p><strong>🏪 Concessionario:</strong> ${appuntamento.concessionario_nome}</p>
+                ${appuntamento.moto_marca && appuntamento.moto_modello ? `<p><strong>🏍️ Moto:</strong> ${appuntamento.moto_marca} ${appuntamento.moto_modello}</p>` : ''}
+                ${appuntamento.note ? `<p><strong>📝 Note:</strong> ${appuntamento.note}</p>` : ''}
+              </div>
+              
+              <p><strong>💡 Ricorda:</strong> Il concessionario ti confermerà l'appuntamento a breve. Riceverai una notifica quando sarà confermato.</p>
+              
+              <div style="text-align: center;">
+                <a href="https://prontomoto.it/conversazioni" class="button">
+                  💬 Vedi le tue conversazioni
+                </a>
+              </div>
+              
+              <div class="footer">
+                <p>Questo messaggio è stato inviato automaticamente da ProntoMoto</p>
+                <p>Se non vuoi più ricevere queste notifiche, contatta il supporto</p>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    }
+    
+    const result = await transporter.sendMail(mailOptions)
+    console.log('✅ Email conferma appuntamento inviata al cliente:', result.messageId)
+    return result
+    
+  } catch (error) {
+    console.error('❌ Errore invio email conferma appuntamento al cliente:', error)
     throw error
   }
 }

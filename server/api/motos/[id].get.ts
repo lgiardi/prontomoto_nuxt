@@ -4,15 +4,31 @@ const supabaseUrl = process.env.SUPABASE_URL || 'https://xffcrstnyfjthlaurlyx.su
 const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmZmNyc3RueWZqdGhsYXVybHl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwNjA4OTgsImV4cCI6MjA3MzYzNjg5OH0.ksZs9k0fYCUZ0nKvF-s8LNL3SQQbppifIbtTVxpyQUE'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
+// Funzione per validare UUID
+function isValidUUID(str: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return uuidRegex.test(str)
+}
+
 export default defineEventHandler(async (event) => {
     const motoId = getRouterParam(event, 'id')
     
     if (!motoId) {
       throw createError({
         statusCode: 400,
-      statusMessage: 'ID moto richiesto.'
-    })
-  }
+        statusMessage: 'ID moto richiesto.'
+      })
+    }
+    
+    // Valida che motoId sia un UUID valido
+    if (!isValidUUID(motoId)) {
+      console.error('❌ ID moto non valido (non è un UUID):', motoId)
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'ID moto non valido. Formato UUID richiesto.',
+        data: `L'ID "${motoId}" non è un UUID valido.`
+      })
+    }
   
   try {
     // Recupera i dettagli della moto da Supabase
@@ -45,6 +61,12 @@ export default defineEventHandler(async (event) => {
         concessionario_id,
         disponibile,
         prezzo_speciale,
+        quantita,
+        colore,
+        promozioni,
+        foto_principale,
+        foto_gallery,
+        note,
         moto_id,
         concessionari!inner(
           id,
@@ -74,6 +96,12 @@ export default defineEventHandler(async (event) => {
           concessionario_id,
           disponibile,
           prezzo_speciale,
+          quantita,
+          colore,
+          promozioni,
+          foto_principale,
+          foto_gallery,
+          note,
           moto_id,
           concessionari!inner(
             id,
@@ -100,6 +128,12 @@ export default defineEventHandler(async (event) => {
             concessionario_id,
             disponibile,
             prezzo_speciale,
+            quantita,
+            colore,
+            promozioni,
+            foto_principale,
+            foto_gallery,
+            note,
             moto_id,
             concessionari!inner(
               id,
@@ -145,6 +179,28 @@ export default defineEventHandler(async (event) => {
       console.log(`⚠️ Ci sono ${concessionari.length} concessionari ma nessuno attivo!`)
     }
     
+    // Recupera i rating per ogni concessionario
+    const concessionariConRating = await Promise.all(
+      concessionariAttivi.map(async (c) => {
+        const { data: recensioni } = await supabase
+          .from('recensioni_concessionari')
+          .select('voto')
+          .eq('concessionario_id', c.concessionari.id)
+          .eq('status', 'approved')
+        
+        const numeroRecensioni = recensioni?.length || 0
+        const ratingMedio = numeroRecensioni > 0
+          ? recensioni.reduce((sum: number, r: any) => sum + r.voto, 0) / numeroRecensioni
+          : 0
+        
+        return {
+          ...c,
+          rating_medio: Math.round(ratingMedio * 10) / 10,
+          numero_recensioni: numeroRecensioni
+        }
+      })
+    )
+    
     // Trasforma i dati per mantenere la compatibilità con il frontend
     const motoData = {
       id: moto.id,
@@ -155,11 +211,14 @@ export default defineEventHandler(async (event) => {
       cilindrata: moto.cilindrata,
       prezzo: moto.prezzo,
       potenza: moto.potenza,
-      peso_a_secco: moto.peso_a_secco,
+      // Mappatura camelCase per il frontend
+      pesoASecco: moto.peso_a_secco,
+      peso_a_secco: moto.peso_a_secco, // Mantieni anche snake_case per compatibilità
       peso_in_ordine_di_marcia: moto.peso_in_ordine_di_marcia,
       alimentazione: moto.alimentazione,
       trasmissione: moto.trasmissione,
       frizione: moto.frizione,
+      rapporti: moto.rapporti || null, // Aggiungi se presente nel DB
       lunghezza: moto.lunghezza,
       larghezza: moto.larghezza,
       altezza: moto.altezza,
@@ -167,15 +226,28 @@ export default defineEventHandler(async (event) => {
       altezza_sella_da_terra_min: moto.altezza_sella_da_terra_min,
       altezza_sella_da_terra_max: moto.altezza_sella_da_terra_max,
       interasse: moto.interasse,
+      // Mappatura camelCase per freni
+      frenoAnteriore: moto.freno_anteriore,
       freno_anteriore: moto.freno_anteriore,
+      frenoPosteriore: moto.freno_posteriore,
       freno_posteriore: moto.freno_posteriore,
       abs: moto.abs,
+      // Mappatura camelCase per ruote
+      ruotaAnteriore: moto.ruota_anteriore,
       ruota_anteriore: moto.ruota_anteriore,
+      ruotaPosteriore: moto.ruota_posteriore,
       ruota_posteriore: moto.ruota_posteriore,
+      tipoRuote: moto.tipo_ruote,
       tipo_ruote: moto.tipo_ruote,
+      // Mappatura camelCase per serbatoio e consumo
+      capacitaSerbatoio: moto.capacita_serbatoio_carburante,
       capacita_serbatoio_carburante: moto.capacita_serbatoio_carburante,
       capacita_riserva_carburante: moto.capacita_riserva_carburante,
+      consumo: moto.consumo_medio_vmtc,
       consumo_medio_vmtc: moto.consumo_medio_vmtc,
+      // Colore (se presente nel DB)
+      colore: moto.colore || moto.colori?.[0] || null,
+      colori: moto.colori || [],
       anno_inizio_produzione: moto.anno_inizio_produzione,
       anno_fine_produzione: moto.anno_fine_produzione,
       garanzia: moto.garanzia,
@@ -193,7 +265,7 @@ export default defineEventHandler(async (event) => {
       raffreddamento: moto.raffreddamento,
       is_disponibile: moto.is_disponibile,
       is_promozione: moto.is_promozione,
-      concessionari: concessionariAttivi.map(c => ({
+      concessionari: concessionariConRating.map(c => ({
         _id: c.concessionari.id, // Usa _id per compatibilità con il frontend
         id: c.concessionari.id,
         nome: c.concessionari.nome,
@@ -202,7 +274,16 @@ export default defineEventHandler(async (event) => {
         telefono: c.concessionari.telefono,
         email: c.concessionari.email,
         prezzo_speciale: c.prezzo_speciale,
-        immagineUrl: null // Colonna immagine non disponibile
+        disponibile: c.disponibile,
+        quantita: c.quantita,
+        colore: c.colore,
+        promozioni: c.promozioni, // JSONB con le promozioni
+        foto_principale: c.foto_principale,
+        foto_gallery: c.foto_gallery, // JSONB array con le foto
+        note: c.note,
+        immagineUrl: c.foto_principale || null,
+        rating_medio: c.rating_medio,
+        numero_recensioni: c.numero_recensioni
       }))
     }
     

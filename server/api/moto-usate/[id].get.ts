@@ -111,7 +111,7 @@ export default defineEventHandler(async (event) => {
       }
       return []
     }
-    
+
     const marca = moto.moto_usate_catalogo?.marca || moto.marca
     const modello = moto.moto_usate_catalogo?.modello || moto.modello
     const categoria = moto.categoria || null // categoria nella tabella moto_usate

@@ -223,32 +223,52 @@ const loadDealerMotos = async () => {
 
     console.log('📊 Moto da Supabase:', motosFromSupabase)
 
+    if (!motosFromSupabase || motosFromSupabase.length === 0) {
+      console.warn('⚠️ Nessuna moto trovata in Supabase per gli ID:', motoIds)
+      dealerMotos.value = []
+      loading.value = false
+      return
+    }
+
     // 3. Combina i dati di Supabase con i dati specifici del concessionario
-    dealerMotos.value = motoConcessionari.map(mc => {
-      const supabaseMoto = motosFromSupabase.find(sm => sm.id === mc.moto_id)
-      const combinedMoto = {
-        ...supabaseMoto, // Dati da Supabase (marca, modello, allestimento, categoria, cilindrata, immagine_copertina)
-        ...mc, // Dati da moto_concessionari (id, prezzo_speciale, quantita, colore, promozioni, note, foto_principale, foto_gallery)
-        // Preserva l'ID del record moto_concessionari per l'eliminazione
-        motoConcessionariId: mc.id,
-        motoId: mc.moto_id,
-        immagineUrl: supabaseMoto?.immagine_copertina, // Mappa il campo corretto
-        // Assicurati che il prezzo_speciale abbia la precedenza sul prezzo di listino
-        prezzo_speciale: mc.prezzo_speciale
-      }
-      console.log('🔍 Moto combinata:', {
-        motoConcessionariId: mc.id,
-        motoId: mc.moto_id,
-        combinedId: combinedMoto.id,
-        marca: combinedMoto.marca,
-        modello: combinedMoto.modello,
-        prezzoListino: combinedMoto.prezzo,
-        prezzoSpeciale: combinedMoto.prezzo_speciale,
-        colore: combinedMoto.colore
+    dealerMotos.value = motoConcessionari
+      .map(mc => {
+        // Cerca la moto corrispondente, provando sia con id numerico che stringa
+        const supabaseMoto = motosFromSupabase.find(sm => 
+          sm.id === mc.moto_id || 
+          sm.id.toString() === mc.moto_id.toString() ||
+          String(sm.id) === String(mc.moto_id)
+        )
+        
+        if (!supabaseMoto) {
+          console.warn('⚠️ Moto non trovata in Supabase per moto_id:', mc.moto_id)
+          return null // Filtraremo questi dopo
+        }
+        
+        const combinedMoto = {
+          ...supabaseMoto, // Dati da Supabase (marca, modello, allestimento, categoria, cilindrata, immagine_copertina)
+          ...mc, // Dati da moto_concessionari (id, prezzo_speciale, quantita, colore, promozioni, note, foto_principale, foto_gallery)
+          // Preserva l'ID del record moto_concessionari per l'eliminazione
+          motoConcessionariId: mc.id,
+          motoId: mc.moto_id,
+          immagineUrl: supabaseMoto?.immagine_copertina, // Mappa il campo corretto
+          // Assicurati che il prezzo_speciale abbia la precedenza sul prezzo di listino
+          prezzo_speciale: mc.prezzo_speciale
+        }
+        console.log('🔍 Moto combinata:', {
+          motoConcessionariId: mc.id,
+          motoId: mc.moto_id,
+          combinedId: combinedMoto.id,
+          marca: combinedMoto.marca,
+          modello: combinedMoto.modello,
+          prezzoListino: combinedMoto.prezzo,
+          prezzoSpeciale: combinedMoto.prezzo_speciale,
+          colore: combinedMoto.colore
+        })
+        console.log('🔍 Record moto_concessionari completo:', mc)
+        return combinedMoto
       })
-      console.log('🔍 Record moto_concessionari completo:', mc)
-      return combinedMoto
-    })
+      .filter(moto => moto !== null) // Rimuovi le moto non trovate
     
     console.log('✅ Moto del concessionario caricate:', dealerMotos.value)
 

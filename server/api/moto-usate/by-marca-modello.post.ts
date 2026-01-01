@@ -90,9 +90,9 @@ export default defineEventHandler(async (event) => {
         // Match flessibile: corrispondenza esatta o parziale
         const marcaMatch = m === marcaNorm || m.includes(marcaNorm) || marcaNorm.includes(m)
         const modelloMatch = mod === modelloNorm || mod.includes(modelloNorm) || modelloNorm.includes(mod)
-        
+      
         // Log per debug
-        if (marcaMatch && modelloMatch) {
+      if (marcaMatch && modelloMatch) {
           console.log('✅ Match FLESSIBILE trovato:', {
             db: `${m}-${mod}`,
             input: `${marcaNorm}-${modelloNorm}`,
@@ -101,10 +101,10 @@ export default defineEventHandler(async (event) => {
             modelloOriginale: moto.moto_usate_catalogo?.modello || moto.modello
           })
           return true
-        }
-        
+      }
+      
         return false
-      })
+    })
     }
     
     if (!motoTrovata) {

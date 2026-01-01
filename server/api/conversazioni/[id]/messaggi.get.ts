@@ -1,8 +1,17 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.SUPABASE_URL || 'https://xffcrstnyfjthlaurlyx.supabase.co'
-const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmZmNyc3RueWZqdGhsYXVybHl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwNjA4OTgsImV4cCI6MjA3MzYzNjg5OH0.ksZs9k0fYCUZ0nKvF-s8LNL3SQQbppifIbtTVxpyQUE'
-const supabase = createClient(supabaseUrl, supabaseKey)
+const config = useRuntimeConfig()
+const supabaseUrl = config.public.supabaseUrl
+const supabaseAnonKey = config.public.supabaseAnonKey
+const supabaseServiceKey = config.supabaseServiceRoleKey
+
+// Usa service key per bypassare RLS
+const supabase = supabaseServiceKey ? createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+}) : createClient(supabaseUrl, supabaseAnonKey)
 
 export default defineEventHandler(async (event) => {
   try {
@@ -29,22 +38,67 @@ export default defineEventHandler(async (event) => {
 
     if (msgError) {
       console.error('❌ Errore recupero messaggi:', msgError)
+      console.error('❌ Dettagli errore messaggi:', {
+        message: msgError.message,
+        details: msgError.details,
+        hint: msgError.hint,
+        code: msgError.code
+      })
       throw createError({
         statusCode: 500,
         statusMessage: 'Errore nel recupero dei messaggi',
-        data: msgError.message
+        data: {
+          message: msgError.message,
+          details: msgError.details,
+          code: msgError.code
+        }
       })
     }
 
-    // Recupera anche i dettagli della conversazione
+    // Recupera anche i dettagli della conversazione con concessionario
     const { data: conversazione, error: convError } = await supabase
       .from('conversazioni')
-      .select('*')
+      .select(`
+        *,
+        concessionari(
+          id,
+          nome,
+          citta,
+          telefono,
+          email
+        )
+      `)
       .eq('id', conversazioneId)
       .single()
 
     if (convError) {
       console.error('❌ Errore recupero conversazione:', convError)
+      console.error('❌ Dettagli errore conversazione:', {
+        message: convError.message,
+        details: convError.details,
+        hint: convError.hint,
+        code: convError.code
+      })
+      
+      // Se l'errore è "non trovato", restituisci 404
+      if (convError.code === 'PGRST116') {
+        throw createError({
+          statusCode: 404,
+          statusMessage: 'Conversazione non trovata',
+          data: { conversazioneId }
+        })
+      }
+      
+      // Altrimenti, errore generico
+      throw createError({
+        statusCode: 500,
+        statusMessage: 'Errore nel recupero della conversazione',
+        data: {
+          message: convError.message,
+          details: convError.details,
+          code: convError.code
+        }
+      })
     }
 
     console.log('✅ Messaggi recuperati:', messaggi?.length || 0)

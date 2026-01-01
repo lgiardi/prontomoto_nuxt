@@ -166,6 +166,49 @@
               </div>
             </div>
 
+            <!-- Appuntamenti collegati -->
+            <div v-if="appuntamentiCollegati.length > 0" class="p-4 border-t bg-yellow-50">
+              <h4 class="text-sm font-semibold text-gray-900 mb-2">Appuntamenti</h4>
+              <div class="space-y-2">
+                <div 
+                  v-for="app in appuntamentiCollegati" 
+                  :key="app.id"
+                  class="flex items-center justify-between p-2 bg-white rounded border"
+                >
+                  <div>
+                    <p class="text-sm font-medium text-gray-900">
+                      {{ formatDate(app.data_appuntamento) }} alle {{ app.orario_appuntamento }}
+                    </p>
+                    <p class="text-xs text-gray-500">
+                      Stato: {{ getStatusLabel(app.stato) }}
+                    </p>
+                  </div>
+                  <span :class="[
+                    'px-2 py-1 rounded text-xs font-medium',
+                    app.stato === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    app.stato === 'confirmed' ? 'bg-green-100 text-green-800' :
+                    app.stato === 'completed' ? 'bg-blue-100 text-blue-800' :
+                    'bg-red-100 text-red-800'
+                  ]">
+                    {{ getStatusLabel(app.stato) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pulsante Prenota Appuntamento -->
+            <div v-if="conversazioneSelezionata?.concessionario_id" class="p-4 border-t bg-gray-50">
+              <button
+                @click="showAppointmentModal = true"
+                class="w-full px-4 py-2 bg-[#90c149] text-white rounded-lg hover:bg-[#7ba83a] transition-colors flex items-center justify-center gap-2"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                Prenota Appuntamento
+              </button>
+            </div>
+
             <!-- Input messaggio -->
             <div class="p-4 border-t">
               <form @submit.prevent="inviaMessaggio" class="flex space-x-2">
@@ -190,12 +233,22 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal Prenota Appuntamento -->
+    <AppointmentFromConversation
+      v-if="conversazioneSelezionata?.concessionario_id"
+      :is-open="showAppointmentModal"
+      :conversazione="conversazioneSelezionata"
+      :concessionario-id="conversazioneSelezionata?.concessionario_id"
+      @close="showAppointmentModal = false"
+      @appointment-created="handleAppointmentCreated"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue'
-import { useSupabase } from '#imports'
+import AppointmentFromConversation from '~/components/AppointmentFromConversation.vue'
 
 // Meta
 definePageMeta({
@@ -212,9 +265,11 @@ const messaggi = ref([])
 const nuovoMessaggio = ref('')
 const unreadCount = ref(0)
 const messaggiContainer = ref(null)
+const showAppointmentModal = ref(false)
+const appuntamentiCollegati = ref([])
 
 // Supabase
-const supabase = useSupabase()
+const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 
 // Methods
@@ -255,12 +310,21 @@ const caricaConversazioni = async () => {
     })
 
     if (response.success) {
-      conversazioni.value = response.conversazioni
-      unreadCount.value = response.unreadCount
+      conversazioni.value = response.conversazioni || []
+      unreadCount.value = response.unreadCount || 0
       console.log('✅ Conversazioni caricate:', conversazioni.value.length)
+    } else {
+      console.error('❌ Risposta API non valida:', response)
+      conversazioni.value = []
     }
   } catch (error) {
     console.error('❌ Errore caricamento conversazioni:', error)
+    console.error('❌ Dettagli errore:', {
+      message: error.message,
+      statusCode: error.statusCode,
+      data: error.data
+    })
+    conversazioni.value = []
   } finally {
     loading.value = false
   }
@@ -269,6 +333,7 @@ const caricaConversazioni = async () => {
 const selezionaConversazione = async (conversazione) => {
   conversazioneSelezionata.value = conversazione
   await caricaMessaggi(conversazione.id)
+  await caricaAppuntamenti(conversazione.id)
 }
 
 const caricaMessaggi = async (conversazioneId) => {
@@ -334,10 +399,53 @@ const inviaMessaggio = async () => {
   }
 }
 
+const caricaAppuntamenti = async (conversazioneId) => {
+  try {
+    const { data, error } = await supabase
+      .from('appuntamenti')
+      .select('*')
+      .eq('conversazione_id', conversazioneId)
+      .order('data_appuntamento', { ascending: true })
+      .order('orario_appuntamento', { ascending: true })
+
+    if (error) throw error
+    appuntamentiCollegati.value = data || []
+  } catch (error) {
+    console.error('❌ Errore caricamento appuntamenti:', error)
+    appuntamentiCollegati.value = []
+  }
+}
+
+const handleAppointmentCreated = async (appuntamento) => {
+  console.log('✅ Appuntamento creato:', appuntamento)
+  await caricaAppuntamenti(conversazioneSelezionata.value.id)
+  showAppointmentModal.value = false
+}
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('it-IT', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+const getStatusLabel = (stato) => {
+  const labels = {
+    'pending': 'In Attesa',
+    'confirmed': 'Confermato',
+    'completed': 'Completato',
+    'cancelled': 'Annullato'
+  }
+  return labels[stato] || stato
+}
+
 // Lifecycle
 onMounted(async () => {
   if (!user.value) {
-    await navigateTo('/login')
+    await navigateTo('/auth/login')
     return
   }
 

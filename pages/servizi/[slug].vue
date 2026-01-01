@@ -223,12 +223,6 @@
                           </svg>
                           <span class="text-gray-700">{{ concessionario.via }}, {{ concessionario.citta }}</span>
                         </div>
-                        <div v-if="concessionario.telefono" class="flex items-center gap-3">
-                          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                          </svg>
-                          <span class="text-gray-700">{{ concessionario.telefono }}</span>
-                        </div>
                         <div v-if="concessionario.email" class="flex items-center gap-3">
                           <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
@@ -245,16 +239,16 @@
                   <!-- Colonna Destra - CTA e Azioni -->
                   <div class="space-y-6">
                     
-                    <!-- CTA Principali -->
+                    <!-- CTA Principali - Sistema Contatto Globale -->
                     <div class="space-y-4">
                       <button 
                         @click="contattaConcessionario(concessionario)"
                         class="w-full bg-[#90c149] text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-[#7aa83f] transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
                       >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                         </svg>
-                        Contatta il Concessionario
+                        Contatta il Venditore
                       </button>
                       <button 
                         @click="fissaAppuntamento(concessionario)"
@@ -264,6 +258,16 @@
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
                         Prenota Appuntamento
+                      </button>
+                      <button 
+                        @click="mostraNumero(concessionario)"
+                        class="w-full bg-gray-100 text-gray-700 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-gray-200 transition-all duration-300 flex items-center justify-center gap-3"
+                      >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                        </svg>
+                        <span v-if="!showPhoneNumbers[concessionario.id]">Mostra Numero</span>
+                        <span v-else class="font-mono">{{ concessionario.telefono || 'Non disponibile' }}</span>
                       </button>
                     </div>
                   </div>
@@ -336,6 +340,7 @@ const cittaSelezionata = ref(null)
 const showContactModal = ref(false)
 const showAppointmentModal = ref(false)
 const selectedConcessionario = ref(null)
+const showPhoneNumbers = ref({})
 
 // Computed: crea oggetto servizio per il concessionario selezionato
 const servizioConcessionario = computed(() => {
@@ -454,6 +459,10 @@ const contattaConcessionario = (concessionario) => {
 const fissaAppuntamento = (concessionario) => {
   selectedConcessionario.value = concessionario
   showAppointmentModal.value = true
+}
+
+const mostraNumero = (concessionario) => {
+  showPhoneNumbers.value[concessionario.id] = !showPhoneNumbers.value[concessionario.id]
 }
 
 const onContactSent = () => {
